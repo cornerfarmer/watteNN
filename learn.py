@@ -1,3 +1,5 @@
+from time import sleep
+
 import gym
 import gym_watten
 import itertools
@@ -71,10 +73,11 @@ if __name__ == '__main__':
                 obs = env.reset()
                 episode_rewards.append(0)
 
-            is_solved = t > 100 and np.mean(episode_rewards[-101:-1]) == 0
+            is_solved = t > 1000 and np.mean(episode_rewards[-1001:-1]) == 5
             if is_solved:
                 # Show off the result
                 env.render()
+                sleep(1)
             else:
                 # Minimize the error in Bellman's equation on a batch sampled from replay buffer.
                 if t > 1000:
