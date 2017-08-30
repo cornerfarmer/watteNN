@@ -1,4 +1,4 @@
-from time import sleep
+import time
 
 import gym
 import gym_watten
@@ -39,11 +39,13 @@ if __name__ == '__main__':
         replay_buffer = ReplayBuffer(50000)
         # Create the schedule for exploration starting from 1 (every action is random) down to
         # 0.02 (98% of actions are selected according to values predicted by the model).
-        exploration = LinearSchedule(schedule_timesteps=10000, initial_p=1.0, final_p=0)
+        exploration = LinearSchedule(schedule_timesteps=20000, initial_p=1.0, final_p=0)
 
         # Initialize the parameters and copy them to the target network.
         U.initialize()
         update_target()
+
+        train_writer = tf.summary.FileWriter('tensorboard/' + time.strftime("%Y%m%d-%H%M%S"))
 
         episode_rewards = [0.0]
         obs = env.reset()
@@ -73,11 +75,11 @@ if __name__ == '__main__':
                 obs = env.reset()
                 episode_rewards.append(0)
 
-            is_solved = t > 1000 and np.mean(episode_rewards[-1001:-1]) == 5
+            is_solved = t > 60000
             if is_solved:
                 # Show off the result
                 env.render()
-                sleep(1)
+                time.sleep(1)
             else:
                 # Minimize the error in Bellman's equation on a batch sampled from replay buffer.
                 if t > 1000:
@@ -87,9 +89,33 @@ if __name__ == '__main__':
                 if t % 1000 == 0:
                     update_target()
 
-            if done and len(episode_rewards) % 10 == 0:
-                logger.record_tabular("steps", t)
-                logger.record_tabular("episodes", len(episode_rewards))
-                logger.record_tabular("mean episode reward", round(np.mean(episode_rewards[-101:-1]), 1))
-                logger.record_tabular("% time spent exploring", int(100 * exploration.value(t)))
-                logger.dump_tabular()
+            if done and len(episode_rewards) % 100 == 0:
+
+                g = 0
+                avg_reward = 0
+                starting_player = 0
+                while g < 100:
+                    if env.current_player == starting_player:
+                        action = None
+                    else:
+                        action = act([obs], update_eps=0)[0]
+                    obs, rew, done, _ = env.step(action)
+
+                    if len(rew) > 0 and rew[0] < 0:
+                        if env.current_player == starting_player:
+                            avg_reward += rew[0]
+                    elif len(rew) == 2:
+                        avg_reward += rew[starting_player]
+
+                    if done:
+                        starting_player = 0 if g < 50 else 1
+                        obs = env.reset()
+                        g += 1
+                obs = env.reset()
+
+                summary = tf.Summary()
+                summary.value.add(tag="mean episode reward", simple_value=round(np.mean(episode_rewards[-101:-1]), 1))
+                summary.value.add(tag="rating", simple_value=avg_reward / 100)
+                summary.value.add(tag="exploring", simple_value=int(100 * exploration.value(t)))
+                train_writer.add_summary(summary, t)
+                train_writer.flush()
