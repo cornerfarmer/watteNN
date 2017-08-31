@@ -19,7 +19,7 @@ def model(inpt, num_actions, scope, reuse=False):
     """This model takes as input an observation and returns values of all actions."""
     with tf.variable_scope(scope, reuse=reuse):
         out = inpt
-        out = layers.fully_connected(out, num_outputs=64, activation_fn=tf.nn.tanh)
+        out = layers.fully_connected(out, num_outputs=64, activation_fn=tf.nn.relu)
         out = layers.fully_connected(out, num_outputs=num_actions, activation_fn=None)
         return out
 
@@ -35,6 +35,13 @@ if __name__ == '__main__':
             num_actions=env.action_space.n,
             optimizer=tf.train.AdamOptimizer(learning_rate=1e-3),
         )
+
+        observations_ph = U.ensure_tf_input(U.BatchInput(env.observation_space.shape, name="eval_observation"))
+        q_values = model(observations_ph.get(), env.action_space.n, "deepq/q_func", True)
+        eval = U.function(inputs=[observations_ph],
+                         outputs=q_values)
+
+
         # Create the replay buffer
         replay_buffer = ReplayBuffer(50000)
         # Create the schedule for exploration starting from 1 (every action is random) down to
@@ -77,6 +84,11 @@ if __name__ == '__main__':
 
             is_solved = t > 60000
             if is_solved:
+                U.save_state("save/model")
+
+                print(act([[1] * 68]))
+                print(eval([[1] * 68]))
+                exit()
                 # Show off the result
                 env.render()
                 time.sleep(1)
