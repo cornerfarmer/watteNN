@@ -5,51 +5,41 @@ jQuery(document).ready(function () {
 var cards = [];
 var cards_left = [];
 var players = [{hand_cards: [], board_card: null, tricks: 0}, {hand_cards: [], board_card: null, tricks: 0}];
-var number_of_hand_cards = 5;
+var number_of_hand_cards = 3;
 var current_player = 0;
+var next_start_player = 1;
 var colors = {
-    EICHEL: 1,
-    GRUEN: 2,
-    HERZ: 3,
-    SCHELLN: 4
+    EICHEL: 0,
+    GRUEN: 1,
+    HERZ: 2,
+    SCHELLN: 3
 };
 
 var values = {
-    SAU: 8,
-    KOENIG: 7,
-    OBER: 6,
-    UNTER: 5,
-    ZEHN: 4,
-    NEUN: 3,
-    ACHT: 2,
-    SIEBEN: 1
+    SAU: 7,
+    KOENIG: 6,
+    OBER: 5,
+    UNTER: 4,
+    ZEHN: 3,
+    NEUN: 2,
+    ACHT: 1,
+    SIEBEN: 0
 };
+var model;
 
 function initialize() {
-    jQuery.get('model.json', function (data) {
-
-        net = new convnetjs.Net(); // create an empty network
-        net.fromJSON(data);
-
-        var x_arr = new Array(68);
-
-        for (var i = 0; i < x_arr.length; i++)
-            x_arr[i] = 1;
-
-        var x = new convnetjs.Vol(x_arr);
-
-        var probability_volume = net.forward(x);
-        console.log('probability that x is class 0: ' + probability_volume.w);
-        console.log(net.toJSON());
-
-        for (var color in colors) {
-            for (var value in values) {
-                cards.push({color: colors[color], value: values[value]})
-            }
-        }
-
-        reset();
+    model = new KerasJS.Model({
+      filepath: 'modelDense3.bin'
     });
+
+    for (var color = 0; color < 2; color++) {
+        for (var value = 7; value >= 4; value--) {
+            //cards.push({color: colors[color], value: values[value]})
+            cards.push({color: color, value: value});
+        }
+    }
+
+    reset();
 }
 
 function shuffle(a) {
@@ -72,9 +62,13 @@ function reset() {
         for (var c = 0; c < number_of_hand_cards; c++)
             players[i].hand_cards.push(cards_left.pop());
     }
-    current_player = 1;
+    current_player = next_start_player;
+    next_start_player = 1 - next_start_player;
     refreshState("");
     refreshView();
+
+    if (current_player === 0)
+        setTimeout(runAI, 1000);
 }
 
 function createCardHTML(card, number_in_hand_cards) {
@@ -133,12 +127,12 @@ function set_card(card) {
         else
             current_player = 1 - current_player;
 
-        if (players[0].tricks === 3)
+        if (players[0].tricks === 2)
         {
             action = "AI won!";
             setTimeout(reset, 1000);
         }
-        else if (players[1].tricks === 3)
+        else if (players[1].tricks === 2)
         {
             action = "Human won!";
             setTimeout(reset, 1000);
@@ -221,20 +215,36 @@ function indexOfMax(arr)
 
 function runAI()
 {
-    obs = [];
-    for (var i = 0; i < cards.length; i++) {
-        obs.push(players[0].hand_cards.indexOf(cards[i]) !== -1 ? 1 : 0);
+    obs_cube = [];
+    for (var c = 0; c < 4 * 8 * 2; c++) {
+        obs_cube.push(0);
     }
-    for (var i = 0; i < cards.length; i++) {
-        obs.push(cards[i] === players[1].board_card ? 1 : 0);
+    for (var i = 0; i < players[0].hand_cards.length; i++) {
+        obs_cube[players[0].hand_cards[i].color * 8 * 2 + players[0].hand_cards[i].value * 2 + 0] = 1;
     }
+    if (players[1].board_card !== null)
+        obs_cube[players[1].board_card.color * 8 * 2 + players[1].board_card.value * 2 + 1] = 1;
 
-    addTrickArray(obs, players[0]);
-    addTrickArray(obs, players[1]);
 
-    var output = net.forward(new convnetjs.Vol(obs));
-    var index = indexOfMax(output.w);
-    set_card(cards[index]);
+    obs_flat = [];
+    addTrickArray(obs_flat, players[0]);
+    addTrickArray(obs_flat, players[1]);
+
+    model.ready()
+    .then(() => {
+        const inputData = {
+          input_1: new Float32Array(obs_cube),
+          input_2: new Float32Array(obs_flat)
+        }
+
+        // make predictions
+        return model.predict(inputData)
+    }).then(outputData => {
+        console.log(outputData);
+        var index = indexOfMax(outputData['dense_2']);
+        set_card(cards[index]);
+    })
+
 }
 
 function match(first_card, second_card)
