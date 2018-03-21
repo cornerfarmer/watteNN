@@ -1,10 +1,14 @@
 from gym_watten.envs.watten_env cimport State, WattenEnv, Card, Observation
 from libcpp cimport bool
 from libcpp.vector cimport vector
-from libc.math cimport sqrt
+from libc.math cimport sqrt, exp
+from libc.stdlib cimport rand, RAND_MAX
 from src.LookUp cimport LookUp, ModelOutput
 import numpy as np
-import random
+import time
+import matplotlib.pyplot as plt
+import pydot_ng as pydot
+from io import BytesIO
 
 cdef struct MCTSState:
     vector[MCTSState] childs
@@ -100,7 +104,7 @@ cdef class MCTS:
                 for card in hand_cards:
                     obs = env.step(card.id)
 
-                    self.add_state(state, prediction.p[card.id], env, 0 if not env.is_done() else (1 if env.last_winner  else -1))
+                    self.add_state(state, prediction.p[card.id], env, 0 if not env.is_done() else (1 if env.last_winner == 0 else -1))
 
                     env.set_state(state.env_state)
 
@@ -137,7 +141,7 @@ cdef class MCTS:
             state.n += 1
         return v
 
-    cdef object mcts_game_step(self, WattenEnv env, MCTSState* root, LookUp model, int steps=0):
+    cdef int mcts_game_step(self, WattenEnv env, MCTSState* root, LookUp model, vector[float]* p, int steps=0):
         if steps == 0:
             steps = self.mcts_sims
 
@@ -146,16 +150,34 @@ cdef class MCTS:
             self.mcts_sample(env, root, model, &player)
 
         cdef int child_n
+        p.clear()
         if not self.objective_opponent or root.current_player == 0:
-            p = []
             for i in range(root.childs.size()):
-                p.append(self.calc_q(&root.childs[i], root.current_player, &child_n))
+                p.push_back(self.calc_q(&root.childs[i], root.current_player, &child_n))
         else:
-            p = [child.p for child in root.childs]
+            for i in range(root.childs.size()):
+                p.push_back(root.childs[i].p)
 
-        p = np.exp(p - np.max(p))
-        p /= p.sum(axis=0)
-        return np.random.choice(np.arange(0, len(p)), p=p), p
+        cdef float pmax = -1
+        for i in range(p.size()):
+            if pmax < p[0][i]:
+                pmax = p[0][i]
+
+        cdef float psum = 0
+        for i in range(p.size()):
+            p[0][i] = exp(p[0][i] - pmax)
+            psum += p[0][i]
+
+        for i in range(p.size()):
+            p[0][i] /= psum
+
+        cdef float r = <float>rand() / RAND_MAX
+
+        for i in range(p.size()):
+            r -= p[0][i]
+            if r <= 0:
+                return i
+        return p.size() - 1
 
 
     cdef MCTSState create_root_state(self, WattenEnv env):
@@ -177,11 +199,13 @@ cdef class MCTS:
         cdef int last_player, i
 
         obs = env.reset()
-        env.current_player = random.randint(0, 1)
+        if self.objective_opponent:
+            env.current_player = rand() % 2
 
         cdef MCTSState root = self.create_root_state(env)
         cdef MCTSState tmp
         cdef vector[int] values
+        cdef vector[float] p
 
         while not env.is_done():
 
@@ -192,7 +216,7 @@ cdef class MCTS:
             values.push_back(storage.data.size() - 1)
 
             game_state = env.get_state()
-            a, p = self.mcts_game_step(env, &root, model)
+            a = self.mcts_game_step(env, &root, model, &p)
             env.set_state(game_state)
 
             for i in range(32):
@@ -217,3 +241,49 @@ cdef class MCTS:
         cdef int i
         for i in range(self.episodes):
             self.mcts_game(env, model, storage)
+
+
+    cdef void draw_tree(self, MCTSState* root, int tree_depth=5, object tree_path=[]):
+        dot = pydot.Dot()
+        dot.set('rankdir', 'TB')
+        dot.set('concentrate', True)
+        dot.set_node_defaults(shape='record')
+
+        self.create_nodes(root, dot, tree_depth, tree_path)
+
+       # print("Root: " + str(root.end_v if root.n is 0 else root.w / root.n) + " / " + str(root.n))
+       # for child in root.childs:
+       #     print( str(child.end_v if child.n is 0 else child.w / child.n) + " / " + str(child.n) + " p: " + str(child.p))
+
+        # render pydot by calling dot, no file saved to disk
+        png_str = dot.create_png(prog='dot')
+        dot.write_svg('tree.svg')
+
+        # treat the dot output string as an image file
+        sio = BytesIO()
+        sio.write(png_str)
+        sio.seek(0)
+
+        # plot the image
+        fig, ax = plt.subplots(figsize=(18, 5))
+        ax.imshow(plt.imread(sio), interpolation="bilinear")
+
+    cdef object create_nodes(self, MCTSState* root, object dot, int tree_depth, object tree_path, int id=0):
+        text = "N: " + str(root.n) + " (" + str(root.current_player) + ')\n'
+        text += "Q: " + str(root.end_v if root.end_v is not 0 or root.n is 0 else root.w / root.n) + '\n'
+        text += "P: " + str(root.p) + '\n'
+        text += "V: " + str(root.v)
+
+        node = pydot.Node(str(id), label=text)
+        dot.add_node(node)
+        id += 1
+
+        if tree_depth > 1:
+            i = 0
+            for i in range(root.childs.size()):
+                if len(tree_path) == 0 or (type(tree_path[0]) == list and i in tree_path[0] or type(tree_path[0]) == int and tree_path[0] == i):
+                    child_node, id = self.create_nodes(&root.childs[i], dot, tree_depth - 1, tree_path if len(tree_path) == 0 else tree_path[1:], id)
+                    dot.add_edge(pydot.Edge(node.get_name(), child_node.get_name()))
+                i+=1
+
+        return node, id

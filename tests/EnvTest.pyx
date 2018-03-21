@@ -88,6 +88,7 @@ class EnvTest(unittest.TestCase):
         self.assertTrue(env.is_done(), "game is done")
         self.assertEqual(env.last_winner, 0, "incorrect winner")
 
+
     def test_step_invalid(self):
         cdef WattenEnv env = WattenEnv()
         cdef Observation obs

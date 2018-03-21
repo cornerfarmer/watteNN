@@ -2,6 +2,8 @@ import unittest
 from gym_watten.envs.watten_env cimport WattenEnv, Observation
 from src.MCTS cimport MCTS, Storage, MCTSState
 from src.LookUp cimport LookUp, ModelOutput
+from libcpp.vector cimport vector
+import time
 
 class MCTSTest(unittest.TestCase):
 
@@ -271,12 +273,73 @@ class MCTSTest(unittest.TestCase):
         self.assertEqual(player, -1, "Wrong player")
 
 
-    def test_memorize(self):
-        """ Memorize """
+    def test_mcts_game_step(self):
+        cdef MCTS mcts = MCTS()
         cdef WattenEnv env = WattenEnv()
+        cdef Observation obs = env.reset()
+        cdef LookUp model = LookUp()
+
+        env.seed(42)
+        env.reset()
+        cdef MCTSState root = mcts.create_root_state(env)
+
+        cdef vector[float] p
+        print(mcts.mcts_game_step(env, &root, model, &p))
+        print(root.n)
+
+        self.assertGreater(p[0], p[1], "First card has not highest prob")
+        self.assertGreater(p[0], p[2], "First card has not highest prob")
+
+    def test_mcts_game_step(self):
+        cdef MCTS mcts = MCTS()
+        cdef WattenEnv env = WattenEnv()
+        cdef Observation obs = env.reset()
+        cdef LookUp model = LookUp()
+
+        env.seed(42)
+        env.reset()
+        env.step(env.players[0].hand_cards[2].id)
+
+        cdef MCTSState root = mcts.create_root_state(env)
+
+        cdef vector[float] p
+        cdef int a = mcts.mcts_game_step(env, &root, model, &p)
+
+        self.assertGreater(p[0], p[1], "First card has not highest prob")
+        self.assertGreater(p[0], p[2], "First card has not highest prob")
+
+    def test_mcts_game(self):
+        cdef MCTS mcts = MCTS()
+        cdef WattenEnv env = WattenEnv()
+        cdef Observation obs = env.reset()
         cdef LookUp model = LookUp()
         cdef Storage storage
-        cdef MCTS mcts = MCTS()
 
-        #mcts.mcts_generate(env, model, &storage)
+        env.seed(42)
+        mcts.mcts_game(env, model, &storage)
+
+        self.assertEqual(storage.data.size(), 4, "Not enough storage steps")
+        self.assertAlmostEqual(storage.data[0].output.p[3], 1.0 / 3, 5, "First p[0] wrong")
+        self.assertAlmostEqual(storage.data[0].output.p[4], 1.0 / 3, 5, "First p[1] wrong")
+        self.assertAlmostEqual(storage.data[0].output.p[7], 1.0 / 3, 5, "First p[2] wrong")
+        self.assertAlmostEqual(storage.data[0].output.v, -1, 5, "First v wrong")
+
+        self.assertGreater(storage.data[1].output.p[5], storage.data[1].output.p[1], "First card has not highest prob in second storage item")
+        self.assertGreater(storage.data[1].output.p[5], storage.data[1].output.p[0], "First card has not highest prob in second storage item")
+        self.assertAlmostEqual(storage.data[1].output.v, 1, 5, "Second v wrong")
+
+        self.assertEqual(storage.data[2].output.p[0], storage.data[2].output.p[1], "Third probs not equal")
+        self.assertAlmostEqual(storage.data[2].output.v, 1, 5, "Third v wrong")
+        self.assertEqual(storage.data[3].output.p[3], storage.data[3].output.p[4], "Fourth probs not equal")
+        self.assertAlmostEqual(storage.data[3].output.v, -1, 5, "Fourth v wrong")
+
+    def test_mcts_generate(self):
+        cdef MCTS mcts = MCTS()
+        cdef WattenEnv env = WattenEnv()
+        cdef Observation obs = env.reset()
+        cdef LookUp model = LookUp()
+        cdef Storage storage
+        mcts.mcts_generate(env, model, &storage)
+
+        self.assertGreater(storage.data.size(), 4 * 75, "Not enought storage items created")
 
