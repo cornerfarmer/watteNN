@@ -80,7 +80,6 @@ class EnvTest(unittest.TestCase):
         env.step(7)
         env.step(1)
 
-        #TODO rew
         self.assertEqual(obs.hand_cards, [[[0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]], [[0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]], [[0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]], [[0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]]], "wrong hand_cards obs")
         self.assertEqual(obs.tricks, [0, 1, 1, 0], "wrong tricks obs")
 

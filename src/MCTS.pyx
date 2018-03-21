@@ -48,37 +48,44 @@ cdef class MCTS:
         return state.childs.size() == 0
 
 
-    cdef object calc_q(self, MCTSState* state, int player):
-        cdef int i
+    cdef float calc_q(self, MCTSState* state, int player, int* n):
+        cdef int i, n_sum, n_child
+        cdef float q_sum
         if state.end_v != 0:
-            return state.end_v * (-1 if player == 1 else 1), 1
+            n[0] = 1
+            return state.end_v * (-1 if player == 1 else 1)
         elif state.current_player == player:
-            if state.n is 0:
-                return 0, 0
+            if state.n == 0:
+                n[0] = 0
+                return 0
             else:
-                return state.w / state.n, state.n
+                n[0] = state.n
+                return state.w / state.n
         else:
             q_sum = 0
             n_sum = 0
+
             for i in range(state.childs.size()):
-                q_new, n = self.calc_q(&state.childs[i], player)
-                q_sum += q_new * n
-                n_sum += n
-            return 0 if n_sum is 0 else q_sum / n_sum, n_sum
+                q_sum += self.calc_q(&state.childs[i], player, &n_child) * n_child
+                n_sum += n_child
+
+            n[0] = n_sum
+            return 0 if n_sum is 0 else q_sum / n_sum
 
 
-    cdef mcts_sample(self, WattenEnv env, MCTSState* state, LookUp model):
+    cdef float mcts_sample(self, WattenEnv env, MCTSState* state, LookUp model, int* player):
         cdef vector[Card*] hand_cards
         cdef int current_player, i
         cdef float max_u
         cdef MCTSState* max_child
         cdef ModelOutput prediction
         cdef Observation obs
+        cdef int child_n
 
         if self.is_state_leaf_node(state):
             if state.end_v != 0:
                 v = state.end_v
-                player = -1
+                player[0] = -1
             else:
                 env.set_state(state.env_state)
 
@@ -93,13 +100,13 @@ cdef class MCTS:
                 for card in hand_cards:
                     obs = env.step(card.id)
 
-                    self.add_state(state, prediction.p[card.id], env, 0 if not env.is_done() else (1 if env.last_winner else -1))
+                    self.add_state(state, prediction.p[card.id], env, 0 if not env.is_done() else (1 if env.last_winner  else -1))
 
                     env.set_state(state.env_state)
 
                 v = prediction.v
                 state.v = prediction.v
-                player = state.current_player
+                player[0] = state.current_player
         else:
             n_sum = 0
             for child in state.childs:
@@ -108,7 +115,7 @@ cdef class MCTS:
             max_child = NULL
             if not self.objective_opponent or state.current_player == 0:
                 for i in range(state.childs.size()):
-                    u = self.calc_q(&state.childs[i], state.current_player)[0]
+                    u = self.calc_q(&state.childs[i], state.current_player, &child_n)
                     u += self.exploration * state.childs[i].p * sqrt(n_sum) / (1 + state.childs[i].n)
 
                     if max_child is NULL or u > max_u:
@@ -120,28 +127,29 @@ cdef class MCTS:
                 p /= p.sum(axis=0)
                 max_child = &state.childs[np.random.choice(np.arange(0, len(p)), p=p)]
 
-            v, player = self.mcts_sample(env, max_child, model)
+            v = self.mcts_sample(env, max_child, model, player)
 
-        if player == state.current_player:
+        if player[0] == state.current_player:
             state.w += v
             state.n += 1
-        elif player == -1:
+        elif player[0] == -1:
             state.w += v * (-1 if state.current_player == 1 else 1)
             state.n += 1
-        return v, player
+        return v
 
     cdef object mcts_game_step(self, WattenEnv env, MCTSState* root, LookUp model, int steps=0):
         if steps == 0:
             steps = self.mcts_sims
 
-        cdef int i
+        cdef int i, player
         for i in range(steps):
-            self.mcts_sample(env, root, model)
+            self.mcts_sample(env, root, model, &player)
 
+        cdef int child_n
         if not self.objective_opponent or root.current_player == 0:
             p = []
             for i in range(root.childs.size()):
-                p.append(self.calc_q(&root.childs[i], root.current_player)[0])
+                p.append(self.calc_q(&root.childs[i], root.current_player, &child_n))
         else:
             p = [child.p for child in root.childs]
 

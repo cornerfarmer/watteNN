@@ -86,6 +86,3 @@ class LookUpTest(unittest.TestCase):
         obs.hand_cards[1][4][0] = 0
         obs.hand_cards[1][4][1] = 1
         self.assertEqual(model.generate_key(&obs).decode("utf-8"), "1,21,-12-1-2", "Wrong key")
-
-#if __name__ == '__main__':
-#    unittest.main(argv=['first-arg-is-ignored'], exit=False)

@@ -33,8 +33,8 @@ cdef class MCTS:
 
     cdef void add_state(self, MCTSState* parent, float p, WattenEnv env, int end_v=?)
     cdef bool is_state_leaf_node(self, MCTSState* state)
-    cdef object calc_q(self, MCTSState* state, int player)
-    cdef mcts_sample(self, WattenEnv env, MCTSState* state, LookUp model)
+    cdef float calc_q(self, MCTSState* state, int player, int* n)
+    cdef float mcts_sample(self, WattenEnv env, MCTSState* state, LookUp model, int* player)
     cdef object mcts_game_step(self, WattenEnv env, MCTSState* root, LookUp model, int steps=?)
     cdef MCTSState create_root_state(self, WattenEnv env)
     cdef void mcts_game(self, WattenEnv env, LookUp model, Storage* storage)
