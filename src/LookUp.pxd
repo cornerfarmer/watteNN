@@ -15,4 +15,4 @@ cdef class LookUp:
 
     cdef string generate_key(self, Observation* obs)
     cdef void memorize(self, Observation* obs, ModelOutput* value)
-    cdef ModelOutput predict_single(self, Observation* obs)
+    cdef void predict_single(self, Observation* obs, ModelOutput* output)

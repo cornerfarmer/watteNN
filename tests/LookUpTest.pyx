@@ -8,7 +8,8 @@ class LookUpTest(unittest.TestCase):
         """ Memorize """
         cdef WattenEnv env = WattenEnv()
         env.seed(1850)
-        cdef Observation obs = env.reset()
+        cdef Observation obs
+        env.reset(&obs)
         cdef LookUp model = LookUp()
         cdef ModelOutput output
 
@@ -19,14 +20,16 @@ class LookUpTest(unittest.TestCase):
 
         model.memorize(&obs, &output)
 
-        cdef ModelOutput prediction = model.predict_single(&obs)
+        cdef ModelOutput prediction
+        model.predict_single(&obs, &prediction)
         self.assertEqual(prediction.p, output.p, "Wrong probability memorized")
         self.assertEqual(prediction.v, output.v, "Wrong value memorized")
 
     def test_memorize_multiple(self):
         cdef WattenEnv env = WattenEnv()
         env.seed(1850)
-        cdef Observation obs = env.reset()
+        cdef Observation obs
+        env.reset(&obs)
         cdef LookUp model = LookUp()
         cdef ModelOutput output
 
@@ -44,14 +47,16 @@ class LookUpTest(unittest.TestCase):
         output.p[4] = 0.5
         output.p[12] = 0.5
         output.v = -0.25
-        cdef ModelOutput prediction = model.predict_single(&obs)
+        cdef ModelOutput prediction
+        model.predict_single(&obs, &prediction)
         self.assertEqual(prediction.p, output.p, "Wrong probability memorized")
         self.assertEqual(prediction.v, output.v, "Wrong value memorized")
 
     def test_predict_empty(self):
         cdef WattenEnv env = WattenEnv()
         env.seed(1850)
-        cdef Observation obs = env.reset()
+        cdef Observation obs
+        env.reset(&obs)
         cdef LookUp model = LookUp()
         cdef ModelOutput output
 
@@ -59,7 +64,8 @@ class LookUpTest(unittest.TestCase):
             output.p[i] = 1
         output.v = 0
 
-        cdef ModelOutput prediction = model.predict_single(&obs)
+        cdef ModelOutput prediction
+        model.predict_single(&obs, &prediction)
         self.assertEqual(prediction.p, output.p, "Wrong probability memorized")
         self.assertEqual(prediction.v, output.v, "Wrong value memorized")
 

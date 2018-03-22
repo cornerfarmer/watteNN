@@ -31,6 +31,10 @@ cdef class MCTS:
     cdef bool objective_opponent
     cdef float exploration
 
+    cdef vector[Card*] _hand_cards
+    cdef ModelOutput _prediction
+    cdef Observation _obs
+
     cdef void add_state(self, MCTSState* parent, float p, WattenEnv env, int end_v=?)
     cdef bool is_state_leaf_node(self, MCTSState* state)
     cdef float calc_q(self, MCTSState* state, int player, int* n)

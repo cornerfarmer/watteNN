@@ -1,4 +1,3 @@
-
 from libcpp.string cimport string
 from gym_watten.envs.watten_env cimport Observation, WattenEnv
 
@@ -45,18 +44,15 @@ cdef class LookUp:
             self.table[key].output.v = value.v
             self.table[key].n = 1
 
-    cdef ModelOutput predict_single(self, Observation* obs):
+    cdef void predict_single(self, Observation* obs, ModelOutput* output):
         key = self.generate_key(obs)
 
-        cdef ModelOutput output
         cdef int i
         if self.table.count(key) > 0:
             for i in range(32):
                 output.p[i] = self.table[key].output.p[i] / self.table[key].n
             output.v = self.table[key].output.v / self.table[key].n
-            return output
         else:
             for i in range(32):
                 output.p[i] = 1
             output.v = 0
-            return output

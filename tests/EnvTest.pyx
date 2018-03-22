@@ -22,7 +22,7 @@ class EnvTest(unittest.TestCase):
         env.reset()
         env.reset()
         env.seed(42)
-        obs = env.reset()
+        env.reset(&obs)
 
         cdef Player* player
         for player in env.players:
@@ -41,7 +41,7 @@ class EnvTest(unittest.TestCase):
         cdef Observation obs
         env.seed(42)
         env.reset()
-        obs = env.step(3)
+        env.step(3, &obs)
 
         self.assertEqual(obs.hand_cards, [[[0, 0], [0, 0], [0, 0], [0, 0], [0, 1], [0, 0], [1, 0], [1, 0]], [[0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [1, 0], [0, 0]], [[0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]], [[0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]]], "wrong hand_cards obs")
         self.assertEqual(obs.tricks, [0, 0, 0, 0], "wrong tricks obs")
@@ -56,7 +56,7 @@ class EnvTest(unittest.TestCase):
         env.seed(42)
         env.reset()
         env.step(3)
-        obs = env.step(0)
+        env.step(0, &obs)
 
         self.assertEqual(obs.hand_cards, [[[0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [1, 0], [0, 0]], [[0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [1, 0], [0, 0]], [[0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]], [[0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]]], "wrong hand_cards obs")
         self.assertEqual(obs.tricks, [1, 0, 0, 0], "wrong tricks obs")
@@ -78,7 +78,7 @@ class EnvTest(unittest.TestCase):
         env.step(4)
 
         env.step(7)
-        env.step(1)
+        env.step(1, &obs)
 
         self.assertEqual(obs.hand_cards, [[[0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]], [[0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]], [[0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]], [[0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]]], "wrong hand_cards obs")
         self.assertEqual(obs.tricks, [0, 1, 1, 0], "wrong tricks obs")
@@ -91,7 +91,6 @@ class EnvTest(unittest.TestCase):
 
     def test_step_invalid(self):
         cdef WattenEnv env = WattenEnv()
-        cdef Observation obs
         env.seed(42)
         env.reset()
         env.step(0)
@@ -134,9 +133,11 @@ class EnvTest(unittest.TestCase):
         state.lastTrick.push_back(env.cards[2])
         state.player0_tricks = 1
         state.player1_tricks = 0
-        env.set_state(state)
+        env.set_state(&state)
 
-        cdef Observation obs = env.regenerate_obs()
+        cdef Observation obs
+        env.regenerate_obs(&obs)
+
         self.assertEqual(obs.hand_cards, [[[0, 0], [0, 0], [0, 0], [0, 0], [1, 0], [0, 0], [0, 0], [0, 0]], [[0, 0], [0, 0], [0, 0], [0, 0], [1, 0], [0, 0], [0, 0], [0, 1]], [[0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]], [[0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]]], "wrong hand_cards obs")
         self.assertEqual(obs.tricks, [0, 0, 1, 0], "wrong tricks obs")
 

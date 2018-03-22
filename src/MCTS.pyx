@@ -9,6 +9,7 @@ import time
 import matplotlib.pyplot as plt
 import pydot_ng as pydot
 from io import BytesIO
+cimport cython
 
 cdef struct MCTSState:
     vector[MCTSState] childs
@@ -76,46 +77,43 @@ cdef class MCTS:
             n[0] = n_sum
             return 0 if n_sum is 0 else q_sum / n_sum
 
-
+    @cython.cdivision(True)
     cdef float mcts_sample(self, WattenEnv env, MCTSState* state, LookUp model, int* player):
-        cdef vector[Card*] hand_cards
         cdef int current_player, i
         cdef float max_u
         cdef float u, v
         cdef MCTSState* max_child
-        cdef ModelOutput prediction
-        cdef Observation obs
         cdef int child_n, n_sum
-
         if self.is_state_leaf_node(state):
             if state.end_v != 0:
                 v = state.end_v
                 player[0] = -1
             else:
-                env.set_state(state.env_state)
+                env.set_state(&state.env_state)
 
                 if model is not None:
-                    obs = env.regenerate_obs()
-                    prediction = model.predict_single(&obs)
+                    env.regenerate_obs(&self._obs)
+                    model.predict_single(&self._obs, &self._prediction)
                 #else:
                 #    p, v = [1] *32, 0
 
-                hand_cards = env.players[env.current_player].hand_cards
+                self._hand_cards = env.players[env.current_player].hand_cards
                 current_player = env.current_player
-                for card in hand_cards:
-                    obs = env.step(card.id)
 
-                    self.add_state(state, prediction.p[card.id], env, 0 if not env.is_done() else (1 if env.last_winner == 0 else -1))
+                for card in self._hand_cards:
+                    env.step(card.id, &self._obs)
+                    self.add_state(state, self._prediction.p[card.id], env, 0 if not env.is_done() else (1 if env.last_winner == 0 else -1))
+                    env.set_state(&state.env_state)
 
-                    env.set_state(state.env_state)
-
-                v = prediction.v
-                state.v = prediction.v
+                v = self._prediction.v
+                state.v = self._prediction.v
                 player[0] = state.current_player
+
         else:
+
             n_sum = 0
-            for child in state.childs:
-                n_sum += child.n
+            for i in range(state.childs.size()):
+                n_sum += state.childs[i].n
 
             max_child = NULL
             if not self.objective_opponent or state.current_player == 0:
@@ -131,6 +129,7 @@ cdef class MCTS:
             #    p = np.exp(p - np.max(p))
             #    p /= p.sum(axis=0)
             #    max_child = &state.childs[np.random.choice(np.arange(0, len(p)), p=p)]
+
 
             v = self.mcts_sample(env, max_child, model, player)
 
@@ -199,7 +198,7 @@ cdef class MCTS:
         cdef Card* card
         cdef int last_player, i
 
-        obs = env.reset()
+        env.reset(&obs)
         if self.objective_opponent:
             env.current_player = rand() % 2
 
@@ -218,7 +217,7 @@ cdef class MCTS:
 
             game_state = env.get_state()
             a = self.mcts_game_step(env, &root, model, &p)
-            env.set_state(game_state)
+            env.set_state(&game_state)
 
             for i in range(32):
                 storage.data.back().output.p[i] = 0
@@ -229,7 +228,7 @@ cdef class MCTS:
                 i += 1
 
             last_player = env.current_player
-            obs = env.step(env.players[env.current_player].hand_cards[a].id)
+            env.step(env.players[env.current_player].hand_cards[a].id, &obs)
             tmp = root.childs[a]
             root = tmp
             root.is_root = True
@@ -288,3 +287,6 @@ cdef class MCTS:
                 i+=1
 
         return node, id
+
+    def end(self):
+        pass
