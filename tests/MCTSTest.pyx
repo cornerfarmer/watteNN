@@ -284,13 +284,13 @@ class MCTSTest(unittest.TestCase):
         cdef MCTSState root = mcts.create_root_state(env)
 
         cdef vector[float] p
-        print(mcts.mcts_game_step(env, &root, model, &p))
-        print(root.n)
+        mcts.mcts_game_step(env, &root, model, &p, 300)
+        mcts.draw_tree(&root)
 
-        self.assertGreater(p[0], p[1], "First card has not highest prob")
-        self.assertGreater(p[0], p[2], "First card has not highest prob")
+        self.assertGreater(p[1], p[0], "Second card has not highest prob")
+        self.assertGreater(p[1], p[2], "Second card has not highest prob")
 
-    def test_mcts_game_step(self):
+    def test_mcts_game_step_2(self):
         cdef MCTS mcts = MCTS()
         cdef WattenEnv env = WattenEnv()
         cdef Observation obs = env.reset()
@@ -313,15 +313,12 @@ class MCTSTest(unittest.TestCase):
         cdef WattenEnv env = WattenEnv()
         cdef Observation obs = env.reset()
         cdef LookUp model = LookUp()
-        cdef Storage storage
+        cdef Storage storage = Storage()
 
         env.seed(42)
-        mcts.mcts_game(env, model, &storage)
+        mcts.mcts_game(env, model, storage)
 
         self.assertEqual(storage.data.size(), 4, "Not enough storage steps")
-        self.assertAlmostEqual(storage.data[0].output.p[3], 1.0 / 3, 5, "First p[0] wrong")
-        self.assertAlmostEqual(storage.data[0].output.p[4], 1.0 / 3, 5, "First p[1] wrong")
-        self.assertAlmostEqual(storage.data[0].output.p[7], 1.0 / 3, 5, "First p[2] wrong")
         self.assertAlmostEqual(storage.data[0].output.v, -1, 5, "First v wrong")
 
         self.assertGreater(storage.data[1].output.p[5], storage.data[1].output.p[1], "First card has not highest prob in second storage item")
@@ -338,8 +335,7 @@ class MCTSTest(unittest.TestCase):
         cdef WattenEnv env = WattenEnv()
         cdef Observation obs = env.reset()
         cdef LookUp model = LookUp()
-        cdef Storage storage
-        mcts.mcts_generate(env, model, &storage)
+        cdef Storage storage = Storage()
+        mcts.mcts_generate(env, model, storage)
 
         self.assertGreater(storage.data.size(), 4 * 75, "Not enought storage items created")
-

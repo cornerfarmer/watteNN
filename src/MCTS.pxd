@@ -21,8 +21,8 @@ cdef struct StorageItem:
     Observation obs
     ModelOutput output
 
-cdef struct Storage:
-    vector[StorageItem] data
+cdef class Storage:
+    cdef vector[StorageItem] data
 
 cdef class MCTS:
 
@@ -37,7 +37,7 @@ cdef class MCTS:
     cdef float mcts_sample(self, WattenEnv env, MCTSState* state, LookUp model, int* player)
     cdef int mcts_game_step(self, WattenEnv env, MCTSState* root, LookUp model, vector[float]* p, int steps=?)
     cdef MCTSState create_root_state(self, WattenEnv env)
-    cdef void mcts_game(self, WattenEnv env, LookUp model, Storage* storage)
-    cdef void mcts_generate(self, WattenEnv env, LookUp model, Storage* storage)
+    cdef void mcts_game(self, WattenEnv env, LookUp model, Storage storage)
+    cdef void mcts_generate(self, WattenEnv env, LookUp model, Storage storage)
     cdef void draw_tree(self, MCTSState* root, int tree_depth=?, object tree_path=?)
     cdef object create_nodes(self, MCTSState* root, object dot, int tree_depth, object tree_path, int id=?)

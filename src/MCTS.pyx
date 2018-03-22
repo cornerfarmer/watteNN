@@ -25,8 +25,8 @@ cdef struct StorageItem:
     Observation obs
     ModelOutput output
 
-cdef struct Storage:
-    vector[StorageItem] data
+cdef class Storage:
+    pass
 
 cdef class MCTS:
 
@@ -81,10 +81,11 @@ cdef class MCTS:
         cdef vector[Card*] hand_cards
         cdef int current_player, i
         cdef float max_u
+        cdef float u, v
         cdef MCTSState* max_child
         cdef ModelOutput prediction
         cdef Observation obs
-        cdef int child_n
+        cdef int child_n, n_sum
 
         if self.is_state_leaf_node(state):
             if state.end_v != 0:
@@ -96,8 +97,8 @@ cdef class MCTS:
                 if model is not None:
                     obs = env.regenerate_obs()
                     prediction = model.predict_single(&obs)
-                else:
-                    p, v = [1] *32, [0]
+                #else:
+                #    p, v = [1] *32, 0
 
                 hand_cards = env.players[env.current_player].hand_cards
                 current_player = env.current_player
@@ -125,11 +126,11 @@ cdef class MCTS:
                     if max_child is NULL or u > max_u:
                         max_u = u
                         max_child = &state.childs[i]
-            else:
-                p = [child.p for child in state.childs]
-                p = np.exp(p - np.max(p))
-                p /= p.sum(axis=0)
-                max_child = &state.childs[np.random.choice(np.arange(0, len(p)), p=p)]
+            #else:
+            #    p = [child.p for child in state.childs]
+            #    p = np.exp(p - np.max(p))
+            #    p /= p.sum(axis=0)
+            #    max_child = &state.childs[np.random.choice(np.arange(0, len(p)), p=p)]
 
             v = self.mcts_sample(env, max_child, model, player)
 
@@ -192,7 +193,7 @@ cdef class MCTS:
         state.is_root = True
         return state
 
-    cdef void mcts_game(self, WattenEnv env, LookUp model, Storage* storage):
+    cdef void mcts_game(self, WattenEnv env, LookUp model, Storage storage):
         cdef Observation obs
         cdef State game_state
         cdef Card* card
@@ -237,7 +238,7 @@ cdef class MCTS:
             storage.data[i].output.v *= (1 if env.last_winner is 0 else -1)
 
 
-    cdef void mcts_generate(self, WattenEnv env, LookUp model, Storage* storage):
+    cdef void mcts_generate(self, WattenEnv env, LookUp model, Storage storage):
         cdef int i
         for i in range(self.episodes):
             self.mcts_game(env, model, storage)
