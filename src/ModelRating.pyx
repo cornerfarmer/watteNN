@@ -5,7 +5,7 @@ from libcpp.string cimport string
 from libcpp.map cimport map
 from libcpp.algorithm cimport sort
 import itertools
-
+import time
 cdef extern from "<algorithm>" namespace "std" nogil:
     const T& max[T](const T& a, const T& b)
 
@@ -41,7 +41,7 @@ cdef class ModelRating:
                 for card_id in other_hand_cards:
                     self.eval_games.back().player1_hand_cards.push_back(self.env.cards[card_id])
 
-    cdef int search(self, Observation obs, vector[float]* all_values=NULL):
+    cdef int search(self, Observation obs, LookUp model, vector[float]* all_values=NULL, target_player=-1):
         cdef int current_player = self.env.current_player
 
         cdef State state = self.env.get_state()
@@ -49,24 +49,37 @@ cdef class ModelRating:
 
         cdef int max_val = 0
         cdef int value
+        cdef ModelOutput output
 
-        for i in range(n):
-            card_id = self.env.players[self.env.current_player].hand_cards[i].id
-            self.env.step(card_id, &obs)
+        if target_player is -1 or target_player == current_player:
+            if target_player is -1:
+                target_player = current_player
+
+            for i in range(n):
+                card_id = self.env.players[self.env.current_player].hand_cards[i].id
+                self.env.step(card_id, &obs)
+
+                if self.env.is_done():
+                    value = self.env.last_winner == current_player
+                else:
+                    value = (1 - self.search(obs, model, NULL, target_player)) if current_player != self.env.current_player else self.search(obs, model, NULL, target_player)
+
+                max_val = max(max_val, value)
+                if all_values != NULL:
+                    all_values.push_back(value)
+
+                self.env.set_state(&state)
+
+            return max_val
+        else:
+            model.predict_single(&obs, &output)
+
+            self.env.step(self._valid_step(output.p, &self.env.players[self.env.current_player].hand_cards), &obs)
 
             if self.env.is_done():
-                value = self.env.last_winner == current_player
+                return self.env.last_winner == current_player
             else:
-                value = (1 - self.search(obs)) if current_player != self.env.current_player else self.search(obs)
-
-            max_val = max(max_val, value)
-            if all_values != NULL:
-                all_values.push_back(value)
-
-            self.env.set_state(&state)
-
-        return max_val
-
+                return (1 - self.search(obs, model, NULL, target_player)) if current_player != self.env.current_player else self.search(obs, model, NULL, target_player)
 
     cdef string generate_hand_cards_key(self, vector[Card*]* hand_cards):
         cdef vector[int] card_ids
@@ -75,27 +88,27 @@ cdef class ModelRating:
 
         sort(card_ids.begin(), card_ids.end())
 
-        cdef string t = ""
+        cdef string t = "["
         for card_id in card_ids:
-            t += to_string(card_id)
-        return "[" + t + "]"
+            t += to_string(card_id) + <char*>","
+        return t + <char*>"]"
 
     cdef string generate_cache_key(self, State* state):
-        return self.generate_hand_cards_key(&state.player0_hand_cards if state.current_player == 0 else &state.player1_hand_cards) + "-" + self.generate_hand_cards_key(&state.player0_hand_cards if state.current_player == 1 else &state.player1_hand_cards) + "-" + (to_string(state.table_card.id) if state.table_card is not NULL else "") + "-" + to_string(state.player0_tricks if state.current_player == 0 else state.player1_tricks) + "-" + to_string(state.player0_tricks if state.current_player == 1 else state.player1_tricks)
+        return self.generate_hand_cards_key(&state.player0_hand_cards if state.current_player == 0 else &state.player1_hand_cards) + <char*>"-" + self.generate_hand_cards_key(&state.player0_hand_cards if state.current_player == 1 else &state.player1_hand_cards) + <char*>"-" + (to_string(state.table_card.id) if state.table_card is not NULL else <char*>"") + <char*>"-" + to_string(state.player0_tricks if state.current_player == 0 else state.player1_tricks) + <char*>"-" + to_string(state.player0_tricks if state.current_player == 1 else state.player1_tricks)
 
-    cdef vector[float] calc_correct_output_sample(self, State* state):
+    cdef vector[float] calc_correct_output_sample(self, State* state, LookUp model):
         cdef vector[Card*]* hand_cards = &state.player0_hand_cards if state.current_player == 0 else &state.player1_hand_cards
         cdef int i
         cdef vector[float] correct_output
         cdef Observation obs
 
         cache_key = self.generate_cache_key(state)
-        if self.cache.count(cache_key) > 0:
+        if self.cache.count(cache_key) == 0:
 
             self.env.set_state(state)
 
             self.env.regenerate_obs(&obs)
-            self.search(obs, &correct_output)
+            self.search(obs, model, &correct_output)
 
             i = 0
             for i in range(hand_cards.size()):
@@ -108,7 +121,7 @@ cdef class ModelRating:
 
         return output
 
-    cdef vector[float] calc_correct_output(self, State state, vector[HandCards]* possible_hand_cards):
+    cdef vector[float] calc_correct_output(self, State state, LookUp model, vector[HandCards]* possible_hand_cards):
         cdef vector[float] correct_output
         cdef int i, c, n = 0
 
@@ -118,7 +131,7 @@ cdef class ModelRating:
             else:
                 state.player1_hand_cards = possible_hand_cards[0][c]
 
-            sample_outputs = self.calc_correct_output_sample(&state)
+            sample_outputs = self.calc_correct_output_sample(&state, model)
 
             if correct_output.size() == 0:
                 correct_output = sample_outputs
@@ -142,15 +155,16 @@ cdef class ModelRating:
                 max_card = card
                 max_value = values[card.id]
 
-        return card.id
+        return max_card.id
 
     cdef int _argmax(self, vector[float]* values):
         cdef float max_value
-        cdef int max_index = 0
-        for i in range(1, values.size()):
-            if values[0][i] > max_value:
+        cdef int max_index = -1
+        for i in range(0, values.size()):
+            if max_index == -1 or values[0][i] > max_value:
                 max_index = i
-        return i
+                max_value = values[0][i]
+        return max_index
 
     cdef int calc_exploitability_in_game(self, LookUp model, vector[HandCards]* possible_hand_cards):
         cdef State state
@@ -163,7 +177,7 @@ cdef class ModelRating:
         current_player = self.env.current_player
         if self.env.current_player == 1:
             state = self.env.get_state()
-            p = self.calc_correct_output(state, possible_hand_cards)
+            p = self.calc_correct_output(state, model, possible_hand_cards)
             self.env.set_state(&state)
             step = self.env.players[self.env.current_player].hand_cards[self._argmax(&p)].id
         else:
