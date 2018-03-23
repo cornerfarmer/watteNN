@@ -18,7 +18,5 @@ cdef class ModelRating:
     cdef string generate_cache_key(self, State* state)
     cdef vector[float] calc_correct_output_sample(self, State* state, LookUp model)
     cdef vector[float] calc_correct_output(self, State state, LookUp model, vector[HandCards]* possible_hand_cards)
-    cdef int _valid_step(self, float* values, vector[Card*]* hand_cards)
-    cdef int _argmax(self, vector[float]* values)
     cdef int calc_exploitability_in_game(self, LookUp model, vector[HandCards]* possible_hand_cards)
-    cdef calc_exploitability(self, model)
+    cpdef float calc_exploitability(self, model)

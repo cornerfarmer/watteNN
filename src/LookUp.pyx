@@ -1,13 +1,9 @@
 from libcpp.string cimport string
-from gym_watten.envs.watten_env cimport Observation, WattenEnv
+from libcpp cimport bool
+from gym_watten.envs.watten_env cimport Observation, WattenEnv, Card
+from src.MCTS cimport Storage
+from src cimport ModelOutput
 
-cdef struct ModelOutput:
-    float p[32]
-    float v
-
-cdef struct Experience:
-    ModelOutput output
-    int n
 
 cdef extern from "<string>" namespace "std":
     string to_string(int val)
@@ -44,6 +40,14 @@ cdef class LookUp:
             self.table[key].output.v = value.v
             self.table[key].n = 1
 
+    cpdef void memorize_storage(self, Storage storage, bool clear_afterwards=True):
+        cdef int i
+        for i in range(storage.data.size()):
+            self.memorize(&storage.data[i].obs, &storage.data[i].output)
+
+        if clear_afterwards:
+            storage.data.clear()
+
     cdef void predict_single(self, Observation* obs, ModelOutput* output):
         key = self.generate_key(obs)
 
@@ -56,3 +60,23 @@ cdef class LookUp:
             for i in range(32):
                 output.p[i] = 1
             output.v = 0
+
+    cdef int valid_step(self, float* values, vector[Card*]* hand_cards):
+        cdef float max_value
+        cdef Card* card, *max_card = NULL
+
+        for card in hand_cards[0]:
+            if max_card is NULL or max_value < values[card.id]:
+                max_card = card
+                max_value = values[card.id]
+
+        return max_card.id
+
+    cdef int argmax(self, vector[float]* values):
+        cdef float max_value
+        cdef int max_index = -1
+        for i in range(0, values.size()):
+            if max_index == -1 or values[0][i] > max_value:
+                max_index = i
+                max_value = values[0][i]
+        return max_index

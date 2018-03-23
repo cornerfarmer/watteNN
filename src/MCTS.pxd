@@ -2,24 +2,9 @@ from gym_watten.envs.watten_env cimport State, WattenEnv, Card, Observation
 from libcpp cimport bool
 from libcpp.vector cimport vector
 from libc.math cimport sqrt
-from src.LookUp cimport LookUp, ModelOutput
-import numpy as np
-import random
-
-cdef struct MCTSState:
-    vector[MCTSState] childs
-    int n
-    float w
-    float v
-    float p
-    State env_state
-    float end_v
-    int current_player
-    bool is_root
-
-cdef struct StorageItem:
-    Observation obs
-    ModelOutput output
+from src.LookUp cimport LookUp
+from src cimport ModelOutput
+from src cimport MCTSState, StorageItem
 
 cdef class Storage:
     cdef vector[StorageItem] data

@@ -82,34 +82,6 @@ class ModelRatingTest(unittest.TestCase):
         self.assertEqual(p, [1, 1, 0], "Wrong values")
         self.assertEqual(rating.cache["[3,4,7,]-[0,1,5,]--0-0"], {3: 1.0, 4: 1.0, 7: 0.0}, "Wrong cache")
 
-    def test_argmax(self):
-        cdef WattenEnv env = WattenEnv()
-        cdef ModelRating rating = ModelRating(env)
-        cdef vector[float] values
-
-        self.assertEqual(rating._argmax(&values), -1, 'Wrong argmax (0)')
-
-        values.push_back(1)
-        self.assertEqual(rating._argmax(&values), 0, 'Wrong argmax (1)')
-
-        values.push_back(1)
-        self.assertEqual(rating._argmax(&values), 0, 'Wrong argmax (2)')
-
-        values.push_back(5)
-        self.assertEqual(rating._argmax(&values), 2, 'Wrong argmax (3)')
-
-        values.push_back(-2.63)
-        self.assertEqual(rating._argmax(&values), 2, 'Wrong argmax (4)')
-
-    def test_valid_step(self):
-        cdef WattenEnv env = WattenEnv()
-        cdef ModelRating rating = ModelRating(env)
-        cdef float[32] values = [0, 0, 0, 4, -1, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-
-        env.seed(42)
-        env.reset()
-
-        self.assertEqual(rating._valid_step(values, &env.players[0].hand_cards), 7, 'Wrong valid step (0)')
 
     def test_calc_correct_output(self):
         cdef WattenEnv env = WattenEnv()

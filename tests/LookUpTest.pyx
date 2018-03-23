@@ -1,6 +1,7 @@
 import unittest
 from gym_watten.envs.watten_env cimport WattenEnv, Observation
 from src.LookUp cimport LookUp, ModelOutput
+from libcpp.vector cimport vector
 
 class LookUpTest(unittest.TestCase):
 
@@ -92,3 +93,32 @@ class LookUpTest(unittest.TestCase):
         obs.hand_cards[1][4][0] = 0
         obs.hand_cards[1][4][1] = 1
         self.assertEqual(model.generate_key(&obs).decode("utf-8"), "1,21,-12-1-2", "Wrong key")
+
+
+    def test_argmax(self):
+        cdef LookUp model = LookUp()
+        cdef vector[float] values
+
+        self.assertEqual(model.argmax(&values), -1, 'Wrong argmax (0)')
+
+        values.push_back(1)
+        self.assertEqual(model.argmax(&values), 0, 'Wrong argmax (1)')
+
+        values.push_back(1)
+        self.assertEqual(model.argmax(&values), 0, 'Wrong argmax (2)')
+
+        values.push_back(5)
+        self.assertEqual(model.argmax(&values), 2, 'Wrong argmax (3)')
+
+        values.push_back(-2.63)
+        self.assertEqual(model.argmax(&values), 2, 'Wrong argmax (4)')
+
+    def test_valid_step(self):
+        cdef LookUp model = LookUp()
+        cdef WattenEnv env = WattenEnv()
+        cdef float[32] values = [0, 0, 0, 4, -1, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+        env.seed(42)
+        env.reset()
+
+        self.assertEqual(model.valid_step(values, &env.players[0].hand_cards), 7, 'Wrong valid step (0)')

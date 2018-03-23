@@ -74,7 +74,7 @@ cdef class ModelRating:
         else:
             model.predict_single(&obs, &output)
 
-            self.env.step(self._valid_step(output.p, &self.env.players[self.env.current_player].hand_cards), &obs)
+            self.env.step(model.valid_step(output.p, &self.env.players[self.env.current_player].hand_cards), &obs)
 
             if self.env.is_done():
                 return self.env.last_winner == current_player
@@ -146,26 +146,6 @@ cdef class ModelRating:
 
         return correct_output
 
-    cdef int _valid_step(self, float* values, vector[Card*]* hand_cards):
-        cdef float max_value
-        cdef Card* card, *max_card = NULL
-
-        for card in hand_cards[0]:
-            if max_card is NULL or max_value < values[card.id]:
-                max_card = card
-                max_value = values[card.id]
-
-        return max_card.id
-
-    cdef int _argmax(self, vector[float]* values):
-        cdef float max_value
-        cdef int max_index = -1
-        for i in range(0, values.size()):
-            if max_index == -1 or values[0][i] > max_value:
-                max_index = i
-                max_value = values[0][i]
-        return max_index
-
     cdef int calc_exploitability_in_game(self, LookUp model, vector[HandCards]* possible_hand_cards):
         cdef State state
         cdef int current_player, i, j, k
@@ -179,12 +159,12 @@ cdef class ModelRating:
             state = self.env.get_state()
             p = self.calc_correct_output(state, model, possible_hand_cards)
             self.env.set_state(&state)
-            step = self.env.players[self.env.current_player].hand_cards[self._argmax(&p)].id
+            step = self.env.players[self.env.current_player].hand_cards[model.argmax(&p)].id
         else:
             self.env.regenerate_obs(&obs)
             model.predict_single(&obs, &output)
 
-            step = self._valid_step(output.p, &self.env.players[self.env.current_player].hand_cards)
+            step = model.valid_step(output.p, &self.env.players[self.env.current_player].hand_cards)
 
             i = 0
             while i < possible_hand_cards.size():
@@ -197,7 +177,7 @@ cdef class ModelRating:
                     obs.hand_cards[<int>card.color][<int>card.value][0] = 1
                 model.predict_single(&obs, &output)
 
-                theoretical_step = self._valid_step(output.p, &possible_hand_cards[0][i])
+                theoretical_step = model.valid_step(output.p, &possible_hand_cards[0][i])
                 if step == theoretical_step:
                     for j in range(possible_hand_cards[0][i].size()):
                         if possible_hand_cards[0][i][j].id == step:
@@ -214,7 +194,7 @@ cdef class ModelRating:
         else:
             return (1 - self.calc_exploitability_in_game(model, possible_hand_cards)) if current_player != self.env.current_player else self.calc_exploitability_in_game(model, possible_hand_cards)
 
-    cdef calc_exploitability(self, model):
+    cpdef float calc_exploitability(self, model):
         cdef vector[HandCards] opposite_hand_card_combinations
         cdef int exploitability = 0
         cdef Card* card
