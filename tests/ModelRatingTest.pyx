@@ -1,6 +1,6 @@
 import unittest
 from gym_watten.envs.watten_env cimport WattenEnv, Color, Value, Observation, Player, State
-from src.ModelRating cimport ModelRating
+from src.ModelRating cimport ModelRating, HandCards
 from src.LookUp cimport LookUp
 from libcpp.vector cimport vector
 import time
@@ -67,7 +67,7 @@ class ModelRatingTest(unittest.TestCase):
 
         self.assertEqual(rating.generate_cache_key(&state).decode('utf-8'), "[1,5,]-[4,7,]--1-0", "Wrong cache key (2)")
 
-    def test_generate_cache_key(self):
+    def test_generate_calc_correct_output_sample(self):
         cdef WattenEnv env = WattenEnv()
         cdef ModelRating rating = ModelRating(env)
         cdef LookUp model = LookUp()
@@ -110,3 +110,71 @@ class ModelRatingTest(unittest.TestCase):
         env.reset()
 
         self.assertEqual(rating._valid_step(values, &env.players[0].hand_cards), 7, 'Wrong valid step (0)')
+
+    def test_calc_correct_output(self):
+        cdef WattenEnv env = WattenEnv()
+        cdef ModelRating rating = ModelRating(env)
+        cdef LookUp model = LookUp()
+
+        env.seed(42)
+        env.reset()
+        cdef State state = env.get_state()
+        cdef vector[HandCards] possible_hand_cards
+
+        possible_hand_cards.push_back(HandCards())
+        possible_hand_cards.back().push_back(env.cards[2])
+        possible_hand_cards.back().push_back(env.cards[5])
+        possible_hand_cards.back().push_back(env.cards[6])
+
+        possible_hand_cards.push_back(HandCards(state.player1_hand_cards))
+
+        cdef vector[float] correct_output = rating.calc_correct_output(state, model, &possible_hand_cards)
+        self.assertEqual(correct_output, [0.5, 1.0, 0.5], 'Wrong correct output')
+        self.assertEqual(rating.cache.size(), 2, "Wrong cache number")
+
+    def test_calc_exploitability_in_game(self):
+        cdef WattenEnv env = WattenEnv()
+        cdef ModelRating rating = ModelRating(env)
+        cdef LookUp model = LookUp()
+
+        env.seed(42)
+        env.reset()
+
+        cdef HandCards tmp = env.players[0].hand_cards
+        env.players[0].hand_cards = env.players[1].hand_cards
+        env.players[1].hand_cards = tmp
+        cdef State state = env.get_state()
+
+        cdef vector[HandCards] possible_hand_cards
+
+        possible_hand_cards.push_back(HandCards())
+        possible_hand_cards.back().push_back(env.cards[2])
+        possible_hand_cards.back().push_back(env.cards[5])
+        possible_hand_cards.back().push_back(env.cards[6])
+
+        possible_hand_cards.push_back(HandCards(env.players[0].hand_cards))
+
+        cdef int exploitability = rating.calc_exploitability_in_game(model, &possible_hand_cards)
+        self.assertEqual(exploitability, 0, 'Wrong exploitability (0)')
+
+
+        env.set_state(&state)
+        env.current_player = 1
+
+        possible_hand_cards.clear()
+        possible_hand_cards.push_back(HandCards())
+        possible_hand_cards.back().push_back(env.cards[2])
+        possible_hand_cards.back().push_back(env.cards[5])
+        possible_hand_cards.back().push_back(env.cards[6])
+
+        possible_hand_cards.push_back(HandCards(env.players[0].hand_cards))
+
+        exploitability = rating.calc_exploitability_in_game(model, &possible_hand_cards)
+        self.assertEqual(exploitability, 1, 'Wrong exploitability (1)')
+
+    def test_calc_exploitability(self):
+        cdef WattenEnv env = WattenEnv()
+        cdef ModelRating rating = ModelRating(env)
+        cdef LookUp model = LookUp()
+
+        self.assertAlmostEqual(rating.calc_exploitability(model), 0.5107142857142857, 5, "Wrong exploitability for empty model")

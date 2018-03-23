@@ -186,7 +186,8 @@ cdef class ModelRating:
 
             step = self._valid_step(output.p, &self.env.players[self.env.current_player].hand_cards)
 
-            for i in range(possible_hand_cards.size()):
+            i = 0
+            while i < possible_hand_cards.size():
 
                 for j in range(4):
                     for k in range(8):
@@ -194,7 +195,6 @@ cdef class ModelRating:
 
                 for card in possible_hand_cards[0][i]:
                     obs.hand_cards[<int>card.color][<int>card.value][0] = 1
-
                 model.predict_single(&obs, &output)
 
                 theoretical_step = self._valid_step(output.p, &possible_hand_cards[0][i])
@@ -206,6 +206,7 @@ cdef class ModelRating:
                 else:
                     possible_hand_cards.erase(possible_hand_cards.begin() + i)
                     i -= 1
+                i += 1
 
         self.env.step(step)
         if self.env.is_done():
@@ -224,7 +225,7 @@ cdef class ModelRating:
                 self.env.set_state(&self.eval_games[i])
                 self.env.current_player = start_player
 
-                possible_opposite_cards = range(self.env.cards.size())
+                possible_opposite_cards = list(range(self.env.cards.size()))
                 for card in self.env.players[1].hand_cards:
                     possible_opposite_cards.remove(card.id)
 
@@ -239,4 +240,4 @@ cdef class ModelRating:
                 winner = ((1 - self.calc_exploitability_in_game(model, &opposite_hand_card_combinations)) if start_player == 1 else self.calc_exploitability_in_game(model, &opposite_hand_card_combinations))
                 exploitability += (-1 if winner == 1 else 1)
 
-        return exploitability / (len(self.eval_games.size()) * 2)
+        return <float>exploitability / (self.eval_games.size() * 2)
