@@ -25,4 +25,4 @@ class GameTest(unittest.TestCase):
         cdef ModelRating rating = ModelRating(env)
 
         env.seed(42)
-        self.assertEqual(game.compare_given_games(model1, model2, &rating.eval_games), 0.5)
+        self.assertEqual(game.compare_given_games(model1, model2, rating), 0.5)

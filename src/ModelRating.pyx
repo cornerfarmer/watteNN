@@ -5,7 +5,8 @@ from libcpp.string cimport string
 from libcpp.map cimport map
 from libcpp.algorithm cimport sort
 import itertools
-import time
+from libc.string cimport memset
+
 cdef extern from "<algorithm>" namespace "std" nogil:
     const T& max[T](const T& a, const T& b)
 
@@ -41,7 +42,7 @@ cdef class ModelRating:
                 for card_id in other_hand_cards:
                     self.eval_games.back().player1_hand_cards.push_back(self.env.cards[card_id])
 
-    cdef int search(self, Observation obs, LookUp model, vector[float]* all_values=NULL, target_player=-1):
+    cdef int search(self, Observation obs, LookUp model, vector[float]* all_values=NULL, int target_player=-1):
         cdef int current_player = self.env.current_player
 
         cdef State state = self.env.get_state()
@@ -88,7 +89,8 @@ cdef class ModelRating:
 
         sort(card_ids.begin(), card_ids.end())
 
-        cdef string t = "["
+        cdef string t = <char*>"["
+        cdef int card_id
         for card_id in card_ids:
             t += to_string(card_id) + <char*>","
         return t + <char*>"]"
@@ -143,7 +145,6 @@ cdef class ModelRating:
 
         for i in range(correct_output.size()):
             correct_output[i] /= n
-
         return correct_output
 
     cdef int calc_exploitability_in_game(self, LookUp model, vector[HandCards]* possible_hand_cards):
@@ -169,12 +170,14 @@ cdef class ModelRating:
             i = 0
             while i < possible_hand_cards.size():
 
-                for j in range(4):
-                    for k in range(8):
-                        obs.hand_cards[j][k][0] = 0
+                memset(obs.hand_cards, 0, sizeof(obs.hand_cards))
 
                 for card in possible_hand_cards[0][i]:
                     obs.hand_cards[<int>card.color][<int>card.value][0] = 1
+
+                if self.env.table_card is not NULL:
+                    obs.hand_cards[<int>self.env.table_card.color][<int>self.env.table_card.value][1] = 1
+
                 model.predict_single(&obs, &output)
 
                 theoretical_step = model.valid_step(output.p, &possible_hand_cards[0][i])

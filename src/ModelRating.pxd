@@ -13,7 +13,7 @@ cdef class ModelRating:
     cdef map[string, CacheEntry] cache
 
     cdef void _define_eval_games(self)
-    cdef int search(self, Observation obs, LookUp model, vector[float]* all_values=?, target_player=?)
+    cdef int search(self, Observation obs, LookUp model, vector[float]* all_values=?, int target_player=?)
     cdef string generate_hand_cards_key(self, vector[Card*]* hand_cards)
     cdef string generate_cache_key(self, State* state)
     cdef vector[float] calc_correct_output_sample(self, State* state, LookUp model)
