@@ -229,6 +229,8 @@ cdef class ModelRating:
                         opposite_hand_card_combinations.back().push_back(self.env.cards[hand_card])
 
                 winner = ((1 - self.calc_exploitability_in_game(model, &opposite_hand_card_combinations)) if start_player == 1 else self.calc_exploitability_in_game(model, &opposite_hand_card_combinations))
+               # if start_player == 1 and self.eval_games[i].player0_hand_cards[0].id == 1 and self.eval_games[i].player0_hand_cards[1].id == 3 and self.eval_games[i].player0_hand_cards[2].id == 5:
+               #     print(i, winner)
                 exploitability += (-1 if winner == 1 else 1)
 
         return <float>exploitability / (self.eval_games.size() * 2)

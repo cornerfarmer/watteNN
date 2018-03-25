@@ -4,6 +4,7 @@ from src.ModelRating cimport ModelRating, HandCards
 from src.LookUp cimport LookUp
 from src.MCTS cimport MCTS, Storage
 from src.Game cimport Game
+from src.Solver cimport Solver
 from libcpp.vector cimport vector
 import time
 
@@ -33,3 +34,6 @@ class CombinateTest(unittest.TestCase):
                 eval_scores.push_back(exploitability)
                 print(exploitability)
 
+        cdef Solver solver = Solver(env)
+        solver.solve(rating)
+        print("game", game.compare_given_games(solver.model, best_model, rating))

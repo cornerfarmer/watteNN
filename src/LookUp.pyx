@@ -9,6 +9,8 @@ cdef extern from "<string>" namespace "std":
     string to_string(int val)
 
 cdef class LookUp:
+    def __cinit__(self):
+        self.watch = False
 
     cdef string generate_key(self, Observation* obs):
         cdef int i, j
@@ -48,6 +50,9 @@ cdef class LookUp:
             self.table[key].output.v = value.v
             self.table[key].n = 1
 
+    cdef bool is_memorized(self, Observation* obs):
+        return self.table.count(self.generate_key(obs)) > 0
+
     cpdef void memorize_storage(self, Storage storage, bool clear_afterwards=True):
         cdef int i
         for i in range(storage.data.size()):
@@ -65,6 +70,8 @@ cdef class LookUp:
                 output.p[i] = self.table[key].output.p[i] / self.table[key].n
             output.v = self.table[key].output.v / self.table[key].n
         else:
+            if self.watch:
+                print(key)
             for i in range(32):
                 output.p[i] = 1
             output.v = 0
