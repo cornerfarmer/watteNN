@@ -27,6 +27,6 @@ cdef class MCTS:
     cdef int mcts_game_step(self, WattenEnv env, MCTSState* root, LookUp model, vector[float]* p, int steps=?)
     cdef MCTSState create_root_state(self, WattenEnv env)
     cdef void mcts_game(self, WattenEnv env, LookUp model, Storage storage)
-    cdef void mcts_generate(self, WattenEnv env, LookUp model, Storage storage)
+    cpdef void mcts_generate(self, WattenEnv env, LookUp model, Storage storage)
     cdef void draw_tree(self, MCTSState* root, int tree_depth=?, object tree_path=?)
     cdef object create_nodes(self, MCTSState* root, object dot, int tree_depth, object tree_path, int id=?)

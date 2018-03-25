@@ -6,6 +6,7 @@ from libcpp.map cimport map
 from libcpp.algorithm cimport sort
 import itertools
 from libc.string cimport memset
+import sys
 
 cdef extern from "<algorithm>" namespace "std" nogil:
     const T& max[T](const T& a, const T& b)
@@ -32,7 +33,7 @@ cdef class ModelRating:
                 self.eval_games.push_back(State())
                 self.eval_games.back().current_player = 0
                 self.eval_games.back().table_card = NULL
-                self.eval_games.back().lastTrick.resize(2)
+                #self.eval_games.back().lastTrick.resize(2)
                 self.eval_games.back().player0_tricks = 0
                 self.eval_games.back().player1_tricks = 0
 
@@ -96,7 +97,15 @@ cdef class ModelRating:
         return t + <char*>"]"
 
     cdef string generate_cache_key(self, State* state):
-        return self.generate_hand_cards_key(&state.player0_hand_cards if state.current_player == 0 else &state.player1_hand_cards) + <char*>"-" + self.generate_hand_cards_key(&state.player0_hand_cards if state.current_player == 1 else &state.player1_hand_cards) + <char*>"-" + (to_string(state.table_card.id) if state.table_card is not NULL else <char*>"") + <char*>"-" + to_string(state.player0_tricks if state.current_player == 0 else state.player1_tricks) + <char*>"-" + to_string(state.player0_tricks if state.current_player == 1 else state.player1_tricks)
+        cdef string key
+        key += self.generate_hand_cards_key(&state.player0_hand_cards) + <char*>"-"
+        key += self.generate_hand_cards_key(&state.player1_hand_cards) + <char*>"-"
+        key += (to_string(state.table_card.id) if state.table_card is not NULL else <char*>"") + <char*>"-"
+        cdef Card* card
+        for card in state.last_tricks:
+            key += to_string(card.id) + <char*>"-"
+        key = key + <char*>"|" + to_string(state.player0_tricks) + <char*>"-" + to_string(state.player1_tricks)
+        return key
 
     cdef vector[float] calc_correct_output_sample(self, State* state, LookUp model):
         cdef vector[Card*]* hand_cards = &state.player0_hand_cards if state.current_player == 0 else &state.player1_hand_cards
@@ -104,18 +113,16 @@ cdef class ModelRating:
         cdef vector[float] correct_output
         cdef Observation obs
 
+
         cache_key = self.generate_cache_key(state)
         if self.cache.count(cache_key) == 0:
-
             self.env.set_state(state)
 
             self.env.regenerate_obs(&obs)
             self.search(obs, model, &correct_output)
 
-            i = 0
             for i in range(hand_cards.size()):
                 self.cache[cache_key][hand_cards[0][i].id] = correct_output[i]
-                i += 1
 
         cdef vector[float] output
         for i in range(hand_cards.size()):
@@ -128,10 +135,7 @@ cdef class ModelRating:
         cdef int i, c, n = 0
 
         for c in range(possible_hand_cards[0].size()):
-            if state.current_player == 1:
-                state.player0_hand_cards = possible_hand_cards[0][c]
-            else:
-                state.player1_hand_cards = possible_hand_cards[0][c]
+            state.player0_hand_cards = possible_hand_cards[0][c]
 
             sample_outputs = self.calc_correct_output_sample(&state, model)
 
@@ -155,12 +159,16 @@ cdef class ModelRating:
         cdef ModelOutput output
         cdef int step
 
+
         current_player = self.env.current_player
         if self.env.current_player == 1:
             state = self.env.get_state()
             p = self.calc_correct_output(state, model, possible_hand_cards)
+
             self.env.set_state(&state)
+
             step = self.env.players[self.env.current_player].hand_cards[model.argmax(&p)].id
+
         else:
             self.env.regenerate_obs(&obs)
             model.predict_single(&obs, &output)
@@ -170,13 +178,12 @@ cdef class ModelRating:
             i = 0
             while i < possible_hand_cards.size():
 
-                memset(obs.hand_cards, 0, sizeof(obs.hand_cards))
+                for j in range(4):
+                    for k in range(8):
+                        obs.hand_cards[j][k][0] = 0
 
                 for card in possible_hand_cards[0][i]:
                     obs.hand_cards[<int>card.color][<int>card.value][0] = 1
-
-                if self.env.table_card is not NULL:
-                    obs.hand_cards[<int>self.env.table_card.color][<int>self.env.table_card.value][1] = 1
 
                 model.predict_single(&obs, &output)
 
@@ -190,8 +197,9 @@ cdef class ModelRating:
                     possible_hand_cards.erase(possible_hand_cards.begin() + i)
                     i -= 1
                 i += 1
-
         self.env.step(step)
+
+
         if self.env.is_done():
             return self.env.last_winner == current_player
         else:

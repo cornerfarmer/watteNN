@@ -223,7 +223,7 @@ cdef class MCTS:
             storage.data[i].output.v *= (1 if env.last_winner is 0 else -1)
 
 
-    cdef void mcts_generate(self, WattenEnv env, LookUp model, Storage storage):
+    cpdef void mcts_generate(self, WattenEnv env, LookUp model, Storage storage):
         cdef int i
         for i in range(self.episodes):
             self.mcts_game(env, model, storage)
