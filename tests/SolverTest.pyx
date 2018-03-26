@@ -5,7 +5,7 @@ from src.Solver cimport Solver
 from src cimport ModelOutput
 from libcpp.vector cimport vector
 
-class ModelRatingTest(unittest.TestCase):
+class SolverTest(unittest.TestCase):
 
     def test_solve(self):
         cdef WattenEnv env = WattenEnv()

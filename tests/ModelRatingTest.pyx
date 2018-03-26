@@ -23,62 +23,6 @@ class ModelRatingTest(unittest.TestCase):
             self.assertEqual(rating.eval_games[i].player1_tricks, 0, "Wrong trick number in eval game (p1)")
             self.assertEqual(rating.eval_games[i].current_player, 0, "Wrong current_player")
 
-    def test_search(self):
-        cdef WattenEnv env = WattenEnv()
-        cdef ModelRating rating = ModelRating(env)
-        cdef LookUp model = LookUp()
-        cdef Observation obs
-
-        env.seed(42)
-        env.reset(&obs)
-
-        cdef vector[float] values
-        cdef max_v = rating.search(obs, model, &values)
-
-        self.assertEqual(max_v, 1, "Wrong max_v")
-        self.assertEqual(values, [1, 1, 0], "Wrong values")
-
-    def test_generate_hand_cards_key(self):
-        cdef WattenEnv env = WattenEnv()
-        cdef ModelRating rating = ModelRating(env)
-
-        env.seed(42)
-        env.reset()
-
-        self.assertEqual(rating.generate_hand_cards_key(&env.players[0].hand_cards).decode('utf-8'), "[3,4,7,]", "Wrong hand card key for player 0")
-        self.assertEqual(rating.generate_hand_cards_key(&env.players[1].hand_cards).decode('utf-8'), "[0,1,5,]", "Wrong hand card key for player 1")
-
-    def test_generate_cache_key(self):
-        cdef WattenEnv env = WattenEnv()
-        cdef ModelRating rating = ModelRating(env)
-
-        env.seed(42)
-        env.reset()
-
-        cdef State state = env.get_state()
-
-        self.assertEqual(rating.generate_cache_key(&state).decode('utf-8'), "[3,4,7,]-[0,1,5,]--|0-0", "Wrong cache key (0)")
-
-        env.step(3)
-        state = env.get_state()
-
-        self.assertEqual(rating.generate_cache_key(&state).decode('utf-8'), "[4,7,]-[0,1,5,]-3-|0-0", "Wrong cache key (1)")
-
-        env.step(0)
-        state = env.get_state()
-
-        self.assertEqual(rating.generate_cache_key(&state).decode('utf-8'), "[4,7,]-[1,5,]--3-0-|0-1", "Wrong cache key (2)")
-
-        env.step(1)
-        state = env.get_state()
-
-        self.assertEqual(rating.generate_cache_key(&state).decode('utf-8'), "[4,7,]-[5,]-1-3-0-|0-1", "Wrong cache key (3)")
-
-        env.step(4)
-        state = env.get_state()
-
-        self.assertEqual(rating.generate_cache_key(&state).decode('utf-8'), "[7,]-[5,]--3-0-4-1-|0-2", "Wrong cache key (4)")
-
     def test_generate_calc_correct_output_sample(self):
         cdef WattenEnv env = WattenEnv()
         cdef ModelRating rating = ModelRating(env)
@@ -89,7 +33,7 @@ class ModelRatingTest(unittest.TestCase):
 
         cdef State state = env.get_state()
 
-        cdef vector[float] p = rating.calc_correct_output_sample(&state, model)
+        cdef vector[float] p#' = rating.calc_correct_output_sample(&state, model)
 
         self.assertEqual(p, [1, 1, 0], "Wrong values")
         self.assertEqual(rating.cache["[3,4,7,]-[0,1,5,]--|0-0"], {3: 1.0, 4: 1.0, 7: 0.0}, "Wrong cache")
@@ -118,9 +62,9 @@ class ModelRatingTest(unittest.TestCase):
 
         possible_hand_cards.push_back(HandCards(state.player0_hand_cards))
 
-        cdef vector[float] correct_output = rating.calc_correct_output(state, model, &possible_hand_cards)
-        self.assertEqual(correct_output, [0.5, 1.0, 0.5], 'Wrong correct output')
-        self.assertEqual(rating.cache.size(), 2, "Wrong cache number")
+#        cdef vector[float] correct_output = rating.calc_correct_output(state, model, &possible_hand_cards)
+     #   self.assertEqual(correct_output, [0.5, 1.0, 0.5], 'Wrong correct output')
+    #    self.assertEqual(rating.cache.size(), 2, "Wrong cache number")
 
     def test_calc_exploitability_in_game(self):
         cdef WattenEnv env = WattenEnv()
@@ -167,4 +111,4 @@ class ModelRatingTest(unittest.TestCase):
         cdef ModelRating rating = ModelRating(env)
         cdef LookUp model = LookUp()
 
-        self.assertAlmostEqual(rating.calc_exploitability(model), 0.5107142857142857, 5, "Wrong exploitability for empty model")
+        self.assertAlmostEqual(rating.calc_exploitability(model), 0.5267857313156128, 5, "Wrong exploitability for empty model")
