@@ -17,11 +17,12 @@ cdef class Storage:
 
 cdef class MCTS:
 
-    def __cinit__(self, episodes=75, mcts_sims=20, objective_opponent=False, exploration=1):
+    def __cinit__(self, episodes=75, mcts_sims=20, objective_opponent=False, exploration=1, high_q_for_unvisited_nodes=True):
         self.episodes = episodes
         self.mcts_sims = mcts_sims
         self.objective_opponent = objective_opponent
         self.exploration = exploration
+        self.high_q_for_unvisited_nodes = high_q_for_unvisited_nodes
 
     cdef void add_state(self, MCTSState* parent, float p, WattenEnv env, int end_v=0):
         parent.childs.push_back(MCTSState())
@@ -47,8 +48,12 @@ cdef class MCTS:
             return state.end_v * (-1 if player == 1 else 1)
         elif state.current_player == player:
             if state.n == 0:
-                n[0] = 1
-                return 1
+                if self.high_q_for_unvisited_nodes:
+                    n[0] = 1
+                    return 1
+                else:
+                    n[0] = 0
+                    return 0
             else:
                 n[0] = state.n
                 return state.w / state.n
@@ -70,6 +75,7 @@ cdef class MCTS:
         cdef float u, v
         cdef MCTSState* max_child
         cdef int child_n, n_sum
+        cdef vector[float] p
         if self.is_state_leaf_node(state):
             if state.end_v != 0:
                 v = state.end_v
@@ -110,11 +116,10 @@ cdef class MCTS:
                     if max_child is NULL or u > max_u:
                         max_u = u
                         max_child = &state.childs[i]
-            #else:
-            #    p = [child.p for child in state.childs]
-            #    p = np.exp(p - np.max(p))
-            #    p /= p.sum(axis=0)
-            #    max_child = &state.childs[np.random.choice(np.arange(0, len(p)), p=p)]
+            else:
+                for i in range(state.childs.size()):
+                    p.push_back(state.childs[i].p)
+                max_child = &state.childs[self.softmax_step(&p)]
 
 
             v = self.mcts_sample(env, max_child, model, player)
@@ -127,23 +132,7 @@ cdef class MCTS:
             state.n += 1
         return v
 
-    cdef int mcts_game_step(self, WattenEnv env, MCTSState* root, LookUp model, vector[float]* p, int steps=0):
-        if steps == 0:
-            steps = self.mcts_sims
-
-        cdef int i, player
-        for i in range(steps):
-            self.mcts_sample(env, root, model, &player)
-
-        cdef int child_n
-        p.clear()
-        if not self.objective_opponent or root.current_player == 0:
-            for i in range(root.childs.size()):
-                p.push_back(self.calc_q(&root.childs[i], root.current_player, &child_n))
-        else:
-            for i in range(root.childs.size()):
-                p.push_back(root.childs[i].p)
-
+    cdef int softmax_step(self, vector[float]* p):
         cdef float pmax = -1
         for i in range(p.size()):
             if pmax < p[0][i]:
@@ -164,6 +153,25 @@ cdef class MCTS:
             if r <= 0:
                 return i
         return p.size() - 1
+
+    cdef int mcts_game_step(self, WattenEnv env, MCTSState* root, LookUp model, vector[float]* p, int steps=0):
+        if steps == 0:
+            steps = self.mcts_sims
+
+        cdef int i, player
+        for i in range(steps):
+            self.mcts_sample(env, root, model, &player)
+
+        cdef int child_n
+        p.clear()
+        if not self.objective_opponent or root.current_player == 0:
+            for i in range(root.childs.size()):
+                p.push_back(self.calc_q(&root.childs[i], root.current_player, &child_n))
+        else:
+            for i in range(root.childs.size()):
+                p.push_back(root.childs[i].p)
+
+        return self.softmax_step(p)
 
 
     cdef MCTSState create_root_state(self, WattenEnv env):

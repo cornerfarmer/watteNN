@@ -49,7 +49,7 @@ class MCTSTest(unittest.TestCase):
         self.assertEqual(mcts.calc_q(&root, 1, &n), -1, "Wrong q (other player)")
 
     def test_calc_q_same_player(self):
-        cdef MCTS mcts = MCTS()
+        cdef MCTS mcts = MCTS(high_q_for_unvisited_nodes=False)
         cdef MCTSState root
         root.end_v = 0
         root.current_player = 0

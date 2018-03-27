@@ -15,6 +15,7 @@ cdef class MCTS:
     cdef int mcts_sims
     cdef bool objective_opponent
     cdef float exploration
+    cdef bool high_q_for_unvisited_nodes
 
     cdef vector[Card*] _hand_cards
     cdef ModelOutput _prediction
@@ -24,6 +25,7 @@ cdef class MCTS:
     cdef bool is_state_leaf_node(self, MCTSState* state)
     cdef float calc_q(self, MCTSState* state, int player, int* n)
     cdef float mcts_sample(self, WattenEnv env, MCTSState* state, LookUp model, int* player)
+    cdef int softmax_step(self, vector[float]* p)
     cdef int mcts_game_step(self, WattenEnv env, MCTSState* root, LookUp model, vector[float]* p, int steps=?)
     cdef MCTSState create_root_state(self, WattenEnv env)
     cdef void mcts_game(self, WattenEnv env, LookUp model, Storage storage)
