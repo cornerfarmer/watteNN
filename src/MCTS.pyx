@@ -47,8 +47,8 @@ cdef class MCTS:
             return state.end_v * (-1 if player == 1 else 1)
         elif state.current_player == player:
             if state.n == 0:
-                n[0] = 0
-                return 0
+                n[0] = 1
+                return 1
             else:
                 n[0] = state.n
                 return state.w / state.n
