@@ -2,13 +2,14 @@ from libcpp.string cimport string
 from libcpp cimport bool
 from gym_watten.envs.watten_env cimport Observation, WattenEnv, Card
 from src.MCTS cimport Storage
+from src.Model cimport Model
 from src cimport ModelOutput
 
 
 cdef extern from "<string>" namespace "std":
     string to_string(int val)
 
-cdef class LookUp:
+cdef class LookUp(Model):
     def __cinit__(self):
         self.watch = False
 

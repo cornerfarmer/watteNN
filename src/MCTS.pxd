@@ -5,9 +5,7 @@ from libc.math cimport sqrt
 from src.LookUp cimport LookUp
 from src cimport ModelOutput
 from src cimport MCTSState, StorageItem
-
-cdef class Storage:
-    cdef vector[StorageItem] data
+from src.Storage cimport Storage
 
 cdef class MCTS:
 

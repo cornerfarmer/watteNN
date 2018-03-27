@@ -11,9 +11,7 @@ import matplotlib.pyplot as plt
 import pydot_ng as pydot
 from io import BytesIO
 cimport cython
-
-cdef class Storage:
-    pass
+from src.Storage cimport Storage
 
 cdef class MCTS:
 

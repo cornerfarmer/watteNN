@@ -6,6 +6,7 @@ from src.MCTS cimport MCTS, Storage
 from src.Game cimport Game
 from libcpp.vector cimport vector
 import time
+import itertools
 
 class ModelRatingTest(unittest.TestCase):
 
@@ -31,12 +32,29 @@ class ModelRatingTest(unittest.TestCase):
         env.seed(42)
         env.reset()
 
+        cdef HandCards tmp = env.players[0].hand_cards
+        env.players[0].hand_cards = env.players[1].hand_cards
+        env.players[1].hand_cards = tmp
+        env.current_player = 1
+
         cdef State state = env.get_state()
 
-        cdef vector[float] p#' = rating.calc_correct_output_sample(&state, model)
+        possible_opposite_cards = list(range(env.cards.size()))
+        for card in env.players[1].hand_cards:
+            possible_opposite_cards.remove(card.id)
 
-        self.assertEqual(p, [1, 1, 0], "Wrong values")
-        self.assertEqual(rating.cache["[3,4,7,]-[0,1,5,]--|0-0"], {3: 1.0, 4: 1.0, 7: 0.0}, "Wrong cache")
+        combinations = itertools.combinations(possible_opposite_cards, env.players[0].hand_cards.size())
+
+        cdef vector[HandCards] opposite_hand_card_combinations
+        opposite_hand_card_combinations.clear()
+        for hand_cards in combinations:
+            opposite_hand_card_combinations.push_back(HandCards())
+            for hand_card in hand_cards:
+                opposite_hand_card_combinations.back().push_back(env.cards[hand_card])
+
+        cdef vector[float] p = rating.calc_correct_output_sample(&state, model, &opposite_hand_card_combinations)
+
+        self.assertEqual(p, [1, 0, 0], "Wrong values")
 
 
     def test_calc_correct_output(self):
