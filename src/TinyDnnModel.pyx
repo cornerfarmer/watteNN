@@ -4,64 +4,126 @@ from gym_watten.envs.watten_env cimport Observation, WattenEnv, Card
 from src.MCTS cimport Storage
 from src cimport ModelOutput
 from src.Model cimport Model
-
-from src.TinyDnn cimport network, fc, sequential, construct_graph, input, shape3d, concat, layer, conv, connect, tensor_t
-from libcpp.memory cimport make_shared
+import time
+from src.TinyDnn cimport network, fc, sequential, construct_graph, input, shape3d, concat, layer, conv, connect, tensor_t, relu, sigmoid, tanh, mse, graph_visualizer, ofstream, vec_t
+from libcpp.memory cimport make_shared, shared_ptr
 
 cdef class TinyDnnModel(Model):
     def __init__(self):
+        cdef int i
 
-        print("1")
         self.input_layer.resize(2)
-        self.input_layer[0].reset(new input(shape3d(4, 8, 6)))
+        self.input_layer[0].reset(new input(shape3d(1, 1, 192)))
         self.input_layer[1].reset(new input(shape3d(1, 1, 4)))
-        print("2")
 
         cdef vector[shape3d] concat_shapes
         concat_shapes.push_back(shape3d(1, 1, 192))
         concat_shapes.push_back(shape3d(1, 1, 4))
-        self.hidden_layer.resize(2)
-        self.hidden_layer[0].reset(new conv(4, 8, 4, 8, 6, 192))
-        self.hidden_layer[1].reset(new concat(concat_shapes))
 
-        self.output_layer.resize(2)
-        self.output_layer[0].reset(new fc(196, 32))
-        self.output_layer[1].reset(new fc(196, 1))
-        print("3")
-        self.input_layer[0].get()[0] << self.hidden_layer[0].get()[0] << self.hidden_layer[1].get()[0]
-        print("4")
-        connect(self.input_layer[1].get(), self.hidden_layer[1].get(), 0, 1)
+        self.conv_layer.resize(2)
+        self.conv_layer[0].reset(new conv(4, 8, 4, 8, 6, 192))
+        self.conv_layer[1].reset(new concat(concat_shapes))
 
-        self.hidden_layer[1].get()[0] << self.output_layer[0].get()[0]
-        self.hidden_layer[1].get()[0] << self.output_layer[1].get()[0]
+       # connect(self.input_layer[0].get(), self.conv_layer[0].get(), 0, 0)
+        connect(self.input_layer[0].get(), self.conv_layer[1].get(), 0, 0)
+        connect(self.input_layer[1].get(), self.conv_layer[1].get(), 0, 1)
 
-        print("5")
+        self.policy_layer.resize(4)
+        self.policy_layer[0].reset(new fc(196, 256))
+        self.policy_layer[1].reset(new relu())
+        self.policy_layer[2].reset(new fc(256, 32))
+        self.policy_layer[3].reset(new sigmoid())
+
+        self.value_layer.resize(4)
+        self.value_layer[0].reset(new fc(196, 256))
+        self.value_layer[1].reset(new relu())
+        self.value_layer[2].reset(new fc(256, 1))
+        self.value_layer[3].reset(new tanh())
+
+        connect(self.conv_layer.back().get(), self.policy_layer[0].get(), 0, 0)
+        for i in range(1, self.policy_layer.size()):
+             connect(self.policy_layer[i - 1].get(), self.policy_layer[i].get(), 0, 0)
+
+        connect(self.conv_layer.back().get(), self.value_layer[0].get(), 0, 0)
+        for i in range(1, self.value_layer.size()):
+             connect(self.value_layer[i - 1].get(), self.value_layer[i].get(), 0, 0)
+
+        self.output_layer.push_back(shared_ptr[layer](self.policy_layer.back()))
+        self.output_layer.push_back(shared_ptr[layer](self.value_layer.back()))
+
         construct_graph(self.model, self.input_layer, self.output_layer)
 
-        print(self.model.in_data_size(), self.model.out_data_size())
+        self.model_input.resize(2)
+        self.model_input[0].resize(4 * 8 * 6)
+        self.model_input[1].resize(4)
 
+        cdef ofstream ofs = ofstream("graph_net_example.txt")
+        cdef graph_visualizer* viz = new graph_visualizer(self.model)
+        viz.generate(ofs)
+        self.timing = [0] * 3
     cpdef void memorize_storage(self, Storage storage, bool clear_afterwards=True, int epochs=1):
+
+        self.training_input.resize(storage.data.size())
+        self.training_output.resize(storage.data.size())
+
+        for i in range(storage.data.size()):
+            self.training_input[i].resize(2)
+            self.training_input[i][0].resize(4 * 8 * 6)
+            self.training_input[i][1].resize(4)
+
+            self.training_output[i].resize(2)
+            self.training_output[i][0].resize(32)
+            self.training_output[i][1].resize(1)
+
+            self._obs_to_tensor(&storage.data[i].obs, &self.training_input[i])
+            self._output_to_tensor(&storage.data[i].output, &self.training_output[i])
+
+        self.model.fit[mse](self.opt, self.training_input, self.training_output, 64, epochs)
 
         if clear_afterwards:
             storage.data.clear()
 
+    cdef void _obs_to_tensor(self, Observation* obs, tensor_t* tensor):
+        cdef int i, j, k
+        for i in range(4):
+            for j in range(8):
+                for k in range(6):
+                    tensor[0][0][k + i * 6 + j * 4 * 6] = obs.hand_cards[i][j][k]
+
+        for i in range(4):
+            tensor[0][1][i] = obs.tricks[i]
+
+    cdef void _output_to_tensor(self, ModelOutput* output, tensor_t* tensor):
+        cdef int i
+
+        for i in range(32):
+            tensor[0][0][i] = output.p[i]
+        tensor[0][1][0] = output.v
+
     cdef void predict_single(self, Observation* obs, ModelOutput* output):
         cdef int i
-        cdef tensor_t model_input
-        cdef tensor_t model_output
+        begin = time.time()
+        self._obs_to_tensor(obs, &self.model_input)
+        self.timing[0] += time.time() - begin
 
-        model_input.resize(2)
-        model_input[0].resize(4 * 8 * 6)
-        model_input[1].resize(4)
+        begin = time.time()
+        self.model_output = self.model.predict(self.model_input)
+        self.timing[1] += time.time() - begin
 
-        model_output = self.model.predict(model_input)
-
-        print(model_output[0].size(), model_output[1].size())
+        begin = time.time()
         for i in range(32):
-            print(<float>model_output[0][i])
-        print(<float>model_output[1][0])
-
+            output.p[i] = self.model_output[0][i]
+        output.v = self.model_output[1][0]
+        self.timing[2] += time.time() - begin
 
 
     cdef void copy_weights_from(self, Model other_model):
-        pass
+        cdef int i,j
+        cdef vector[vec_t*] own_weights
+        cdef vector[vec_t*] other_weights
+        for i in range(self.model.depth()):
+            own_weights = self.model[i].weights()
+            other_weights = (<TinyDnnModel>other_model).model[i].weights()
+
+            for j in range(own_weights.size()):
+                own_weights[j][0] = other_weights[j][0]

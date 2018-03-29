@@ -3,6 +3,7 @@ from gym_watten.envs.watten_env cimport WattenEnv, Observation
 from src.KerasModel cimport KerasModel, ModelOutput, Storage
 from src cimport StorageItem
 from libcpp.vector cimport vector
+import time
 
 class KerasModelTest(unittest.TestCase):
 
@@ -41,8 +42,11 @@ class KerasModelTest(unittest.TestCase):
             output.p[i] = 1
         output.v = 0
 
+        begin = time.time()
         cdef ModelOutput prediction
-        model.predict_single(&obs, &prediction)
+        for i in range(1):
+            model.predict_single(&obs, &prediction)
+        print(time.time() - begin)
 
         for i in range(32):
             self.assertTrue(0.4 < prediction.p[i] < 0.6, "Prediction probability not in range")
