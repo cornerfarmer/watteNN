@@ -3,7 +3,7 @@ from libcpp cimport bool
 from libcpp.vector cimport vector
 from libc.math cimport sqrt, exp
 from libc.stdlib cimport rand, RAND_MAX
-from src.LookUp cimport LookUp, ModelOutput
+from src.Model cimport Model, ModelOutput
 from src cimport MCTSState, StorageItem
 import numpy as np
 import time
@@ -67,7 +67,7 @@ cdef class MCTS:
             return 0 if n_sum is 0 else q_sum / n_sum
 
     @cython.cdivision(True)
-    cdef float mcts_sample(self, WattenEnv env, MCTSState* state, LookUp model, int* player):
+    cdef float mcts_sample(self, WattenEnv env, MCTSState* state, Model model, int* player):
         cdef int current_player, i
         cdef float max_u
         cdef float u, v
@@ -152,7 +152,7 @@ cdef class MCTS:
                 return i
         return p.size() - 1
 
-    cdef int mcts_game_step(self, WattenEnv env, MCTSState* root, LookUp model, vector[float]* p, int steps=0):
+    cdef int mcts_game_step(self, WattenEnv env, MCTSState* root, Model model, vector[float]* p, int steps=0):
         if steps == 0:
             steps = self.mcts_sims
 
@@ -184,7 +184,7 @@ cdef class MCTS:
         state.is_root = True
         return state
 
-    cdef void mcts_game(self, WattenEnv env, LookUp model, Storage storage):
+    cdef void mcts_game(self, WattenEnv env, Model model, Storage storage):
         cdef Observation obs
         cdef State game_state
         cdef Card* card
@@ -229,7 +229,7 @@ cdef class MCTS:
             storage.data[i].output.v *= (1 if env.last_winner is 0 else -1)
 
 
-    cpdef void mcts_generate(self, WattenEnv env, LookUp model, Storage storage):
+    cpdef void mcts_generate(self, WattenEnv env, Model model, Storage storage):
         cdef int i
         for i in range(self.episodes):
             self.mcts_game(env, model, storage)

@@ -5,3 +5,5 @@ from tests.ModelRatingTest import *
 from tests.GameTest import *
 #from tests.CombineTest import *
 from tests.SolverTest import *
+from tests.KerasModelTest import *
+from tests.TinyDnnTest import *

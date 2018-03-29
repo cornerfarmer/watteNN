@@ -5,6 +5,7 @@ from src.LookUp cimport LookUp
 from src.MCTS cimport MCTS, Storage
 from src.Game cimport Game
 from libcpp.vector cimport vector
+from src.KerasModel cimport KerasModel
 import time
 import itertools
 
@@ -130,3 +131,10 @@ class ModelRatingTest(unittest.TestCase):
         cdef LookUp model = LookUp()
 
         self.assertAlmostEqual(rating.calc_exploitability(model), 0.5267857313156128, 5, "Wrong exploitability for empty model")
+
+    def test_calc_exploitability_with_nn(self):
+        cdef WattenEnv env = WattenEnv()
+        cdef ModelRating rating = ModelRating(env)
+        cdef KerasModel model = KerasModel()
+
+        #self.assertAlmostEqual(rating.calc_exploitability(model), 0.5, 1, "Wrong exploitability for empty model")

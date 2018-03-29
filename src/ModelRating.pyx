@@ -1,5 +1,5 @@
 from gym_watten.envs.watten_env cimport State, WattenEnv, Card, Observation
-from src.LookUp cimport LookUp, ModelOutput
+from src.LookUp cimport Model, LookUp, ModelOutput
 from libcpp.vector cimport vector
 from libcpp.string cimport string
 from libcpp.map cimport map
@@ -45,7 +45,7 @@ cdef class ModelRating:
                 for card_id in other_hand_cards:
                     self.eval_games.back().player1_hand_cards.push_back(self.env.cards[card_id])
 
-    cdef vector[float] calc_correct_output_sample(self, State* state, LookUp model, vector[HandCards]* possible_hand_cards):
+    cdef vector[float] calc_correct_output_sample(self, State* state, Model model, vector[HandCards]* possible_hand_cards):
         cdef vector[Card*]* hand_cards = &state.player0_hand_cards if state.current_player == 0 else &state.player1_hand_cards
         cdef int i
         cdef vector[float] correct_output
@@ -77,7 +77,7 @@ cdef class ModelRating:
 #
         return correct_output
 
-    cdef int calc_correct_output(self, State state, LookUp model, vector[HandCards]* possible_hand_cards):
+    cdef int calc_correct_output(self, State state, Model model, vector[HandCards]* possible_hand_cards):
         cdef vector[float] correct_output
         cdef int i, c, n = 0
         cdef Observation obs
@@ -112,7 +112,7 @@ cdef class ModelRating:
 
         return self.memory.valid_step(model_output.p, &state.player1_hand_cards)
 
-    cdef int calc_exploitability_in_game(self, LookUp model, vector[HandCards]* possible_hand_cards):
+    cdef int calc_exploitability_in_game(self, Model model, vector[HandCards]* possible_hand_cards):
         cdef State state
         cdef int current_player, i, j, k
         cdef Observation obs
@@ -163,7 +163,7 @@ cdef class ModelRating:
         else:
             return (1 - self.calc_exploitability_in_game(model, possible_hand_cards)) if current_player != self.env.current_player else self.calc_exploitability_in_game(model, possible_hand_cards)
 
-    cpdef float calc_exploitability(self, model):
+    cpdef float calc_exploitability(self, Model model):
         cdef vector[HandCards] opposite_hand_card_combinations
         cdef int exploitability = 0
         cdef Card* card

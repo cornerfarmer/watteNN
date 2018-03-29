@@ -10,7 +10,7 @@ cdef extern from "<string>" namespace "std":
 
 cdef class Model:
 
-    cpdef void memorize_storage(self, Storage storage, bool clear_afterwards=True):
+    cpdef void memorize_storage(self, Storage storage, bool clear_afterwards=True, int epochs=1):
         raise NotImplementedError('subclasses must override memorize_storage()!')
 
     cdef void predict_single(self, Observation* obs, ModelOutput* output):
@@ -35,3 +35,6 @@ cdef class Model:
                 max_index = i
                 max_value = values[0][i]
         return max_index
+
+    cdef void copy_weights_from(self, Model other_model):
+        raise NotImplementedError('subclasses must override copy_weights_from()!')

@@ -1,5 +1,5 @@
 from gym_watten.envs.watten_env cimport WattenEnv, Observation
-from src.LookUp cimport LookUp, ModelOutput
+from src.Model cimport Model, ModelOutput
 from src.ModelRating cimport ModelRating
 from libcpp.vector cimport vector
 from libcpp cimport bool
@@ -11,7 +11,7 @@ cdef class Game:
     def __cinit__(self, WattenEnv env):
         self.env = env
 
-    cpdef int match(self, LookUp agent1, LookUp agent2, bool render=False, bool reset=True):
+    cpdef int match(self, Model agent1, Model agent2, bool render=False, bool reset=True):
         cdef Observation obs
         cdef ModelOutput output
         cdef int a
@@ -52,7 +52,7 @@ cdef class Game:
 
         return first_player_wins / 10000"""
 
-    cpdef float compare_given_games(self, LookUp agent1, LookUp agent2, ModelRating rating):
+    cpdef float compare_given_games(self, Model agent1, Model agent2, ModelRating rating):
         cdef int i, first_player_wins, winner, start_player
         first_player_wins = 0
 

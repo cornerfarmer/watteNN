@@ -54,7 +54,7 @@ cdef class LookUp(Model):
     cdef bool is_memorized(self, Observation* obs):
         return self.table.count(self.generate_key(obs)) > 0
 
-    cpdef void memorize_storage(self, Storage storage, bool clear_afterwards=True):
+    cpdef void memorize_storage(self, Storage storage, bool clear_afterwards=True, int epochs=1):
         cdef int i
         for i in range(storage.data.size()):
             self.memorize(&storage.data[i].obs, &storage.data[i].output)
@@ -77,22 +77,5 @@ cdef class LookUp(Model):
                 output.p[i] = 1
             output.v = 0
 
-    cdef int valid_step(self, float* values, vector[Card*]* hand_cards):
-        cdef float max_value
-        cdef Card* card, *max_card = NULL
-
-        for card in hand_cards[0]:
-            if max_card is NULL or max_value < values[card.id]:
-                max_card = card
-                max_value = values[card.id]
-
-        return max_card.id
-
-    cdef int argmax(self, vector[float]* values):
-        cdef float max_value
-        cdef int max_index = -1
-        for i in range(0, values.size()):
-            if max_index == -1 or values[0][i] > max_value:
-                max_index = i
-                max_value = values[0][i]
-        return max_index
+    cdef void copy_weights_from(self, Model other_model):
+        self.model.table = <LookUp>(other_model).table
