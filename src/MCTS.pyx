@@ -198,25 +198,25 @@ cdef class MCTS:
         cdef MCTSState tmp
         cdef vector[int] values
         cdef vector[float] p
+        cdef int storage_index
 
         while not env.is_done():
+            storage_index = storage.add_item()
+            storage.data[storage_index].obs = obs
 
-            storage.data.push_back(StorageItem())
-            storage.data.back().obs = obs
-
-            storage.data.back().output.v = 1 if env.current_player is 0 else -1
-            values.push_back(storage.data.size() - 1)
+            storage.data[storage_index].output.v = 1 if env.current_player is 0 else -1
+            values.push_back(storage_index)
 
             game_state = env.get_state()
             a = self.mcts_game_step(env, &root, model, &p)
             env.set_state(&game_state)
 
             for i in range(32):
-                storage.data.back().output.p[i] = 0
+                storage.data[storage_index].output.p[i] = 0
 
             i = 0
             for card in env.players[env.current_player].hand_cards:
-                storage.data.back().output.p[card.id] = p[i]
+                storage.data[storage_index].output.p[card.id] = p[i]
                 i += 1
 
             last_player = env.current_player

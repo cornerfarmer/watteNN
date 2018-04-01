@@ -4,12 +4,13 @@ from gym_watten.envs.watten_env cimport Observation, WattenEnv, Card
 from src.MCTS cimport Storage
 from src cimport ModelOutput
 from src.Model cimport Model
+from libc.stdlib cimport rand
 import time
 from src.TinyDnn cimport network, fc, sequential, construct_graph, input, shape3d, concat, layer, conv, connect, tensor_t, relu, sigmoid, tanh, mse, graph_visualizer, ofstream, vec_t
 from libcpp.memory cimport make_shared, shared_ptr
 
 cdef class TinyDnnModel(Model):
-    def __init__(self):
+    def __init__(self, hidden_neurons=64):
         cdef int i
 
         self.input_layer.resize(2)
@@ -23,21 +24,23 @@ cdef class TinyDnnModel(Model):
         self.conv_layer.resize(2)
         self.conv_layer[0].reset(new conv(4, 8, 4, 8, 6, 192))
         self.conv_layer[1].reset(new concat(concat_shapes))
+        #self.conv_layer[2].reset(new fc(196, 64))
 
        # connect(self.input_layer[0].get(), self.conv_layer[0].get(), 0, 0)
         connect(self.input_layer[0].get(), self.conv_layer[1].get(), 0, 0)
         connect(self.input_layer[1].get(), self.conv_layer[1].get(), 0, 1)
+        #connect(self.conv_layer[1].get(), self.conv_layer[2].get(), 0, 0)
 
         self.policy_layer.resize(4)
-        self.policy_layer[0].reset(new fc(196, 256))
+        self.policy_layer[0].reset(new fc(196, hidden_neurons))
         self.policy_layer[1].reset(new relu())
-        self.policy_layer[2].reset(new fc(256, 32))
+        self.policy_layer[2].reset(new fc(hidden_neurons, 32))
         self.policy_layer[3].reset(new sigmoid())
 
         self.value_layer.resize(4)
-        self.value_layer[0].reset(new fc(196, 256))
+        self.value_layer[0].reset(new fc(196, hidden_neurons))
         self.value_layer[1].reset(new relu())
-        self.value_layer[2].reset(new fc(256, 1))
+        self.value_layer[2].reset(new fc(hidden_neurons, 1))
         self.value_layer[3].reset(new tanh())
 
         connect(self.conv_layer.back().get(), self.policy_layer[0].get(), 0, 0)
@@ -61,12 +64,14 @@ cdef class TinyDnnModel(Model):
         cdef graph_visualizer* viz = new graph_visualizer(self.model)
         viz.generate(ofs)
         self.timing = [0] * 3
-    cpdef void memorize_storage(self, Storage storage, bool clear_afterwards=True, int epochs=1):
+    cpdef void memorize_storage(self, Storage storage, bool clear_afterwards=True, int epochs=1, int number_of_samples=0):
+        number_of_samples = max(number_of_samples, storage.number_of_samples)
 
-        self.training_input.resize(storage.data.size())
-        self.training_output.resize(storage.data.size())
+        self.training_input.resize(storage.data.size() if number_of_samples is 0 else number_of_samples)
+        self.training_output.resize(storage.data.size() if number_of_samples is 0 else number_of_samples)
 
-        for i in range(storage.data.size()):
+        cdef sample_index = 0
+        for i in range(self.training_input.size()):
             self.training_input[i].resize(2)
             self.training_input[i][0].resize(4 * 8 * 6)
             self.training_input[i][1].resize(4)
@@ -75,8 +80,13 @@ cdef class TinyDnnModel(Model):
             self.training_output[i][0].resize(32)
             self.training_output[i][1].resize(1)
 
-            self._obs_to_tensor(&storage.data[i].obs, &self.training_input[i])
-            self._output_to_tensor(&storage.data[i].output, &self.training_output[i])
+            if number_of_samples is 0:
+                sample_index = i
+            else:
+                sample_index = rand() % storage.number_of_samples
+
+            self._obs_to_tensor(&storage.data[sample_index].obs, &self.training_input[i])
+            self._output_to_tensor(&storage.data[sample_index].output, &self.training_output[i])
 
         self.model.fit[mse](self.opt, self.training_input, self.training_output, 64, epochs)
 

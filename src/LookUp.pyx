@@ -54,7 +54,7 @@ cdef class LookUp(Model):
     cdef bool is_memorized(self, Observation* obs):
         return self.table.count(self.generate_key(obs)) > 0
 
-    cpdef void memorize_storage(self, Storage storage, bool clear_afterwards=True, int epochs=1):
+    cpdef void memorize_storage(self, Storage storage, bool clear_afterwards=True, int epochs=1, int number_of_samples=0):
         cdef int i
         for i in range(storage.data.size()):
             self.memorize(&storage.data[i].obs, &storage.data[i].output)
@@ -78,4 +78,4 @@ cdef class LookUp(Model):
             output.v = 0
 
     cdef void copy_weights_from(self, Model other_model):
-        self.model.table = <LookUp>(other_model).table
+        self.table = (<LookUp>other_model).table

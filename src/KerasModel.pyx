@@ -60,7 +60,7 @@ cdef class KerasModel(Model):
                       loss='mean_squared_error',
                       metrics=['accuracy'])
 
-    cpdef void memorize_storage(self, Storage storage, bool clear_afterwards=True, int epochs=1):
+    cpdef void memorize_storage(self, Storage storage, bool clear_afterwards=True, int epochs=1, int number_of_samples=0):
         cdef np.ndarray input1 = np.zeros([storage.data.size(), 4, 8, 6])
         cdef np.ndarray input2 = np.zeros([storage.data.size(), 4])
 
