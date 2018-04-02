@@ -10,7 +10,7 @@ from src.TinyDnn cimport network, fc, sequential, construct_graph, input, shape3
 from libcpp.memory cimport make_shared, shared_ptr
 
 cdef class TinyDnnModel(Model):
-    def __init__(self, hidden_neurons=64):
+    def __init__(self, hidden_neurons=128):
         cdef int i
 
         self.input_layer.resize(2)
@@ -64,13 +64,15 @@ cdef class TinyDnnModel(Model):
         cdef graph_visualizer* viz = new graph_visualizer(self.model)
         viz.generate(ofs)
         self.timing = [0] * 3
+        print(self.opt.alpha, self.opt.mu)
+
     cpdef void memorize_storage(self, Storage storage, bool clear_afterwards=True, int epochs=1, int number_of_samples=0):
         number_of_samples = max(number_of_samples, storage.number_of_samples)
 
         self.training_input.resize(storage.data.size() if number_of_samples is 0 else number_of_samples)
         self.training_output.resize(storage.data.size() if number_of_samples is 0 else number_of_samples)
 
-        cdef sample_index = 0
+        cdef int sample_index = 0
         for i in range(self.training_input.size()):
             self.training_input[i].resize(2)
             self.training_input[i][0].resize(4 * 8 * 6)

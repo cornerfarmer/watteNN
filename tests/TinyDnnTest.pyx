@@ -7,7 +7,7 @@ import time
 
 class TinyDnnTest(unittest.TestCase):
 
-    """
+
     def test_memorize(self):
         cdef Storage storage = Storage()
         storage.data.push_back(StorageItem())
@@ -23,10 +23,11 @@ class TinyDnnTest(unittest.TestCase):
         storage.data.back().output.p[4] = 1
         storage.data.back().output.v = -1
 
-        #model.memorize_storage(storage, clear_afterwards=False, epochs=1000)
+        model.memorize_storage(storage, clear_afterwards=False, epochs=100)
 
         cdef ModelOutput prediction
-        #model.predict_single(&storage.data.back().obs, &prediction)
+        model.predict_single(&storage.data.back().obs, &prediction)
+        print(prediction)
         for i in range(32):
             self.assertAlmostEqual(prediction.p[i], storage.data.back().output.p[i], 1, "Wrong probability memorized")
         self.assertAlmostEqual(prediction.v, storage.data.back().output.v, 1, "Wrong value memorized")
@@ -35,10 +36,10 @@ class TinyDnnTest(unittest.TestCase):
         other_model.copy_weights_from(model)
 
         cdef ModelOutput other_prediction
-        #other_model.predict_single(&storage.data.back().obs, &other_prediction)
+        other_model.predict_single(&storage.data.back().obs, &other_prediction)
         for i in range(32):
             self.assertEqual(other_prediction.p[i], prediction.p[i], "Probabilities not equal")
-        self.assertEqual(other_prediction.v, prediction.v, "Value not equal")"""
+        self.assertEqual(other_prediction.v, prediction.v, "Value not equal")
 
 
     def test_predict_single(self):

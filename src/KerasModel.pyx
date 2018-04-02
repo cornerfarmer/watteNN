@@ -12,6 +12,7 @@ from keras.layers.merge import concatenate
 from keras.models import Model as RealKerasModel
 from keras.models import load_model
 from keras import optimizers
+from libc.stdlib cimport rand
 
 import numpy as np
 cimport numpy as np
@@ -22,7 +23,7 @@ cdef extern from "<string>" namespace "std":
     string to_string(int val)
 
 cdef class KerasModel(Model):
-    def __init__(self):
+    def __init__(self, hidden_neurons=128):
         input_1 = Input((4,8,6))
         convnet = input_1
 
@@ -44,35 +45,42 @@ cdef class KerasModel(Model):
         policy_out = concatenate([convnet, input_2])
         #policy_out = Dense(64, activation='relu')(policy_out)
         #policy_out = Dense(128, activation='relu')(policy_out)
-        policy_out = Dense(256, activation='relu')(policy_out)
+        policy_out = Dense(hidden_neurons, activation='relu')(policy_out)
         policy_out = Dense(32, activation='sigmoid')(policy_out)
 
         value_out = concatenate([convnet, input_2])
         #value_out = Dense(64, activation='relu')(value_out)
         #value_out = Dense(128, activation='relu')(value_out)
-        value_out = Dense(256, activation='relu')(value_out)
+        value_out = Dense(hidden_neurons, activation='relu')(value_out)
         value_out = Dense(1, activation='tanh')(value_out)
 
         self.model = RealKerasModel(inputs=[input_1, input_2], outputs=[policy_out, value_out])
 
-        adam = optimizers.SGD(lr=0.1, momentum=0.9)
+        adam = optimizers.SGD(lr=0.01, momentum=0.9)
         self.model.compile(optimizer=adam,
                       loss='mean_squared_error',
                       metrics=['accuracy'])
 
     cpdef void memorize_storage(self, Storage storage, bool clear_afterwards=True, int epochs=1, int number_of_samples=0):
-        cdef np.ndarray input1 = np.zeros([storage.data.size(), 4, 8, 6])
-        cdef np.ndarray input2 = np.zeros([storage.data.size(), 4])
+        cdef int s = storage.data.size() if number_of_samples is 0 else number_of_samples
+        cdef np.ndarray input1 = np.zeros([s, 4, 8, 6])
+        cdef np.ndarray input2 = np.zeros([s, 4])
 
-        cdef np.ndarray output1 = np.zeros([storage.data.size(), 32])
-        cdef np.ndarray output2 = np.zeros([storage.data.size(), 1])
+        cdef np.ndarray output1 = np.zeros([s, 32])
+        cdef np.ndarray output2 = np.zeros([s, 1])
 
-        for i in range(storage.data.size()):
-            input1[i] = storage.data[i].obs.hand_cards
-            input2[i] = storage.data[i].obs.tricks
+        cdef int sample_index = 0
+        for i in range(s):
+            if number_of_samples is 0:
+                sample_index = i
+            else:
+                sample_index = rand() % storage.number_of_samples
 
-            output1[i] = storage.data[i].output.p
-            output2[i][0] = storage.data[i].output.v
+            input1[i] = storage.data[sample_index].obs.hand_cards
+            input2[i] = storage.data[sample_index].obs.tricks
+
+            output1[i] = storage.data[sample_index].output.p
+            output2[i][0] = storage.data[sample_index].output.v
 
         self.model.fit([input1, input2], [output1, output2], epochs=epochs, batch_size=64)
 

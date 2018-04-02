@@ -68,6 +68,7 @@ cdef extern from "tiny_dnn/tiny_dnn.h" namespace "tiny_dnn" nogil:
         size_t depth()
         layer* operator[](size_t index)
         bool has_same_weights(const network[T] &rhs, float eps)
+        float get_loss[Error](const vector[tensor_t]& inputs, const vector[tensor_t]& desired_outputs)
 
     cdef cppclass graph:
         pass

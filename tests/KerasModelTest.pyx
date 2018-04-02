@@ -22,10 +22,11 @@ class KerasModelTest(unittest.TestCase):
         storage.data.back().output.p[4] = 1
         storage.data.back().output.v = -1
 
-        model.memorize_storage(storage, clear_afterwards=False, epochs=1000)
+        model.memorize_storage(storage, clear_afterwards=False, epochs=100)
 
         cdef ModelOutput prediction
         model.predict_single(&storage.data.back().obs, &prediction)
+        print(prediction)
         for i in range(32):
             self.assertAlmostEqual(prediction.p[i], storage.data.back().output.p[i], 1, "Wrong probability memorized")
         self.assertAlmostEqual(prediction.v, storage.data.back().output.v, 1, "Wrong value memorized")
