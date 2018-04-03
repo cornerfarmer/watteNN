@@ -56,22 +56,30 @@ cdef class KerasModel(Model):
 
         self.model = RealKerasModel(inputs=[input_1, input_2], outputs=[policy_out, value_out])
 
-        adam = optimizers.SGD(lr=0.01, momentum=0.9)
+       # adam = optimizers.SGD(lr=0.01, momentum=0)
+        adam = optimizers.Adam()
         self.model.compile(optimizer=adam,
                       loss='mean_squared_error',
                       metrics=['accuracy'])
+        self.clean_opt_weights = None
 
     cpdef void memorize_storage(self, Storage storage, bool clear_afterwards=True, int epochs=1, int number_of_samples=0):
-        cdef int s = storage.data.size() if number_of_samples is 0 else number_of_samples
+        cdef bool use_random_selection = (number_of_samples is 0)
+        number_of_samples = max(number_of_samples, storage.number_of_samples)
+
+        cdef int s = storage.data.size() if use_random_selection else number_of_samples
         cdef np.ndarray input1 = np.zeros([s, 4, 8, 6])
         cdef np.ndarray input2 = np.zeros([s, 4])
 
         cdef np.ndarray output1 = np.zeros([s, 32])
         cdef np.ndarray output2 = np.zeros([s, 1])
 
+        if self.clean_opt_weights is not None:
+            self.model.optimizer.set_weights(self.clean_opt_weights)
+
         cdef int sample_index = 0
         for i in range(s):
-            if number_of_samples is 0:
+            if use_random_selection:
                 sample_index = i
             else:
                 sample_index = rand() % storage.number_of_samples
@@ -82,7 +90,15 @@ cdef class KerasModel(Model):
             output1[i] = storage.data[sample_index].output.p
             output2[i][0] = storage.data[sample_index].output.v
 
-        self.model.fit([input1, input2], [output1, output2], epochs=epochs, batch_size=64)
+        #print("Loss ", self.model.test_on_batch([input1, input2], [output1, output2]))
+        self.model.fit([input1, input2], [output1, output2], epochs=epochs, batch_size=1)
+        #print("Loss ", self.model.test_on_batch([input1, input2], [output1, output2]))
+        #print(self.model.get_weights()[-4:-2])
+
+        if self.clean_opt_weights is None:
+            self.clean_opt_weights = self.model.optimizer.get_weights()
+            for weight in self.clean_opt_weights:
+                weight.fill(0)
 
         if clear_afterwards:
             storage.data.clear()
@@ -98,5 +114,5 @@ cdef class KerasModel(Model):
         output.v = outputs[1][0][0]
 
 
-    cdef void copy_weights_from(self, Model other_model):
+    cpdef void copy_weights_from(self, Model other_model):
         self.model.set_weights((<KerasModel>other_model).model.get_weights())

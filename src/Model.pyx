@@ -36,5 +36,5 @@ cdef class Model:
                 max_value = values[0][i]
         return max_index
 
-    cdef void copy_weights_from(self, Model other_model):
+    cpdef void copy_weights_from(self, Model other_model):
         raise NotImplementedError('subclasses must override copy_weights_from()!')

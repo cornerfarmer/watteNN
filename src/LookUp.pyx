@@ -77,5 +77,5 @@ cdef class LookUp(Model):
                 output.p[i] = 1
             output.v = 0
 
-    cdef void copy_weights_from(self, Model other_model):
+    cpdef void copy_weights_from(self, Model other_model):
         self.table = (<LookUp>other_model).table

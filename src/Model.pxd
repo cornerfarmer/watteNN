@@ -11,4 +11,4 @@ cdef class Model:
     cdef void predict_single(self, Observation* obs, ModelOutput* output)
     cdef int valid_step(self, float* values, vector[Card*]* hand_cards)
     cdef int argmax(self, vector[float]* values)
-    cdef void copy_weights_from(self, Model other_model)
+    cpdef void copy_weights_from(self, Model other_model)

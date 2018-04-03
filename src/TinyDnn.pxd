@@ -35,6 +35,15 @@ cdef extern from "tiny_dnn/tiny_dnn.h" namespace "tiny_dnn::layers" nogil:
     cdef cppclass conv(layer):
         conv(size_t in_width, size_t in_height, size_t window_width, size_t window_height, size_t in_channels, size_t out_channels)
 
+cdef extern from "tiny_dnn/tiny_dnn.h" namespace "tiny_dnn::weight_init" nogil:
+
+    cdef cppclass constant(layer):
+        constant()
+        constant(float c)
+
+    cdef cppclass xavier(layer):
+        xavier()
+
 cdef extern from "tiny_dnn/tiny_dnn.h" namespace "tiny_dnn::activation" nogil:
     cdef cppclass relu(layer):
         relu()
@@ -69,6 +78,9 @@ cdef extern from "tiny_dnn/tiny_dnn.h" namespace "tiny_dnn" nogil:
         layer* operator[](size_t index)
         bool has_same_weights(const network[T] &rhs, float eps)
         float get_loss[Error](const vector[tensor_t]& inputs, const vector[tensor_t]& desired_outputs)
+        network[T] &weight_init[WeightInit](const WeightInit &f)
+        network[T] &bias_init[BiasInit](const BiasInit &f)
+        void init_weight()
 
     cdef cppclass graph:
         pass

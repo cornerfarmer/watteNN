@@ -6,8 +6,11 @@ from src cimport ModelOutput
 from src.Model cimport Model
 from libc.stdlib cimport rand
 import time
-from src.TinyDnn cimport network, fc, sequential, construct_graph, input, shape3d, concat, layer, conv, connect, tensor_t, relu, sigmoid, tanh, mse, graph_visualizer, ofstream, vec_t
+from src.TinyDnn cimport network, fc, sequential, construct_graph, input, shape3d, concat, layer, conv, connect, tensor_t, relu, sigmoid, tanh, mse, graph_visualizer, ofstream, vec_t, constant
 from libcpp.memory cimport make_shared, shared_ptr
+
+cdef extern from "<string>" namespace "std":
+    string to_string(float val)
 
 cdef class TinyDnnModel(Model):
     def __init__(self, hidden_neurons=128):
@@ -56,6 +59,10 @@ cdef class TinyDnnModel(Model):
 
         construct_graph(self.model, self.input_layer, self.output_layer)
 
+        self.model.weight_init(constant(0))
+        self.model.bias_init(constant(0))
+        self.model.init_weight()
+
         self.model_input.resize(2)
         self.model_input[0].resize(4 * 8 * 6)
         self.model_input[1].resize(4)
@@ -64,13 +71,15 @@ cdef class TinyDnnModel(Model):
         cdef graph_visualizer* viz = new graph_visualizer(self.model)
         viz.generate(ofs)
         self.timing = [0] * 3
+        self.opt.mu = 0
         print(self.opt.alpha, self.opt.mu)
 
     cpdef void memorize_storage(self, Storage storage, bool clear_afterwards=True, int epochs=1, int number_of_samples=0):
+        cdef bool use_random_selection = (number_of_samples is 0)
         number_of_samples = max(number_of_samples, storage.number_of_samples)
 
-        self.training_input.resize(storage.data.size() if number_of_samples is 0 else number_of_samples)
-        self.training_output.resize(storage.data.size() if number_of_samples is 0 else number_of_samples)
+        self.training_input.resize(storage.data.size() if use_random_selection else number_of_samples)
+        self.training_output.resize(storage.data.size() if use_random_selection else number_of_samples)
 
         cdef int sample_index = 0
         for i in range(self.training_input.size()):
@@ -82,15 +91,21 @@ cdef class TinyDnnModel(Model):
             self.training_output[i][0].resize(32)
             self.training_output[i][1].resize(1)
 
-            if number_of_samples is 0:
+            if use_random_selection:
                 sample_index = i
             else:
                 sample_index = rand() % storage.number_of_samples
-
+            print(sample_index)
             self._obs_to_tensor(&storage.data[sample_index].obs, &self.training_input[i])
             self._output_to_tensor(&storage.data[sample_index].output, &self.training_output[i])
 
-        self.model.fit[mse](self.opt, self.training_input, self.training_output, 64, epochs)
+
+        #print("Loss ", self.model.get_loss[mse](self.training_input, self.training_output) / storage.data.size())
+        self.model.fit[mse](self.opt, self.training_input, self.training_output, 1, epochs)
+        #print("Loss ", self.model.get_loss[mse](self.training_input, self.training_output) / storage.data.size())
+        #self.print_weights()
+
+
 
         if clear_afterwards:
             storage.data.clear()
@@ -129,7 +144,7 @@ cdef class TinyDnnModel(Model):
         self.timing[2] += time.time() - begin
 
 
-    cdef void copy_weights_from(self, Model other_model):
+    cpdef void copy_weights_from(self, Model other_model):
         cdef int i,j
         cdef vector[vec_t*] own_weights
         cdef vector[vec_t*] other_weights
@@ -139,3 +154,21 @@ cdef class TinyDnnModel(Model):
 
             for j in range(own_weights.size()):
                 own_weights[j][0] = other_weights[j][0]
+
+    cdef void print_weights(self):
+        cdef int i,j,k
+        cdef vector[vec_t*] own_weights
+        cdef string t
+        for i in reversed(range(self.model.depth())):
+            own_weights = self.model[i].weights()
+
+            for j in range(own_weights.size()):
+
+                t = <char*>"["
+                for k in range(own_weights[j].size()):
+                    t += to_string(own_weights[j][0][k]) + <char*>", "
+                t += <char*>"]"
+                print(t)
+
+            if own_weights.size() > 0:
+                break

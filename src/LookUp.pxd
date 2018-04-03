@@ -16,4 +16,4 @@ cdef class LookUp(Model):
     cdef bool is_memorized(self, Observation* obs)
     cpdef void memorize_storage(self, Storage storage, bool clear_afterwards=?, int epochs=?, int number_of_samples=?)
     cdef void predict_single(self, Observation* obs, ModelOutput* output)
-    cdef void copy_weights_from(self, Model other_model)
+    cpdef void copy_weights_from(self, Model other_model)
