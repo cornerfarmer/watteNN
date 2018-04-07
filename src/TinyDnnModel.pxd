@@ -23,7 +23,7 @@ cdef class TinyDnnModel(Model):
     cdef momentum opt
     cdef object timing
 
-    cpdef void memorize_storage(self, Storage storage, bool clear_afterwards=?, int epochs=?, int number_of_samples=?)
+    cpdef float memorize_storage(self, Storage storage, bool clear_afterwards=?, int epochs=?, int number_of_samples=?)
     cdef void _obs_to_tensor(self, Observation* obs, tensor_t* tensor)
     cdef void _output_to_tensor(self, ModelOutput* output, tensor_t* tensor)
     cdef void predict_single(self, Observation* obs, ModelOutput* output)

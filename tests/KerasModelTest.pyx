@@ -11,7 +11,7 @@ class KerasModelTest(unittest.TestCase):
         cdef Storage storage = Storage()
         storage.data.push_back(StorageItem())
 
-        cdef WattenEnv env = WattenEnv()
+        cdef WattenEnv env = WattenEnv(True)
         env.seed(1850)
         env.reset(&storage.data.back().obs)
 
@@ -22,7 +22,7 @@ class KerasModelTest(unittest.TestCase):
         storage.data.back().output.p[4] = 1
         storage.data.back().output.v = -1
 
-        model.memorize_storage(storage, clear_afterwards=False, epochs=100)
+        model.memorize_storage(storage, clear_afterwards=False, epochs=1000)
 
         cdef ModelOutput prediction
         model.predict_single(&storage.data.back().obs, &prediction)
@@ -32,7 +32,7 @@ class KerasModelTest(unittest.TestCase):
         self.assertAlmostEqual(prediction.v, storage.data.back().output.v, 1, "Wrong value memorized")
 
     def test_predict_empty(self):
-        cdef WattenEnv env = WattenEnv()
+        cdef WattenEnv env = WattenEnv(True)
         env.seed(1850)
         cdef Observation obs
         env.reset(&obs)

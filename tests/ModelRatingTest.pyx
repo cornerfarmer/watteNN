@@ -26,7 +26,7 @@ class ModelRatingTest(unittest.TestCase):
             self.assertEqual(rating.eval_games[i].current_player, 0, "Wrong current_player")
 
     def test_generate_calc_correct_output_sample(self):
-        cdef WattenEnv env = WattenEnv()
+        cdef WattenEnv env = WattenEnv(True)
         cdef ModelRating rating = ModelRating(env)
         cdef LookUp model = LookUp()
 
@@ -59,7 +59,7 @@ class ModelRatingTest(unittest.TestCase):
 
 
     def test_calc_correct_output(self):
-        cdef WattenEnv env = WattenEnv()
+        cdef WattenEnv env = WattenEnv(True)
         cdef ModelRating rating = ModelRating(env)
         cdef LookUp model = LookUp()
 
@@ -86,7 +86,7 @@ class ModelRatingTest(unittest.TestCase):
     #    self.assertEqual(rating.cache.size(), 2, "Wrong cache number")
 
     def test_calc_exploitability_in_game(self):
-        cdef WattenEnv env = WattenEnv()
+        cdef WattenEnv env = WattenEnv(True)
         cdef ModelRating rating = ModelRating(env)
         cdef LookUp model = LookUp()
 
@@ -126,14 +126,14 @@ class ModelRatingTest(unittest.TestCase):
         self.assertEqual(exploitability, 1, 'Wrong exploitability (1)')
 
     def test_calc_exploitability(self):
-        cdef WattenEnv env = WattenEnv()
+        cdef WattenEnv env = WattenEnv(True)
         cdef ModelRating rating = ModelRating(env)
         cdef LookUp model = LookUp()
 
         self.assertAlmostEqual(rating.calc_exploitability(model), 0.5267857313156128, 5, "Wrong exploitability for empty model")
 
     def test_calc_exploitability_with_nn(self):
-        cdef WattenEnv env = WattenEnv()
+        cdef WattenEnv env = WattenEnv(True)
         cdef ModelRating rating = ModelRating(env)
         cdef KerasModel model = KerasModel()
 

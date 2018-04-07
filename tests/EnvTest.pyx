@@ -4,7 +4,7 @@ from gym_watten.envs.watten_env cimport WattenEnv, Color, Value, Observation, Pl
 class EnvTest(unittest.TestCase):
 
     def test_init(self):
-        cdef WattenEnv env = WattenEnv()
+        cdef WattenEnv env = WattenEnv(True)
         self.assertEqual(env.players.size(), 2, "wrong number of players")
         self.assertEqual(env.cards.size(), 8, "wrong number of cards")
 
@@ -16,7 +16,7 @@ class EnvTest(unittest.TestCase):
             self.assertIn(env.cards[i].value, [Value.SAU, Value.KOENIG, Value.OBER, Value.UNTER], "card with invalid value")
 
     def test_reset(self):
-        cdef WattenEnv env = WattenEnv()
+        cdef WattenEnv env = WattenEnv(True)
         cdef Observation obs
         env.reset()
         env.reset()
@@ -43,7 +43,7 @@ class EnvTest(unittest.TestCase):
         self.assertFalse(env.is_done(), "game is not done")
 
     def test_step(self):
-        cdef WattenEnv env = WattenEnv()
+        cdef WattenEnv env = WattenEnv(True)
         cdef Observation obs
         env.seed(42)
         env.reset()
@@ -64,7 +64,7 @@ class EnvTest(unittest.TestCase):
         self.assertFalse(env.is_done(), "game is not done")
 
     def test_step_trick(self):
-        cdef WattenEnv env = WattenEnv()
+        cdef WattenEnv env = WattenEnv(True)
         cdef Observation obs
         env.seed(42)
         env.reset()
@@ -88,7 +88,7 @@ class EnvTest(unittest.TestCase):
         self.assertFalse(env.is_done(), "game is not done")
 
     def test_step_win(self):
-        cdef WattenEnv env = WattenEnv()
+        cdef WattenEnv env = WattenEnv(True)
         cdef Observation obs
         env.last_winner = 1
         env.seed(42)
@@ -119,7 +119,7 @@ class EnvTest(unittest.TestCase):
 
 
     def test_step_invalid(self):
-        cdef WattenEnv env = WattenEnv()
+        cdef WattenEnv env = WattenEnv(True)
         env.seed(42)
         env.reset()
         env.step(0)
@@ -129,7 +129,7 @@ class EnvTest(unittest.TestCase):
         self.assertEqual(env.last_winner, 1, "incorrect winner")
 
     def test_get_state(self):
-        cdef WattenEnv env = WattenEnv()
+        cdef WattenEnv env = WattenEnv(True)
         env.seed(42)
         env.reset()
         env.step(3)
@@ -148,7 +148,7 @@ class EnvTest(unittest.TestCase):
         self.assertEqual(state.cards_left.size(), 2, "wrong number of cards left")
 
     def test_set_state(self):
-        cdef WattenEnv env = WattenEnv()
+        cdef WattenEnv env = WattenEnv(True)
         env.seed(1337)
         env.reset()
 

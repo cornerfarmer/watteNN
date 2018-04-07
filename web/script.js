@@ -15,6 +15,7 @@ var colors = {
     HERZ: 2,
     SCHELLN: 3
 };
+var minimal = false;
 
 var values = {
     SAU: 7,
@@ -30,12 +31,12 @@ var model;
 
 function initialize() {
     model = new KerasJS.Model({
-      filepath: 'modelDense3CardsMin.bin'
+      filepath: 'modelDenseFinal32.bin'
     });
 
-    var index = 0
-    for (var color = 0; color < 2; color++) {
-        for (var value = 7; value >= 4; value--) {
+    var index = 0;
+    for (var color = 0; color < (minimal ? 2 : 4); color++) {
+        for (var value = 7; value >= (minimal ? 4 : 0); value--) {
             //cards.push({color: colors[color], value: values[value]})
             cards.push({color: color, value: value, index: index++});
         }
@@ -272,12 +273,12 @@ function match(first_card, second_card)
 
 function getCardValue(card, first_card)
 {
-    if (card.color === colors.HERZ && card.value === values.KOENIG)
+    /*if (card.color === colors.HERZ && card.value === values.KOENIG)
         return 11;
     else if (card.color === colors.SCHELLN && card.value === values.SIEBEN)
         return 10;
     else if (card.color === colors.EICHEL && card.value === values.SIEBEN)
-        return 9;
+        return 9;*/
 
     if (card.color === first_card.color)
         return card.value;

@@ -17,3 +17,4 @@ cdef class ModelRating:
     cdef int calc_correct_output(self, State state, Model model, vector[HandCards]* possible_hand_cards)
     cdef int calc_exploitability_in_game(self, Model model, vector[HandCards]* possible_hand_cards)
     cpdef float calc_exploitability(self, Model model)
+    cpdef float calc_exploitability_by_random_games(self, Model model, int number_of_games)

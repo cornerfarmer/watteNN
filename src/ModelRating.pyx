@@ -7,6 +7,7 @@ from libcpp.algorithm cimport sort
 import itertools
 from libcpp cimport bool
 from libc.string cimport memset
+from libc.stdlib cimport rand
 import sys
 
 cdef extern from "<algorithm>" namespace "std" nogil:
@@ -192,3 +193,34 @@ cdef class ModelRating:
                 exploitability += (-1 if winner == 1 else 1)
 
         return <float>exploitability / (self.eval_games.size() * 2)
+
+
+    cpdef float calc_exploitability_by_random_games(self, Model model, int number_of_games):
+        cdef vector[HandCards] opposite_hand_card_combinations
+        cdef int start_player, exploitability = 0
+        cdef Card* card
+        self.memory.table.clear()
+
+        for i in range(number_of_games):
+            self.env.reset()
+            start_player = rand() % 2
+            self.env.current_player = start_player
+
+            possible_opposite_cards = list(range(self.env.cards.size()))
+            for card in self.env.players[1].hand_cards:
+                possible_opposite_cards.remove(card.id)
+
+            combinations = itertools.combinations(possible_opposite_cards, self.env.players[0].hand_cards.size())
+
+            opposite_hand_card_combinations.clear()
+            for hand_cards in combinations:
+                opposite_hand_card_combinations.push_back(HandCards())
+                for hand_card in hand_cards:
+                    opposite_hand_card_combinations.back().push_back(self.env.cards[hand_card])
+
+            winner = ((1 - self.calc_exploitability_in_game(model, &opposite_hand_card_combinations)) if start_player == 1 else self.calc_exploitability_in_game(model, &opposite_hand_card_combinations))
+           # if start_player == 1 and self.eval_games[i].player0_hand_cards[0].id == 1 and self.eval_games[i].player0_hand_cards[1].id == 3 and self.eval_games[i].player0_hand_cards[2].id == 5:
+           #     print(i, winner)
+            exploitability += (-1 if winner == 1 else 1)
+
+        return <float>exploitability / number_of_games

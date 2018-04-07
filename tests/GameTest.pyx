@@ -9,7 +9,7 @@ import time
 class GameTest(unittest.TestCase):
 
     def test_match(self):
-        cdef WattenEnv env = WattenEnv()
+        cdef WattenEnv env = WattenEnv(True)
         cdef Game game = Game(env)
         cdef LookUp model1 = LookUp()
         cdef LookUp model2 = LookUp()
@@ -18,7 +18,7 @@ class GameTest(unittest.TestCase):
         self.assertEqual(game.match(model1, model2), 0)
 
     def test_compare(self):
-        cdef WattenEnv env = WattenEnv()
+        cdef WattenEnv env = WattenEnv(True)
         cdef Game game = Game(env)
         cdef LookUp model1 = LookUp()
         cdef LookUp model2 = LookUp()

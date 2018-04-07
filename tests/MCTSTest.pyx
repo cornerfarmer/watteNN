@@ -9,7 +9,7 @@ class MCTSTest(unittest.TestCase):
 
     def test_add_state(self):
         """ Memorize """
-        cdef WattenEnv env = WattenEnv()
+        cdef WattenEnv env = WattenEnv(True)
         cdef LookUp model = LookUp()
         cdef Storage storage
         cdef MCTS mcts = MCTS()
@@ -172,7 +172,7 @@ class MCTSTest(unittest.TestCase):
 
     def test_mcts_sample_leaf(self):
         cdef MCTS mcts = MCTS()
-        cdef WattenEnv env = WattenEnv()
+        cdef WattenEnv env = WattenEnv(True)
         env.seed(42)
         cdef Observation obs
         env.reset(&obs)
@@ -203,7 +203,7 @@ class MCTSTest(unittest.TestCase):
 
     def test_mcts_sample_step(self):
         cdef MCTS mcts = MCTS()
-        cdef WattenEnv env = WattenEnv()
+        cdef WattenEnv env = WattenEnv(True)
         env.seed(42)
         env.reset()
         cdef LookUp model = LookUp()
@@ -241,7 +241,7 @@ class MCTSTest(unittest.TestCase):
 
     def test_mcts_sample_end_v(self):
         cdef MCTS mcts = MCTS()
-        cdef WattenEnv env = WattenEnv()
+        cdef WattenEnv env = WattenEnv(True)
         env.reset()
         cdef LookUp model = LookUp()
 
@@ -277,7 +277,7 @@ class MCTSTest(unittest.TestCase):
 
     def test_mcts_game_step(self):
         cdef MCTS mcts = MCTS()
-        cdef WattenEnv env = WattenEnv()
+        cdef WattenEnv env = WattenEnv(True)
         env.reset()
         cdef LookUp model = LookUp()
 
@@ -294,7 +294,7 @@ class MCTSTest(unittest.TestCase):
 
     def test_mcts_game_step_2(self):
         cdef MCTS mcts = MCTS()
-        cdef WattenEnv env = WattenEnv()
+        cdef WattenEnv env = WattenEnv(True)
         env.reset()
         cdef LookUp model = LookUp()
 
@@ -312,7 +312,7 @@ class MCTSTest(unittest.TestCase):
 
     def test_mcts_game(self):
         cdef MCTS mcts = MCTS()
-        cdef WattenEnv env = WattenEnv()
+        cdef WattenEnv env = WattenEnv(True)
         env.reset()
         cdef LookUp model = LookUp()
         cdef Storage storage = Storage()
@@ -334,7 +334,7 @@ class MCTSTest(unittest.TestCase):
 
     def test_mcts_generate(self):
         cdef MCTS mcts = MCTS()
-        cdef WattenEnv env = WattenEnv()
+        cdef WattenEnv env = WattenEnv(True)
         env.reset()
         cdef LookUp model = LookUp()
         cdef Storage storage = Storage()

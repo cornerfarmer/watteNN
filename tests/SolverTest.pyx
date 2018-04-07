@@ -8,7 +8,7 @@ from libcpp.vector cimport vector
 class SolverTest(unittest.TestCase):
 
     def test_solve(self):
-        cdef WattenEnv env = WattenEnv()
+        cdef WattenEnv env = WattenEnv(True)
         cdef ModelRating rating = ModelRating(env)
         cdef Solver solver = Solver(env)
         cdef vector[Card*] tmp

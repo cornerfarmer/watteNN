@@ -10,6 +10,7 @@ cdef class Game:
 
     def __cinit__(self, WattenEnv env):
         self.env = env
+        self.mean_game_length = 0
 
     cpdef int match(self, Model agent1, Model agent2, bool render=False, bool reset=True):
         cdef Observation obs
@@ -35,6 +36,8 @@ cdef class Game:
                 sleep(2)
            # if env.lastTrick  is not None:
             #    break
+
+            self.mean_game_length += 1
 
         return self.env.last_winner
 
@@ -64,6 +67,22 @@ cdef class Game:
                 first_player_wins += (winner == 0)
 
         return <float>first_player_wins / (rating.eval_games.size() * 2)
+
+    cpdef float compare_rand_games(self, Model agent1, Model agent2, int number_of_games):
+        cdef int i, first_player_wins, winner
+        first_player_wins = 0
+
+        self.mean_game_length = 0
+
+        for i in range(number_of_games):
+            self.env.reset()
+            self.env.current_player = rand() % 2
+            winner = self.match(agent1, agent2, render=False, reset=False)
+            first_player_wins += (winner == 0)
+
+        self.mean_game_length /= number_of_games
+
+        return <float>first_player_wins / number_of_games
 
     def test(self):
         pass
