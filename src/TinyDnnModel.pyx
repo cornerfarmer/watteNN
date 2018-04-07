@@ -76,7 +76,7 @@ cdef class TinyDnnModel(Model):
 
     cpdef void memorize_storage(self, Storage storage, bool clear_afterwards=True, int epochs=1, int number_of_samples=0):
         cdef bool use_random_selection = (number_of_samples is 0)
-        number_of_samples = max(number_of_samples, storage.number_of_samples)
+        number_of_samples = min(number_of_samples, storage.number_of_samples)
 
         self.training_input.resize(storage.data.size() if use_random_selection else number_of_samples)
         self.training_output.resize(storage.data.size() if use_random_selection else number_of_samples)

@@ -56,8 +56,8 @@ cdef class KerasModel(Model):
 
         self.model = RealKerasModel(inputs=[input_1, input_2], outputs=[policy_out, value_out])
 
-       # adam = optimizers.SGD(lr=0.01, momentum=0)
-        adam = optimizers.Adam()
+        adam = optimizers.SGD(lr=0.1, momentum=0)
+        #adam = optimizers.Adam()
         self.model.compile(optimizer=adam,
                       loss='mean_squared_error',
                       metrics=['accuracy'])
@@ -65,7 +65,7 @@ cdef class KerasModel(Model):
 
     cpdef void memorize_storage(self, Storage storage, bool clear_afterwards=True, int epochs=1, int number_of_samples=0):
         cdef bool use_random_selection = (number_of_samples is 0)
-        number_of_samples = max(number_of_samples, storage.number_of_samples)
+        number_of_samples = min(number_of_samples, storage.number_of_samples)
 
         cdef int s = storage.data.size() if use_random_selection else number_of_samples
         cdef np.ndarray input1 = np.zeros([s, 4, 8, 6])

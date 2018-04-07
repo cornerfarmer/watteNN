@@ -8,6 +8,7 @@ var players = [{hand_cards: [], board_card: null, tricks: 0}, {hand_cards: [], b
 var number_of_hand_cards = 3;
 var current_player = 0;
 var next_start_player = 1;
+var last_tricks = [];
 var colors = {
     EICHEL: 0,
     GRUEN: 1,
@@ -29,13 +30,14 @@ var model;
 
 function initialize() {
     model = new KerasJS.Model({
-      filepath: 'modelDense3.bin'
+      filepath: 'modelDense3CardsMin.bin'
     });
 
+    var index = 0
     for (var color = 0; color < 2; color++) {
         for (var value = 7; value >= 4; value--) {
             //cards.push({color: colors[color], value: values[value]})
-            cards.push({color: color, value: value});
+            cards.push({color: color, value: value, index: index++});
         }
     }
 
@@ -64,6 +66,7 @@ function reset() {
     }
     current_player = next_start_player;
     next_start_player = 1 - next_start_player;
+    last_tricks = [];
     refreshState("");
     refreshView();
 
@@ -118,6 +121,9 @@ function set_card(card) {
 
         if (players[0].board_card !== null && players[1].board_card !== null) {
             var best_player = match(players[1 - current_player].board_card, players[current_player].board_card);
+
+            last_tricks.push(players[0].board_card);
+            last_tricks.push(players[1].board_card);
 
             if (best_player === 0)
                 current_player = 1 - current_player;
@@ -216,16 +222,20 @@ function indexOfMax(arr)
 function runAI()
 {
     obs_cube = [];
-    for (var c = 0; c < 4 * 8 * 2; c++) {
+    for (var c = 0; c < 4 * 8 * 6; c++) {
         obs_cube.push(0);
     }
     for (var i = 0; i < players[0].hand_cards.length; i++) {
-        obs_cube[players[0].hand_cards[i].color * 8 * 2 + players[0].hand_cards[i].value * 2 + 0] = 1;
+        obs_cube[players[0].hand_cards[i].color * 8 * 6 + players[0].hand_cards[i].value * 6 + 0] = 1;
     }
     if (players[1].board_card !== null)
-        obs_cube[players[1].board_card.color * 8 * 2 + players[1].board_card.value * 2 + 1] = 1;
+        obs_cube[players[1].board_card.color * 8 * 6 + players[1].board_card.value * 6 + 1] = 1;
+
+    for (var i = Math.max(0, last_tricks.length - 4); i < last_tricks.length; i++)
+        obs_cube[last_tricks[i].color * 8 * 6 + last_tricks[i].value * 6 + (2 + ((last_tricks.length - 1) / 2 - i / 2) * 2 + (current_player === 1 ? (1 - i % 2) : (i % 2)))] = 1
 
 
+    console.log(obs_cube);
     obs_flat = [];
     addTrickArray(obs_flat, players[0]);
     addTrickArray(obs_flat, players[1]);
@@ -233,16 +243,21 @@ function runAI()
     model.ready()
     .then(() => {
         const inputData = {
-          input_1: new Float32Array(obs_cube),
-          input_2: new Float32Array(obs_flat)
+          input_3: new Float32Array(obs_cube),
+          input_4: new Float32Array(obs_flat)
         }
 
         // make predictions
         return model.predict(inputData)
     }).then(outputData => {
         console.log(outputData);
-        var index = indexOfMax(outputData['dense_2']);
-        set_card(cards[index]);
+        var output = outputData['dense_6'];
+        var max_i = 0;
+        for (var i = 1; i < players[current_player].hand_cards.length; i++) {
+            if (output[players[current_player].hand_cards[i].index] > output[players[current_player].hand_cards[max_i].index])
+                max_i = i;
+        }
+        set_card(players[current_player].hand_cards[max_i]);
     })
 
 }
