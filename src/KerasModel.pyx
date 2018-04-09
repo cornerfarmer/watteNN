@@ -123,4 +123,4 @@ cdef class KerasModel(Model):
         self.model.load_weights(filename)
 
     cpdef void save(self, filename):
-        self.model.save_weights(filename)
+        self.model.save(filename)
