@@ -31,7 +31,7 @@ var model;
 
 function initialize() {
     model = new KerasJS.Model({
-      filepath: 'modelDenseFinal32.bin'
+      filepath: 'fullGamev2.bin'
     });
 
     var index = 0;
@@ -273,15 +273,17 @@ function match(first_card, second_card)
 
 function getCardValue(card, first_card)
 {
-    /*if (card.color === colors.HERZ && card.value === values.KOENIG)
-        return 11;
+    if (card.color === colors.HERZ && card.value === values.KOENIG)
+        return 18;
     else if (card.color === colors.SCHELLN && card.value === values.SIEBEN)
-        return 10;
+        return 17;
     else if (card.color === colors.EICHEL && card.value === values.SIEBEN)
-        return 9;*/
+        return 16;
 
-    if (card.color === first_card.color)
-        return card.value;
+    if (card.color === colors.HERZ)
+        return card.value + 9;
+    else if (card.color === first_card.color)
+        return card.value + 1;
     else
         return 0;
 }
