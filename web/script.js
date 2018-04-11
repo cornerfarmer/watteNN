@@ -5,7 +5,7 @@ jQuery(document).ready(function () {
 var cards = [];
 var cards_left = [];
 var players = [{hand_cards: [], board_card: null, tricks: 0}, {hand_cards: [], board_card: null, tricks: 0}];
-var number_of_hand_cards = 3;
+var number_of_hand_cards = 5;
 var current_player = 0;
 var next_start_player = 1;
 var last_tricks = [];
@@ -31,7 +31,7 @@ var model;
 
 function initialize() {
     model = new KerasJS.Model({
-      filepath: 'fullGamev2.bin'
+      filepath: 'full5Gamev3.bin'
     });
 
     var index = 0;
@@ -134,12 +134,12 @@ function set_card(card) {
         else
             current_player = 1 - current_player;
 
-        if (players[0].tricks === 2)
+        if (players[0].tricks === 3)
         {
             action = "AI won!";
             setTimeout(reset, 1000);
         }
-        else if (players[1].tricks === 2)
+        else if (players[1].tricks === 3)
         {
             action = "Human won!";
             setTimeout(reset, 1000);

@@ -23,7 +23,7 @@ class TinyDnnTest(unittest.TestCase):
         storage.data.back().output.p[4] = 1
         storage.data.back().output.v = -1
 
-        model.memorize_storage(storage, clear_afterwards=False, epochs=100)
+        model.memorize_storage(storage, clear_afterwards=False, epochs=1000)
 
         cdef ModelOutput prediction
         model.predict_single(&storage.data.back().obs, &prediction)

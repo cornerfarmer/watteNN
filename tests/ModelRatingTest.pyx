@@ -12,7 +12,7 @@ import itertools
 class ModelRatingTest(unittest.TestCase):
 
     def test_init(self):
-        cdef WattenEnv env = WattenEnv()
+        cdef WattenEnv env = WattenEnv(True)
         cdef ModelRating rating = ModelRating(env)
 
         self.assertEqual(rating.eval_games.size(), 560, "Wrong eval games number")

@@ -72,36 +72,40 @@ class LookUpTest(unittest.TestCase):
 
     def test_generate_key(self):
         cdef Observation obs
+        obs.sets.resize(4)
         for i in range(4):
+            obs.sets[i].resize(8)
             for j in range(8):
+                obs.sets[i][j].resize(6)
                 for k in range(6):
-                    obs.hand_cards[i][j][k] = 0
+                    obs.sets[i][j][k] = 0
+        obs.scalars.resize(4)
         for i in range(4):
-            obs.tricks[i] = 0
+            obs.scalars[i] = 0
         cdef LookUp model = LookUp()
 
-        obs.hand_cards[0][1][0] = 1
-        obs.hand_cards[2][5][0] = 1
-        obs.hand_cards[1][4][0] = 1
+        obs.sets[0][1][0] = 1
+        obs.sets[2][5][0] = 1
+        obs.sets[1][4][0] = 1
 
         self.assertEqual(model.generate_key(&obs).decode("utf-8"), "1,12,21,------0-0", "Wrong key")
 
-        obs.tricks[0] = 1
-        obs.tricks[3] = 1
+        obs.scalars[0] = 1
+        obs.scalars[3] = 1
         self.assertEqual(model.generate_key(&obs).decode("utf-8"), "1,12,21,------1-2", "Wrong key")
 
-        obs.hand_cards[1][4][0] = 0
-        obs.hand_cards[1][4][1] = 1
+        obs.sets[1][4][0] = 0
+        obs.sets[1][4][1] = 1
         self.assertEqual(model.generate_key(&obs).decode("utf-8"), "1,21,-12-----1-2", "Wrong key")
 
-        obs.hand_cards[0][2][2] = 1
-        obs.hand_cards[0][3][4] = 1
+        obs.sets[0][2][2] = 1
+        obs.sets[0][3][4] = 1
         self.assertEqual(model.generate_key(&obs).decode("utf-8"), "1,21,-12-2--3--1-2", "Wrong key")
 
-        obs.hand_cards[0][2][2] = 0
-        obs.hand_cards[0][3][4] = 0
-        obs.hand_cards[0][2][3] = 1
-        obs.hand_cards[0][3][5] = 1
+        obs.sets[0][2][2] = 0
+        obs.sets[0][3][4] = 0
+        obs.sets[0][2][3] = 1
+        obs.sets[0][3][5] = 1
         self.assertEqual(model.generate_key(&obs).decode("utf-8"), "1,21,-12--2--3-1-2", "Wrong key")
 
 

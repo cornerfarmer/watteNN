@@ -34,8 +34,8 @@ class EnvTest(unittest.TestCase):
         hand_cards[1][4][0] = 1
         hand_cards[1][7][0] = 1
 
-        self.assertEqual(obs.hand_cards, hand_cards, "wrong hand_cards obs")
-        self.assertEqual(obs.tricks, [0, 0, 0, 0], "wrong tricks obs")
+        self.assertEqual(obs.sets, hand_cards, "wrong hand_cards obs")
+        self.assertEqual(obs.scalars, [0, 0, 0, 0], "wrong tricks obs")
 
         self.assertTrue(env.table_card == NULL, "wrong table card")
         self.assertEqual(env.last_tricks.size(), 0, "last tricks not empty")
@@ -55,8 +55,8 @@ class EnvTest(unittest.TestCase):
         hand_cards[0][7][0] = 1
         hand_cards[1][6][0] = 1
 
-        self.assertEqual(obs.hand_cards, hand_cards, "wrong hand_cards obs")
-        self.assertEqual(obs.tricks, [0, 0, 0, 0], "wrong tricks obs")
+        self.assertEqual(obs.sets, hand_cards, "wrong hand_cards obs")
+        self.assertEqual(obs.scalars, [0, 0, 0, 0], "wrong tricks obs")
 
         self.assertEqual(env.last_tricks.size(), 0, "last tricks not empty")
         self.assertTrue(env.table_card == env.cards[3], "wrong table card")
@@ -77,8 +77,8 @@ class EnvTest(unittest.TestCase):
         hand_cards[0][7][2] = 1
         hand_cards[1][6][0] = 1
 
-        self.assertEqual(obs.hand_cards, hand_cards, "wrong hand_cards obs")
-        self.assertEqual(obs.tricks, [1, 0, 0, 0], "wrong tricks obs")
+        self.assertEqual(obs.sets, hand_cards, "wrong hand_cards obs")
+        self.assertEqual(obs.scalars, [1, 0, 0, 0], "wrong tricks obs")
 
         self.assertEqual(env.last_tricks.size(), 2, "last tricks not empty")
         self.assertTrue(env.last_tricks[0] == env.cards[3], "wrong first card last tricks")
@@ -109,8 +109,8 @@ class EnvTest(unittest.TestCase):
         hand_cards[1][4][2] = 1
         hand_cards[0][6][3] = 1
 
-        self.assertEqual(obs.hand_cards, hand_cards, "wrong hand_cards obs")
-        self.assertEqual(obs.tricks, [0, 1, 1, 0], "wrong tricks obs")
+        self.assertEqual(obs.sets, hand_cards, "wrong hand_cards obs")
+        self.assertEqual(obs.scalars, [0, 1, 1, 0], "wrong tricks obs")
 
         self.assertTrue(env.table_card == NULL, "wrong table card")
         self.assertEqual(env.current_player, 0, "wrong current player")
@@ -174,8 +174,8 @@ class EnvTest(unittest.TestCase):
         hand_cards[1][4][0] = 1
         hand_cards[0][4][0] = 1
 
-        self.assertEqual(obs.hand_cards, hand_cards, "wrong hand_cards obs")
-        self.assertEqual(obs.tricks, [0, 0, 1, 0], "wrong tricks obs")
+        self.assertEqual(obs.sets, hand_cards, "wrong hand_cards obs")
+        self.assertEqual(obs.scalars, [0, 0, 1, 0], "wrong tricks obs")
 
         self.assertEqual(env.current_player, 1, "wrong current player")
         for i in range(state.last_tricks.size()):

@@ -107,7 +107,7 @@ cdef class KerasModel(Model):
     cdef void predict_single(self, Observation* obs, ModelOutput* output):
         cdef int i
 
-        inputs = [np.array([obs.hand_cards]), np.array([obs.tricks])]
+        inputs = [np.array([obs.sets]), np.array([obs.scalars])]
 
         outputs = self.model.predict(inputs)
 

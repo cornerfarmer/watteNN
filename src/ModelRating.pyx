@@ -139,10 +139,10 @@ cdef class ModelRating:
 
                 for j in range(4):
                     for k in range(8):
-                        obs.hand_cards[j][k][0] = 0
+                        obs.sets[j][k][0] = 0
 
                 for card in possible_hand_cards[0][i]:
-                    obs.hand_cards[<int>card.color][<int>card.value][0] = 1
+                    obs.sets[<int>card.color][<int>card.value][0] = 1
 
                 model.predict_single(&obs, &output)
 

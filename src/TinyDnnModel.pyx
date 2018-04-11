@@ -114,13 +114,13 @@ cdef class TinyDnnModel(Model):
 
     cdef void _obs_to_tensor(self, Observation* obs, tensor_t* tensor):
         cdef int i, j, k
-        for i in range(4):
-            for j in range(8):
-                for k in range(6):
-                    tensor[0][0][k + i * 6 + j * 4 * 6] = obs.hand_cards[i][j][k]
+        for i in range(obs.sets.size()):
+            for j in range(obs.sets[i].size()):
+                for k in range(obs.sets[i][j].size()):
+                    tensor[0][0][k + i * 6 + j * 4 * 6] = obs.sets[i][j][k]
 
         for i in range(4):
-            tensor[0][1][i] = obs.tricks[i]
+            tensor[0][1][i] = obs.scalars[i]
 
     cdef void _output_to_tensor(self, ModelOutput* output, tensor_t* tensor):
         cdef int i
