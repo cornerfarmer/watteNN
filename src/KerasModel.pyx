@@ -23,8 +23,10 @@ cdef extern from "<string>" namespace "std":
     string to_string(int val)
 
 cdef class KerasModel(Model):
-    def __init__(self, hidden_neurons=128):
-        input_1 = Input((4,8,6))
+    def __init__(self, env, hidden_neurons=128):
+
+        self.input_sets_size = 2 + env.max_number_of_tricks
+        input_1 = Input((4,8, self.input_sets_size))
         convnet = input_1
 
         #convnet = conv_layer(convnet, 75, (3, 3))
@@ -68,7 +70,7 @@ cdef class KerasModel(Model):
         number_of_samples = min(number_of_samples, storage.number_of_samples)
 
         cdef int s = storage.data.size() if use_random_selection else number_of_samples
-        cdef np.ndarray input1 = np.zeros([s, 4, 8, 6])
+        cdef np.ndarray input1 = np.zeros([s, 4, 8, self.input_sets_size])
         cdef np.ndarray input2 = np.zeros([s, 4])
 
         cdef np.ndarray output1 = np.zeros([s, 32])
@@ -84,8 +86,8 @@ cdef class KerasModel(Model):
             else:
                 sample_index = rand() % storage.number_of_samples
 
-            input1[i] = storage.data[sample_index].obs.hand_cards
-            input2[i] = storage.data[sample_index].obs.tricks
+            input1[i] = storage.data[sample_index].obs.sets
+            input2[i] = storage.data[sample_index].obs.scalars
 
             output1[i] = storage.data[sample_index].output.p
             output2[i][0] = storage.data[sample_index].output.v

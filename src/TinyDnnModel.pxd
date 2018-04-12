@@ -22,6 +22,7 @@ cdef class TinyDnnModel(Model):
     cdef vector[tensor_t] training_output
     cdef momentum opt
     cdef object timing
+    cdef int input_sets_size
 
     cpdef float memorize_storage(self, Storage storage, bool clear_afterwards=?, int epochs=?, int number_of_samples=?)
     cdef void _obs_to_tensor(self, Observation* obs, tensor_t* tensor)

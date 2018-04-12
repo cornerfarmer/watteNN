@@ -13,19 +13,20 @@ cdef extern from "<string>" namespace "std":
     string to_string(float val)
 
 cdef class TinyDnnModel(Model):
-    def __init__(self, hidden_neurons=128):
+    def __init__(self, env, hidden_neurons=128):
         cdef int i
 
+        self.input_sets_size = 2 + env.max_number_of_tricks
         self.input_layer.resize(2)
-        self.input_layer[0].reset(new input(shape3d(1, 1, 192)))
+        self.input_layer[0].reset(new input(shape3d(1, 1, 32 * self.input_sets_size)))
         self.input_layer[1].reset(new input(shape3d(1, 1, 4)))
 
         cdef vector[shape3d] concat_shapes
-        concat_shapes.push_back(shape3d(1, 1, 192))
+        concat_shapes.push_back(shape3d(1, 1, 32 * self.input_sets_size))
         concat_shapes.push_back(shape3d(1, 1, 4))
 
         self.conv_layer.resize(2)
-        self.conv_layer[0].reset(new conv(4, 8, 4, 8, 6, 192))
+        self.conv_layer[0].reset(new conv(4, 8, 4, 8, self.input_sets_size, 32 * self.input_sets_size))
         self.conv_layer[1].reset(new concat(concat_shapes))
         #self.conv_layer[2].reset(new fc(196, 64))
 
@@ -35,13 +36,13 @@ cdef class TinyDnnModel(Model):
         #connect(self.conv_layer[1].get(), self.conv_layer[2].get(), 0, 0)
 
         self.policy_layer.resize(4)
-        self.policy_layer[0].reset(new fc(196, hidden_neurons))
+        self.policy_layer[0].reset(new fc(32 * self.input_sets_size + 4, hidden_neurons))
         self.policy_layer[1].reset(new relu())
         self.policy_layer[2].reset(new fc(hidden_neurons, 32))
         self.policy_layer[3].reset(new sigmoid())
 
         self.value_layer.resize(4)
-        self.value_layer[0].reset(new fc(196, hidden_neurons))
+        self.value_layer[0].reset(new fc(32 * self.input_sets_size + 4, hidden_neurons))
         self.value_layer[1].reset(new relu())
         self.value_layer[2].reset(new fc(hidden_neurons, 1))
         self.value_layer[3].reset(new tanh())
@@ -64,7 +65,7 @@ cdef class TinyDnnModel(Model):
         self.model.init_weight()
 
         self.model_input.resize(2)
-        self.model_input[0].resize(4 * 8 * 6)
+        self.model_input[0].resize(32 * self.input_sets_size)
         self.model_input[1].resize(4)
 
         cdef ofstream ofs = ofstream("graph_net_example.txt")
@@ -84,7 +85,7 @@ cdef class TinyDnnModel(Model):
         cdef int sample_index = 0
         for i in range(self.training_input.size()):
             self.training_input[i].resize(2)
-            self.training_input[i][0].resize(4 * 8 * 6)
+            self.training_input[i][0].resize(self.input_sets_size * 32)
             self.training_input[i][1].resize(4)
 
             self.training_output[i].resize(2)
@@ -117,7 +118,7 @@ cdef class TinyDnnModel(Model):
         for i in range(obs.sets.size()):
             for j in range(obs.sets[i].size()):
                 for k in range(obs.sets[i][j].size()):
-                    tensor[0][0][k + i * 6 + j * 4 * 6] = obs.sets[i][j][k]
+                    tensor[0][0][k + i * self.input_sets_size + j * 4 * self.input_sets_size] = obs.sets[i][j][k]
 
         for i in range(4):
             tensor[0][1][i] = obs.scalars[i]

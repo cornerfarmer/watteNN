@@ -135,6 +135,6 @@ class ModelRatingTest(unittest.TestCase):
     def test_calc_exploitability_with_nn(self):
         cdef WattenEnv env = WattenEnv(True)
         cdef ModelRating rating = ModelRating(env)
-        cdef KerasModel model = KerasModel()
+        cdef KerasModel model = KerasModel(env)
 
         #self.assertAlmostEqual(rating.calc_exploitability(model), 0.5, 1, "Wrong exploitability for empty model")

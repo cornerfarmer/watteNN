@@ -31,7 +31,7 @@ var model;
 
 function initialize() {
     model = new KerasJS.Model({
-      filepath: 'full5Gamev3.bin'
+      filepath: 'full5Gamev4.bin'
     });
 
     var index = 0;

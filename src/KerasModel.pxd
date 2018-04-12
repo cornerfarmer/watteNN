@@ -10,6 +10,7 @@ from src.Model cimport Model
 cdef class KerasModel(Model):
     cdef object model
     cdef object clean_opt_weights
+    cdef int input_sets_size
 
     cpdef float memorize_storage(self, Storage storage, bool clear_afterwards=?, int epochs=?, int number_of_samples=?)
     cdef void predict_single(self, Observation* obs, ModelOutput* output)

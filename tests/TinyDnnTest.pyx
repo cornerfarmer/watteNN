@@ -12,11 +12,11 @@ class TinyDnnTest(unittest.TestCase):
         cdef Storage storage = Storage()
         storage.data.push_back(StorageItem())
 
-        cdef WattenEnv env = WattenEnv()
+        cdef WattenEnv env = WattenEnv(True)
         env.seed(1850)
         env.reset(&storage.data.back().obs)
 
-        cdef TinyDnnModel model = TinyDnnModel()
+        cdef TinyDnnModel model = TinyDnnModel(env)
 
         for i in range(32):
             storage.data.back().output.p[i] = 0
@@ -32,7 +32,7 @@ class TinyDnnTest(unittest.TestCase):
             self.assertAlmostEqual(prediction.p[i], storage.data.back().output.p[i], 1, "Wrong probability memorized")
         self.assertAlmostEqual(prediction.v, storage.data.back().output.v, 1, "Wrong value memorized")
 
-        cdef TinyDnnModel other_model = TinyDnnModel()
+        cdef TinyDnnModel other_model = TinyDnnModel(env)
         other_model.copy_weights_from(model)
 
         cdef ModelOutput other_prediction
@@ -48,7 +48,7 @@ class TinyDnnTest(unittest.TestCase):
         env.seed(1850)
         cdef Observation obs
         env.reset(&obs)
-        cdef TinyDnnModel model = TinyDnnModel()
+        cdef TinyDnnModel model = TinyDnnModel(env)
         cdef ModelOutput output
 
         for i in range(32):

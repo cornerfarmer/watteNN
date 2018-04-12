@@ -15,7 +15,7 @@ class KerasModelTest(unittest.TestCase):
         env.seed(1850)
         env.reset(&storage.data.back().obs)
 
-        cdef KerasModel model = KerasModel()
+        cdef KerasModel model = KerasModel(env)
 
         for i in range(32):
             storage.data.back().output.p[i] = 0
@@ -36,7 +36,7 @@ class KerasModelTest(unittest.TestCase):
         env.seed(1850)
         cdef Observation obs
         env.reset(&obs)
-        cdef KerasModel model = KerasModel()
+        cdef KerasModel model = KerasModel(env)
         cdef ModelOutput output
 
         for i in range(32):
