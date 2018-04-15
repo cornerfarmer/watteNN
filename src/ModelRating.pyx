@@ -1,4 +1,4 @@
-from gym_watten.envs.watten_env cimport State, WattenEnv, Card, Observation
+from gym_watten.envs.watten_env cimport State, WattenEnv, Card, Observation, ActionType
 from src.LookUp cimport Model, LookUp, ModelOutput
 from libcpp.vector cimport vector
 from libcpp.string cimport string
@@ -39,6 +39,7 @@ cdef class ModelRating:
                 #self.eval_games.back().lastTrick.resize(2)
                 self.eval_games.back().player0_tricks = 0
                 self.eval_games.back().player1_tricks = 0
+                self.eval_games.back().type = ActionType.DRAW_CARD if self.env.minimal else ActionType.CHOOSE_VALUE
 
                 for card_id in hand_cards:
                     self.eval_games.back().player0_hand_cards.push_back(self.env.cards[card_id])

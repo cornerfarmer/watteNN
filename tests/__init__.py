@@ -1,4 +1,5 @@
-from tests.EnvTest import *
+from tests.EnvFullTest import *
+from tests.EnvMinimalTest import *
 from tests.LookUpTest import *
 from tests.MCTSTest import *
 from tests.ModelRatingTest import *

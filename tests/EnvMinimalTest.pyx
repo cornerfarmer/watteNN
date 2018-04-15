@@ -1,7 +1,7 @@
 import unittest
-from gym_watten.envs.watten_env cimport WattenEnv, Color, Value, Observation, Player, State
+from gym_watten.envs.watten_env cimport WattenEnv, Color, Value, Observation, Player, State, ActionType
 
-class EnvTest(unittest.TestCase):
+class EnvMinimalTest(unittest.TestCase):
 
     def test_init(self):
         cdef WattenEnv env = WattenEnv(True)
@@ -162,6 +162,7 @@ class EnvTest(unittest.TestCase):
         state.last_tricks.push_back(env.cards[2])
         state.player0_tricks = 1
         state.player1_tricks = 0
+        state.type = ActionType.DRAW_CARD
         env.set_state(&state)
 
         cdef Observation obs

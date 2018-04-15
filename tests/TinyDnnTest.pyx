@@ -44,7 +44,7 @@ class TinyDnnTest(unittest.TestCase):
 
     def test_predict_single(self):
 
-        cdef WattenEnv env = WattenEnv()
+        cdef WattenEnv env = WattenEnv(True)
         env.seed(1850)
         cdef Observation obs
         env.reset(&obs)

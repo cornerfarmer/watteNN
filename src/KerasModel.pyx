@@ -1,6 +1,6 @@
 from libcpp.string cimport string
 from libcpp cimport bool
-from gym_watten.envs.watten_env cimport Observation, WattenEnv, Card
+from gym_watten.envs.watten_env cimport Observation, WattenEnv, Card, ActionType
 from src.MCTS cimport Storage
 from src cimport ModelOutput
 from src.Model cimport Model
@@ -25,7 +25,7 @@ cdef extern from "<string>" namespace "std":
 cdef class KerasModel(Model):
     def __init__(self, env, hidden_neurons=128):
 
-        self.input_sets_size = 2 + env.max_number_of_tricks
+        self.input_sets_size = env.get_input_sets_size(ActionType.DRAW_CARD)
         input_1 = Input((4,8, self.input_sets_size))
         convnet = input_1
 

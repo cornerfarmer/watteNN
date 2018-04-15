@@ -1,6 +1,6 @@
 from libcpp.string cimport string
 from libcpp cimport bool
-from gym_watten.envs.watten_env cimport Observation, WattenEnv, Card
+from gym_watten.envs.watten_env cimport Observation, WattenEnv, Card, ActionType
 from src.MCTS cimport Storage
 from src cimport ModelOutput
 from src.Model cimport Model
@@ -16,7 +16,7 @@ cdef class TinyDnnModel(Model):
     def __init__(self, env, hidden_neurons=128):
         cdef int i
 
-        self.input_sets_size = 2 + env.max_number_of_tricks
+        self.input_sets_size = env.get_input_sets_size(ActionType.DRAW_CARD)
         self.input_layer.resize(2)
         self.input_layer[0].reset(new input(shape3d(1, 1, 32 * self.input_sets_size)))
         self.input_layer[1].reset(new input(shape3d(1, 1, 4)))

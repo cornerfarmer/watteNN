@@ -7,7 +7,7 @@ class LookUpTest(unittest.TestCase):
 
     def test_memorize(self):
         """ Memorize """
-        cdef WattenEnv env = WattenEnv()
+        cdef WattenEnv env = WattenEnv(True)
         env.seed(1850)
         cdef Observation obs
         env.reset(&obs)
@@ -27,7 +27,7 @@ class LookUpTest(unittest.TestCase):
         self.assertEqual(prediction.v, output.v, "Wrong value memorized")
 
     def test_memorize_multiple(self):
-        cdef WattenEnv env = WattenEnv()
+        cdef WattenEnv env = WattenEnv(True)
         env.seed(1850)
         cdef Observation obs
         env.reset(&obs)
@@ -54,7 +54,7 @@ class LookUpTest(unittest.TestCase):
         self.assertEqual(prediction.v, output.v, "Wrong value memorized")
 
     def test_predict_empty(self):
-        cdef WattenEnv env = WattenEnv()
+        cdef WattenEnv env = WattenEnv(True)
         env.seed(1850)
         cdef Observation obs
         env.reset(&obs)
@@ -129,7 +129,7 @@ class LookUpTest(unittest.TestCase):
 
     def test_valid_step(self):
         cdef LookUp model = LookUp()
-        cdef WattenEnv env = WattenEnv()
+        cdef WattenEnv env = WattenEnv(True)
         cdef float[32] values = [0, 0, 0, 4, -1, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
         env.seed(42)
