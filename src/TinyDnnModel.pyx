@@ -75,7 +75,7 @@ cdef class TinyDnnModel(Model):
         self.opt.mu = 0
         print(self.opt.alpha, self.opt.mu)
 
-    cpdef float memorize_storage(self, Storage storage, bool clear_afterwards=True, int epochs=1, int number_of_samples=0):
+    cpdef vector[float] memorize_storage(self, Storage storage, bool clear_afterwards=True, int epochs=1, int number_of_samples=0):
         cdef bool use_random_selection = (number_of_samples is 0)
         number_of_samples = min(number_of_samples, storage.number_of_samples)
 
@@ -111,7 +111,7 @@ cdef class TinyDnnModel(Model):
         if clear_afterwards:
             storage.data.clear()
 
-        return 0
+        return vector[float]()
 
     cdef void _obs_to_tensor(self, Observation* obs, tensor_t* tensor):
         cdef int i, j, k

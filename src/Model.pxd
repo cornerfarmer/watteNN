@@ -7,7 +7,7 @@ from src.Storage cimport Storage
 from src cimport ModelOutput, Experience
 
 cdef class Model:
-    cpdef float memorize_storage(self, Storage storage, bool clear_afterwards=?, int epochs=?, int number_of_samples=?)
+    cpdef vector[float] memorize_storage(self, Storage storage, bool clear_afterwards=?, int epochs=?, int number_of_samples=?)
     cdef void predict_single(self, Observation* obs, ModelOutput* output)
     cdef int valid_step(self, float* values, vector[Card*]* hand_cards)
     cdef int argmax(self, vector[float]* values)

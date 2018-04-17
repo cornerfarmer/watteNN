@@ -50,5 +50,6 @@ class KerasModelTest(unittest.TestCase):
         print(time.time() - begin)
 
         for i in range(32):
+            print(prediction.p[i])
             self.assertTrue(0.4 < prediction.p[i] < 0.6, "Prediction probability not in range")
         self.assertTrue(-0.2 < prediction.v < 0.2, "Prediction value not in range")

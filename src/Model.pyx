@@ -10,7 +10,7 @@ cdef extern from "<string>" namespace "std":
 
 cdef class Model:
 
-    cpdef float memorize_storage(self, Storage storage, bool clear_afterwards=True, int epochs=1, int number_of_samples=0):
+    cpdef vector[float] memorize_storage(self, Storage storage, bool clear_afterwards=True, int epochs=1, int number_of_samples=0):
         raise NotImplementedError('subclasses must override memorize_storage()!')
 
     cdef void predict_single(self, Observation* obs, ModelOutput* output):
