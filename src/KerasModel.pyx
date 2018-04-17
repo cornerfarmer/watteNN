@@ -192,7 +192,9 @@ cdef class KerasModel(Model):
         self.play_model.set_weights((<KerasModel>other_model).play_model.get_weights())
 
     cpdef void load(self, filename):
-        self.play_model.load_weights(filename)
+        self.play_model.load_weights("play-" + filename)
+        self.choose_model.load_weights("choose-" + filename)
 
     cpdef void save(self, filename):
-        self.play_model.save(filename)
+        self.play_model.save("play-" + filename)
+        self.choose_model.save("choose-" + filename)
