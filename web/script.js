@@ -27,11 +27,23 @@ var values = {
     ACHT: 1,
     SIEBEN: 0
 };
-var model;
+var play_model, choose_model;
+
+var action_types = {
+    CHOOSE_VALUE: 0,
+    CHOOSE_COLOR: 1,
+    DRAW_CARD: 2
+};
+var next_action_type;
+var chosen_value, chosen_color;
 
 function initialize() {
-    model = new KerasJS.Model({
-      filepath: 'full5Gamev4.bin'
+    play_model = new KerasJS.Model({
+      filepath: 'play-twoNetsv3.bin'
+    });
+
+    choose_model = new KerasJS.Model({
+      filepath: 'choose-twoNetsv3.bin'
     });
 
     var index = 0;
@@ -68,8 +80,10 @@ function reset() {
     current_player = next_start_player;
     next_start_player = 1 - next_start_player;
     last_tricks = [];
+    next_action_type = action_types.CHOOSE_VALUE;
     refreshState("");
     refreshView();
+
 
     if (current_player === 0)
         setTimeout(runAI, 1000);
@@ -109,50 +123,98 @@ function filenameFromCard(card) {
     return filename
 }
 
+function color_to_string(color) {
+    if (color === colors.EICHEL)
+        return "EICHEL";
+    else if (color === colors.GRUEN)
+        return "GRUEN";
+    else if (color === colors.HERZ)
+        return "HERZ";
+    else if (color === colors.SCHELLN)
+        return "SCHELLN";
+}
+
+function value_to_string(value) {
+    if (value === values.SAU)
+        return "SAU";
+    else if (value === values.KOENIG)
+        return "KOENIG";
+    else if (value === values.OBER)
+        return "OBER";
+    else if (value === values.UNTER)
+        return "UNTER";
+    else if (value === values.ZEHN)
+        return "ZEHN";
+    else if (value === values.NEUN)
+        return "NEUN";
+    else if (value === values.ACHT)
+        return "ACHT";
+    else if (value === values.SIEBEN)
+        return "SIEBEN";
+}
+
 function set_card(card) {
-    var index = players[current_player].hand_cards.indexOf(card);
-    var action = "";
-    if (index >= 0) {
-        if (players[0].board_card !== null && players[1].board_card !== null) {
-            players[0].board_card = null;
-            players[1].board_card = null;
-        }
+    if (next_action_type === action_types.CHOOSE_VALUE) {
+        chosen_value = card.value;
+        next_action_type = action_types.CHOOSE_COLOR;
+        current_player = 1 - current_player;
+        action = "Chosen value is " + value_to_string(chosen_value);
 
-        players[current_player].board_card = players[current_player].hand_cards.splice(index, 1)[0];
+        if (current_player === 0)
+            setTimeout(runAI, 1000);
+    } else if (next_action_type === action_types.CHOOSE_COLOR) {
+        chosen_color = card.color;
+        next_action_type = action_types.DRAW_CARD;
+        current_player = 1 - current_player;
+        action = "Chosen value/color is " + value_to_string(chosen_value) + " " + color_to_string(chosen_color);
 
-        if (players[0].board_card !== null && players[1].board_card !== null) {
-            var best_player = match(players[1 - current_player].board_card, players[current_player].board_card);
+        if (current_player === 0)
+            setTimeout(runAI, 1000);
+    } else {
+        var index = players[current_player].hand_cards.indexOf(card);
+        var action = "";
+        if (index >= 0) {
+            if (players[0].board_card !== null && players[1].board_card !== null) {
+                players[0].board_card = null;
+                players[1].board_card = null;
+            }
 
-            last_tricks.push(players[0].board_card);
-            last_tricks.push(players[1].board_card);
+            players[current_player].board_card = players[current_player].hand_cards.splice(index, 1)[0];
 
-            if (best_player === 0)
+            if (players[0].board_card !== null && players[1].board_card !== null) {
+                var best_player = match(players[1 - current_player].board_card, players[current_player].board_card);
+
+                last_tricks.push(players[0].board_card);
+                last_tricks.push(players[1].board_card);
+
+                if (best_player === 0)
+                    current_player = 1 - current_player;
+
+                players[self.current_player].tricks += 1
+            }
+            else
                 current_player = 1 - current_player;
 
-            players[self.current_player].tricks += 1
+            if (players[0].tricks === 3)
+            {
+                action = "AI won!";
+                setTimeout(reset, 1000);
+            }
+            else if (players[1].tricks === 3)
+            {
+                action = "Human won!";
+                setTimeout(reset, 1000);
+            }
+            else if (players[1].hand_cards.length + players[0].hand_cards.length === 0)
+                setTimeout(reset, 1000);
+            else if (current_player === 0)
+                setTimeout(runAI, 1000);
         }
         else
-            current_player = 1 - current_player;
-
-        if (players[0].tricks === 3)
         {
-            action = "AI won!";
+            action = "AI made an invalid move.";
             setTimeout(reset, 1000);
         }
-        else if (players[1].tricks === 3)
-        {
-            action = "Human won!";
-            setTimeout(reset, 1000);
-        }
-        else if (players[1].hand_cards.length + players[0].hand_cards.length === 0)
-            setTimeout(reset, 1000);
-        else if (current_player === 0)
-            setTimeout(runAI, 1000);
-    }
-    else
-    {
-        action = "AI made an invalid move.";
-        setTimeout(reset, 1000);
     }
     refreshState(action);
     refreshView();
@@ -222,37 +284,62 @@ function indexOfMax(arr)
 
 function runAI()
 {
+    var number_of_sets;
+    if (next_action_type === action_types.DRAW_CARD)
+        number_of_sets = 2 + 8 + 2;
+    else
+        number_of_sets = 2;
+
     obs_cube = [];
-    for (var c = 0; c < 4 * 8 * 6; c++) {
+    for (var c = 0; c < 4 * 8 * number_of_sets; c++) {
         obs_cube.push(0);
     }
     for (var i = 0; i < players[0].hand_cards.length; i++) {
-        obs_cube[players[0].hand_cards[i].color * 8 * 6 + players[0].hand_cards[i].value * 6 + 0] = 1;
+        obs_cube[players[0].hand_cards[i].color * 8 * number_of_sets + players[0].hand_cards[i].value * number_of_sets + 0] = 1;
     }
-    if (players[1].board_card !== null)
-        obs_cube[players[1].board_card.color * 8 * 6 + players[1].board_card.value * 6 + 1] = 1;
 
-    for (var i = Math.max(0, last_tricks.length - 4); i < last_tricks.length; i++)
-        obs_cube[last_tricks[i].color * 8 * 6 + last_tricks[i].value * 6 + (2 + ((last_tricks.length - 1) / 2 - i / 2) * 2 + (current_player === 1 ? (1 - i % 2) : (i % 2)))] = 1
+    if (next_action_type === action_types.DRAW_CARD) {
+        if (players[1].board_card !== null)
+            obs_cube[players[1].board_card.color * 8 * number_of_sets + players[1].board_card.value * number_of_sets + 1] = 1;
 
+        for (var i = Math.max(0, last_tricks.length - 8); i < last_tricks.length; i++)
+            obs_cube[last_tricks[i].color * 8 * number_of_sets + last_tricks[i].value * number_of_sets + (2 + ((last_tricks.length - 1) / 2 - i / 2) * 2 + (current_player === 1 ? (1 - i % 2) : (i % 2)))] = 1
+
+        for (var color = 0; color < 4; color++)
+            obs_cube[color * 8 * number_of_sets + chosen_value * number_of_sets + number_of_sets - 2] = 1;
+
+        for (var value = 7; value >= 0; value--)
+            obs_cube[chosen_color * 8 * number_of_sets + value * number_of_sets + number_of_sets - 1] = 1;
+    } else {
+        if (next_action_type === action_types.CHOOSE_COLOR) {
+            for (var color = 0; color < 4; color++)
+                obs_cube[color * 8 * number_of_sets + chosen_value * number_of_sets + 1] = 1;
+        }
+    }
 
     console.log(obs_cube);
     obs_flat = [];
     addTrickArray(obs_flat, players[0]);
     addTrickArray(obs_flat, players[1]);
 
+    var model = next_action_type === action_types.DRAW_CARD ? play_model : choose_model;
     model.ready()
     .then(() => {
-        const inputData = {
-          input_3: new Float32Array(obs_cube),
-          input_4: new Float32Array(obs_flat)
+        const inputData = {};
+
+        if (next_action_type === action_types.DRAW_CARD) {
+            inputData["input_5"] = new Float32Array(obs_cube);
+            inputData["input_6"] = new Float32Array(obs_flat);
+        } else {
+            inputData["input_4"] = new Float32Array(obs_cube);
         }
+
 
         // make predictions
         return model.predict(inputData)
     }).then(outputData => {
         console.log(outputData);
-        var output = outputData['dense_6'];
+        var output = outputData[next_action_type === action_types.DRAW_CARD ? 'dense_14' : 'dense_10'];
         var max_i = 0;
         for (var i = 1; i < players[current_player].hand_cards.length; i++) {
             if (output[players[current_player].hand_cards[i].index] > output[players[current_player].hand_cards[max_i].index])
@@ -260,7 +347,6 @@ function runAI()
         }
         set_card(players[current_player].hand_cards[max_i]);
     })
-
 }
 
 function match(first_card, second_card)
@@ -274,13 +360,17 @@ function match(first_card, second_card)
 function getCardValue(card, first_card)
 {
     if (card.color === colors.HERZ && card.value === values.KOENIG)
-        return 18;
+        return 20;
     else if (card.color === colors.SCHELLN && card.value === values.SIEBEN)
-        return 17;
+        return 19;
     else if (card.color === colors.EICHEL && card.value === values.SIEBEN)
-        return 16;
+        return 18;
 
-    if (card.color === colors.HERZ)
+    if (card.color === chosen_color  && card.value === chosen_value)
+        return 17;
+    else if (card.value === chosen_value)
+        return 16;
+    else if (card.color === chosen_color)
         return card.value + 9;
     else if (card.color === first_card.color)
         return card.value + 1;
@@ -290,5 +380,12 @@ function getCardValue(card, first_card)
 
 function refreshState(lastAction)
 {
-    $("#state").html((current_player === 1 ? "It's your turn" : "It's AI turn") + (lastAction !== "" ? " - " + lastAction : ""));
+    var action_to_do;
+    if (next_action_type === action_types.CHOOSE_VALUE)
+        action_to_do = "to choose the value";
+    else if (next_action_type === action_types.CHOOSE_COLOR)
+        action_to_do = "to choose the color";
+    else
+        action_to_do = "to draw a card (" + value_to_string(chosen_value) + " " + color_to_string(chosen_color) + ")";
+    $("#state").html((current_player === 1 ? "It's your turn" : "It's AI turn") + " " + action_to_do + (lastAction !== "" ? " - " + lastAction : ""));
 }

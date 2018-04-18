@@ -161,7 +161,10 @@ cdef class KerasModel(Model):
         #print("Loss ", self.model.test_on_batch([input1, input2], [output1, output2]))
         cdef vector[float] loss
         loss.push_back(self.play_model.fit([play_input1, play_input2], [play_output1, play_output2], epochs=epochs, batch_size=1).history['loss'][-1])
-        loss.push_back(self.choose_model.fit([choose_input1], [choose_output1, choose_output2], epochs=epochs, batch_size=1).history['loss'][-1])
+        if choose_index > 0:
+            loss.push_back(self.choose_model.fit([choose_input1], [choose_output1, choose_output2], epochs=epochs, batch_size=1).history['loss'][-1])
+        else:
+            loss.push_back(0)
         #print("Loss ", self.model.test_on_batch([input1, input2], [output1, output2]))
         #print(self.model.get_weights()[-4:-2])
 
