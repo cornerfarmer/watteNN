@@ -39,11 +39,11 @@ var chosen_value, chosen_color;
 
 function initialize() {
     play_model = new KerasJS.Model({
-      filepath: 'play-twoNetsv3.bin'
+      filepath: 'play-twoNetsv8.bin'
     });
 
     choose_model = new KerasJS.Model({
-      filepath: 'choose-twoNetsv3.bin'
+      filepath: 'choose-twoNetsv8.bin'
     });
 
     var index = 0;

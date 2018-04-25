@@ -60,7 +60,7 @@ cdef class KerasModel(Model):
 
         self.choose_model = RealKerasModel(inputs=[input_1], outputs=[policy_out, value_out])
 
-        adam = optimizers.SGD(lr=0.01, momentum=0.9)
+        adam = optimizers.SGD(lr=0.04, momentum=0.9)
         #adam = optimizers.Adam()
         self.choose_model.compile(optimizer=adam,
                       loss='mean_squared_error',
@@ -100,7 +100,7 @@ cdef class KerasModel(Model):
 
         self.play_model = RealKerasModel(inputs=[input_1, input_2], outputs=[policy_out, value_out])
 
-        adam = optimizers.SGD(lr=0.01, momentum=0.9)
+        adam = optimizers.SGD(lr=0.04, momentum=0.9)
         #adam = optimizers.Adam()
         self.play_model.compile(optimizer=adam,
                       loss='mean_squared_error',
