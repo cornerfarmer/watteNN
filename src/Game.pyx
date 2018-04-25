@@ -1,4 +1,4 @@
-from gym_watten.envs.watten_env cimport WattenEnv, Observation
+from gym_watten.envs.watten_env cimport WattenEnv, Observation, ActionType
 from src.Model cimport Model, ModelOutput
 from src.ModelRating cimport ModelRating
 from libcpp.vector cimport vector
@@ -11,22 +11,32 @@ cdef class Game:
     def __cinit__(self, WattenEnv env):
         self.env = env
         self.mean_game_length = 0
+        self.mean_v_p1 = 0
+        self.mean_v_p2 = 0
 
     cpdef int match(self, Model agent1, Model agent2, bool render=False, bool reset=True):
         cdef Observation obs
         cdef ModelOutput output
-        cdef int a
+        cdef int a, game_length = 0
+        cdef float v_p1 = 0, v_p2 = 0
         if reset:
             self.env.reset(&obs)
         else:
             self.env.regenerate_obs(&obs)
 
         while not self.env.is_done():
+            if self.env.next_action_type == ActionType.DRAW_CARD:
+                game_length += 1
+
             if self.env.current_player == 0:
                 agent1.predict_single(&obs, &output)
+                if self.env.next_action_type == ActionType.DRAW_CARD:
+                    v_p1 += output.v
                 a = agent1.valid_step(output.p, &self.env.players[self.env.current_player].hand_cards)
             else:
                 agent2.predict_single(&obs, &output)
+                if self.env.next_action_type == ActionType.DRAW_CARD:
+                    v_p2 += output.v
                 a = agent2.valid_step(output.p, &self.env.players[self.env.current_player].hand_cards)
 
             self.env.step(a, &obs)
@@ -37,7 +47,9 @@ cdef class Game:
            # if env.lastTrick  is not None:
             #    break
 
-            self.mean_game_length += 1
+        self.mean_v_p1 += v_p1 / (game_length / 2)
+        self.mean_v_p2 += v_p2 / (game_length / 2)
+        self.mean_game_length += game_length
 
         return self.env.last_winner
 
@@ -73,6 +85,8 @@ cdef class Game:
         first_player_wins = 0
 
         self.mean_game_length = 0
+        self.mean_v_p1 = 0
+        self.mean_v_p2 = 0
 
         for i in range(number_of_games):
             self.env.reset()
@@ -81,6 +95,8 @@ cdef class Game:
             first_player_wins += (winner == 0)
 
         self.mean_game_length /= number_of_games
+        self.mean_v_p1 /= number_of_games
+        self.mean_v_p2 /= number_of_games
 
         return <float>first_player_wins / number_of_games
 

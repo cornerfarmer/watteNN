@@ -6,7 +6,9 @@ from libcpp.vector cimport vector
 
 cdef class Game:
     cdef WattenEnv env
-    cdef float mean_game_length
+    cdef public float mean_game_length
+    cdef public float mean_v_p1
+    cdef public float mean_v_p2
 
     cpdef int match(self, Model agent1, Model agent2, bool render=?, bool reset=?)
     cpdef float compare_given_games(self, Model agent1, Model agent2, ModelRating rating)

@@ -56,6 +56,10 @@ cdef class MCTS:
                 n[0] = state.n
                 return state.w / state.n
         else:
+            if state.childs.size() == 0 and self.high_q_for_unvisited_nodes:
+                n[0] = 1
+                return 1
+
             q_sum = 0
             n_sum = 0
 
@@ -105,11 +109,18 @@ cdef class MCTS:
             for i in range(state.childs.size()):
                 n_sum += state.childs[i].n
 
+            #if state.is_root:
+            #    print("")
+
             max_child = NULL
             if not self.objective_opponent or state.current_player == 0:
                 for i in range(state.childs.size()):
                     u = self.calc_q(&state.childs[i], state.current_player, &child_n)
+                    #if state.is_root:
+                    #    print("# ", u)
                     u += self.exploration * state.childs[i].p * sqrt(n_sum) / (1 + state.childs[i].n)
+                    #if state.is_root:
+                    #    print(u)
 
                     if max_child is NULL or u > max_u:
                         max_u = u
