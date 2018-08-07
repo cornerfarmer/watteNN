@@ -1,0 +1,24 @@
+[
+  {
+    "name": "Default",
+    "abstract": true,
+    "creation_time": 1533646564.381098,
+    "uuid": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "config": {
+      "episodes": 75,
+      "objective_opponent": false,
+      "mcts_sims": 40,
+      "sample_size": 1000,
+      "save_interval": 0,
+      "hidden_neurons": 128,
+      "storage_size": 10000
+    }
+  },
+  {
+    "name": "empty",
+    "creation_time": 1533646719.383332,
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "config": {},
+    "uuid": "54a7b6e6-6817-4d93-945f-1f5687c9048e"
+  }
+]
