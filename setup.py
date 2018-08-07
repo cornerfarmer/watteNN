@@ -4,12 +4,12 @@ from Cython.Build import cythonize
 from distutils.extension import Extension
 Cython.Compiler.Options.annotate = True
 import glob
-
+import numpy as np
 extensions = []
 
 def add_extensions(path):
     for file in glob.glob(path + "/*.pyx"):
-        extensions.append(Extension(file.replace('/', '.')[:file.find('.pyx')], [file], language="c++", libraries=["profiler"], extra_compile_args=["-std=c++14", "-DCNN_USE_AVX", "-mavx", "-DCNN_USE_SSE", "-msse3", "-DUSE_SERIALIZER=0"], include_dirs=[".", "/home/domin/.local/lib/python3.6/site-packages"]))
+        extensions.append(Extension(file.replace('/', '.')[:file.find('.pyx')], [file], language="c++", libraries=[], extra_compile_args=["-std=c++14", "-DCNN_USE_AVX", "-mavx", "-DCNN_USE_SSE", "-msse3", "-DUSE_SERIALIZER=0"], include_dirs=[".", "/home/domin/.local/lib/python3.6/site-packages", np.get_include()]))
 
 add_extensions('src')
 add_extensions('tests')
