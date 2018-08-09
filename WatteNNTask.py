@@ -19,7 +19,7 @@ class WatteNNTask(taskplan.Task):
     def __init__(self, preset, preset_pipe, logger):
         super().__init__(preset, preset_pipe, logger)
         self.sum = 0
-        self.env = WattenEnv()
+        self.env = WattenEnv(self.preset.get_bool("minimal_env"))
         self.model = KerasModel(self.env, self.preset.get_int("hidden_neurons"))
         self.best_model = KerasModel(self.env, self.preset.get_int("hidden_neurons"))
         self.train_model = KerasModel(self.env, self.preset.get_int("hidden_neurons"))
@@ -28,11 +28,12 @@ class WatteNNTask(taskplan.Task):
         self.game = Game(self.env)
         self.train_model.copy_weights_from(self.model)
         self.best_model.copy_weights_from(self.model)
+        self.rating = ModelRating(self.env)
 
     def save(self, path):
-        self.best_model.save('best-model')
-        self.train_model.save('train-model')
-        self.model.save('model')
+        self.best_model.save(str(path / Path('best-model')))
+        self.train_model.save(str(path / Path('train-model')))
+        self.model.save(str(path / Path('model')))
 
     def step(self, tensorboard_writer, current_iteration):
         self.mcts.mcts_generate(self.env, self.model, self.storage)
@@ -55,10 +56,15 @@ class WatteNNTask(taskplan.Task):
             ]), current_iteration)
 
             if rating_value > 0.52:
+                if self.preset.get_bool("minimal_env"):
+                    tensorboard_writer.add_summary(tf.Summary(value=[
+                        tf.Summary.Value(tag="exploitability", simple_value=self.rating.calc_exploitability(self.best_model))
+                    ]), current_iteration)
+
                 self.best_model.copy_weights_from(self.model)
 
 
     def load(self, path):
-        self.best_model.load('best-model')
-        self.train_model.load('train-model')
-        self.model.load('model')
+        self.best_model.load(str(path / Path('best-model')))
+        self.train_model.load(str(path / Path('train-model')))
+        self.model.load(str(path / Path('model')))
