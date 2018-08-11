@@ -12,6 +12,8 @@ from keras.layers.merge import concatenate
 from keras.models import Model as RealKerasModel
 from keras.models import load_model
 from keras import optimizers
+from keras.losses import mean_absolute_error
+import keras.backend as K
 from libc.stdlib cimport rand
 
 import numpy as np
@@ -90,7 +92,7 @@ cdef class KerasModel(Model):
         #policy_out = Dense(64, activation='relu')(policy_out)
         #policy_out = Dense(128, activation='relu')(policy_out)
         policy_out = Dense(hidden_neurons, activation='relu')(policy_out)
-        policy_out = Dense(32, activation='sigmoid')(policy_out)
+        policy_out = Dense(32, activation='softmax')(policy_out)
         def slice(x):
             return x[:, :, :, 0]
         input_slice = Lambda(slice)(input_1)
@@ -105,10 +107,13 @@ cdef class KerasModel(Model):
 
         self.play_model = RealKerasModel(inputs=[input_1, input_2], outputs=[policy_out, value_out])
 
+        def customLoss(yTrue, yPred):
+            return mean_absolute_error(yTrue, yPred) + 0.01 * K.max(yPred, axis=-1)
+
         adam = optimizers.SGD(lr=0.04, momentum=0.9)
         #adam = optimizers.Adam()
         self.play_model.compile(optimizer=adam,
-                      loss=['mean_absolute_error', 'mean_squared_error'],
+                      loss=[customLoss, 'mean_squared_error'],
                       metrics=['accuracy'])
 
     cpdef vector[float] memorize_storage(self, Storage storage, bool clear_afterwards=True, int epochs=1, int number_of_samples=0):

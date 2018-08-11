@@ -31,4 +31,4 @@ cdef class MCTS:
     cpdef void mcts_generate(self, WattenEnv env, Model model, Storage storage)
     cdef void draw_tree(self, MCTSState* root, int tree_depth=?, object tree_path=?)
     cdef object create_nodes(self, MCTSState* root, object dot, int tree_depth, object tree_path, int id=?)
-    cpdef draw_game_tree(self, ModelRating rating, WattenEnv env, Model model, int game_index, int tree_depth)
+    cpdef draw_game_tree(self, ModelRating rating, WattenEnv env, Model model, int game_index, int tree_depth, pre_actions)

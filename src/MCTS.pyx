@@ -52,7 +52,7 @@ cdef class MCTS:
                     return 1
                 else:
                     n[0] = 0
-                    return 0
+                    return -1
             else:
                 n[0] = state.n
                 return state.w / state.n
@@ -149,15 +149,18 @@ cdef class MCTS:
             self.mcts_sample(env, root, model, &player)
 
         cdef int child_n
-        cdef float p_max = -1
+        cdef float p_max = -2
+        cdef int p_max_id = 0
         p.clear()
         for i in range(root.childs.size()):
             p.push_back(self.calc_q(&root.childs[i], root.current_player, &child_n))
             if p.back() > p_max:
                 p_max = p.back()
+                p_max_id = i
 
-        for i in range(root.childs.size()):
-            p[0][i] = (p_max - p[0][i] < 0.1)
+        p[0][p_max_id] = 1
+        #for i in range(root.childs.size()):
+        #    p[0][i] = (p_max - p[0][i] < 0.1)
 
         cdef vector[float] p_step
         for i in range(root.childs.size()):
@@ -212,6 +215,9 @@ cdef class MCTS:
             for card in env.players[env.current_player].hand_cards:
                 storage.data[storage_index].output.p[card.id] = p[i]
                 i += 1
+
+            #print(np.array(storage.data[storage_index].obs.sets)[:,:,0])
+            #print(storage.data[storage_index].output.p)
 
             last_player = env.current_player
             env.step(env.players[env.current_player].hand_cards[a].id, &obs)
@@ -274,9 +280,12 @@ cdef class MCTS:
 
         return node, id
 
-    cpdef draw_game_tree(self, ModelRating rating, WattenEnv env, Model model, int game_index, int tree_depth):
+    cpdef draw_game_tree(self, ModelRating rating, WattenEnv env, Model model, int game_index, int tree_depth, pre_actions):
         env.set_state(&rating.eval_games[game_index])
         env.current_player = 0
+
+        for action in pre_actions:
+            env.step(env.players[env.current_player].hand_cards[action].id)
 
         cdef MCTSState root = self.create_root_state(env)
         cdef vector[float] p

@@ -56,13 +56,12 @@ class WatteNNTask(taskplan.Task):
             ]), current_iteration)
 
             if rating_value > 0.52:
-                if self.preset.get_bool("minimal_env"):
-                    tensorboard_writer.add_summary(tf.Summary(value=[
-                        tf.Summary.Value(tag="exploitability", simple_value=self.rating.calc_exploitability(self.best_model))
-                    ]), current_iteration)
-
                 self.best_model.copy_weights_from(self.model)
 
+        if self.preset.get_bool("minimal_env") and current_iteration % self.preset.get_int("exploit_interval") == 0:
+            tensorboard_writer.add_summary(tf.Summary(value=[
+                tf.Summary.Value(tag="exploitability", simple_value=self.rating.calc_exploitability(self.best_model))
+            ]), current_iteration)
 
     def load(self, path):
         self.best_model.load(str(path / Path('best-model')))

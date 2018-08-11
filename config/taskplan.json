@@ -1,34 +1,35 @@
 [
   {
     "abstract": true,
-    "creation_time": 1533646564.381098,
     "uuid": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "creation_time": 1533646564.381098,
+    "name": "Default",
     "config": {
-      "save_interval": 0,
-      "objective_opponent": false,
-      "mcts_sims": 40,
-      "episodes": 75,
       "storage_size": 10000,
       "hidden_neurons": 128,
+      "save_interval": 0,
+      "objective_opponent": false,
+      "episodes": 75,
+      "sample_size": 1000,
+      "exploit_interval": 100,
       "minimal_env": false,
-      "sample_size": 1000
-    },
-    "name": "Default"
+      "mcts_sims": 40
+    }
   },
   {
     "creation_time": 1533646719.383332,
     "name": "empty",
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
     "uuid": "54a7b6e6-6817-4d93-945f-1f5687c9048e",
-    "config": {},
-    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55"
+    "config": {}
   },
   {
     "creation_time": 1533749672.289856,
     "name": "minimal_env: True",
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
     "uuid": "0b0a34f9-f0ee-408f-9d83-c81c3459ac80",
     "config": {
       "minimal_env": true
-    },
-    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55"
+    }
   }
 ]
