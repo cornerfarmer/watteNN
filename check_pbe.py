@@ -7,9 +7,9 @@ from gym_watten.envs.watten_env import WattenEnv
 env = WattenEnv(True)
 rating = ModelRating(env)
 model = KerasModel(env, 128)
-model.load('best-model')
+model.load('results/gradient fix/minimal_env: True/0/best-model')
 
 game = Game(env)
-game.draw_game_tree(model, rating, True, 10)
+game.draw_game_tree(model, rating, False, 10)
 
 

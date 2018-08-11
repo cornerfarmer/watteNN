@@ -7,7 +7,7 @@ from src.Model cimport Model
 
 from keras.models import Sequential, clone_model
 from keras.layers import Dense, Activation, Input, LeakyReLU
-from keras.layers import Conv2D, MaxPooling2D, Merge, Flatten, BatchNormalization, add
+from keras.layers import Conv2D, MaxPooling2D, Merge, Flatten, BatchNormalization, add, Multiply, Lambda
 from keras.layers.merge import concatenate
 from keras.models import Model as RealKerasModel
 from keras.models import load_model
@@ -63,7 +63,7 @@ cdef class KerasModel(Model):
         adam = optimizers.SGD(lr=0.04, momentum=0.9)
         #adam = optimizers.Adam()
         self.choose_model.compile(optimizer=adam,
-                      loss='mean_squared_error',
+                      loss='mean_absolute_error',
                       metrics=['accuracy'])
 
     cdef void _build_play_model(self, WattenEnv env, int hidden_neurons):
@@ -91,6 +91,11 @@ cdef class KerasModel(Model):
         #policy_out = Dense(128, activation='relu')(policy_out)
         policy_out = Dense(hidden_neurons, activation='relu')(policy_out)
         policy_out = Dense(32, activation='sigmoid')(policy_out)
+        def slice(x):
+            return x[:, :, :, 0]
+        input_slice = Lambda(slice)(input_1)
+        input_slice = Flatten()(input_slice)
+        policy_out = Multiply()([policy_out, input_slice])
 
         value_out = concatenate([convnet, input_2])
         #value_out = Dense(64, activation='relu')(value_out)
@@ -103,7 +108,7 @@ cdef class KerasModel(Model):
         adam = optimizers.SGD(lr=0.04, momentum=0.9)
         #adam = optimizers.Adam()
         self.play_model.compile(optimizer=adam,
-                      loss='mean_squared_error',
+                      loss=['mean_absolute_error', 'mean_squared_error'],
                       metrics=['accuracy'])
 
     cpdef vector[float] memorize_storage(self, Storage storage, bool clear_afterwards=True, int epochs=1, int number_of_samples=0):

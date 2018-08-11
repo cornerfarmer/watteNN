@@ -4,6 +4,7 @@ from libcpp.vector cimport vector
 from libc.math cimport sqrt, exp
 from libc.stdlib cimport rand, RAND_MAX
 from src.Model cimport Model, ModelOutput
+from src.ModelRating cimport ModelRating
 from src cimport MCTSState, StorageItem
 import numpy as np
 import time
@@ -15,7 +16,7 @@ from src.Storage cimport Storage
 
 cdef class MCTS:
 
-    def __cinit__(self, episodes=75, mcts_sims=20, objective_opponent=False, exploration=1, high_q_for_unvisited_nodes=True):
+    def __cinit__(self, episodes=75, mcts_sims=20, objective_opponent=False, exploration=1, high_q_for_unvisited_nodes=False):
         self.episodes = episodes
         self.mcts_sims = mcts_sims
         self.objective_opponent = objective_opponent
@@ -105,31 +106,9 @@ cdef class MCTS:
 
         else:
 
-            n_sum = 0
             for i in range(state.childs.size()):
-                n_sum += state.childs[i].n
-
-            #if state.is_root:
-            #    print("")
-
-            max_child = NULL
-            if not self.objective_opponent or state.current_player == 0:
-                for i in range(state.childs.size()):
-                    u = self.calc_q(&state.childs[i], state.current_player, &child_n)
-                    #if state.is_root:
-                    #    print("# ", u)
-                    u += self.exploration * state.childs[i].p * sqrt(n_sum) / (1 + state.childs[i].n)
-                    #if state.is_root:
-                    #    print(u)
-
-                    if max_child is NULL or u > max_u:
-                        max_u = u
-                        max_child = &state.childs[i]
-            else:
-                for i in range(state.childs.size()):
-                    p.push_back(state.childs[i].p)
-                max_child = &state.childs[self.softmax_step(&p)]
-
+                p.push_back(state.childs[i].p)
+            max_child = &state.childs[self.softmax_step(&p)]
 
             v = self.mcts_sample(env, max_child, model, player)
 
@@ -142,18 +121,16 @@ cdef class MCTS:
         return v
 
     cdef int softmax_step(self, vector[float]* p):
-        cdef float pmax = -1
-        for i in range(p.size()):
-            if pmax < p[0][i]:
-                pmax = p[0][i]
-
         cdef float psum = 0
         for i in range(p.size()):
-            p[0][i] = exp(p[0][i] - pmax)
             psum += p[0][i]
 
-        for i in range(p.size()):
-            p[0][i] /= psum
+        if psum > 0:
+            for i in range(p.size()):
+                p[0][i] /= psum
+        else:
+            for i in range(p.size()):
+                p[0][i] = 1.0 / p.size()
 
         cdef float r = <float>rand() / RAND_MAX
 
@@ -172,15 +149,21 @@ cdef class MCTS:
             self.mcts_sample(env, root, model, &player)
 
         cdef int child_n
+        cdef float p_max = -1
         p.clear()
-        if not self.objective_opponent or root.current_player == 0:
-            for i in range(root.childs.size()):
-                p.push_back(self.calc_q(&root.childs[i], root.current_player, &child_n))
-        else:
-            for i in range(root.childs.size()):
-                p.push_back(root.childs[i].p)
+        for i in range(root.childs.size()):
+            p.push_back(self.calc_q(&root.childs[i], root.current_player, &child_n))
+            if p.back() > p_max:
+                p_max = p.back()
 
-        return self.softmax_step(p)
+        for i in range(root.childs.size()):
+            p[0][i] = (p_max - p[0][i] < 0.1)
+
+        cdef vector[float] p_step
+        for i in range(root.childs.size()):
+            p_step.push_back(root.childs[i].p)
+
+        return self.softmax_step(&p_step)
 
 
     cdef MCTSState create_root_state(self, WattenEnv env):
@@ -260,7 +243,7 @@ cdef class MCTS:
 
         # render pydot by calling dot, no file saved to disk
         png_str = dot.create_png(prog='dot')
-        dot.write_svg('tree.svg')
+        dot.write_svg('mcts-tree.svg')
 
         # treat the dot output string as an image file
         sio = BytesIO()
@@ -290,6 +273,17 @@ cdef class MCTS:
                 i+=1
 
         return node, id
+
+    cpdef draw_game_tree(self, ModelRating rating, WattenEnv env, Model model, int game_index, int tree_depth):
+        env.set_state(&rating.eval_games[game_index])
+        env.current_player = 0
+
+        cdef MCTSState root = self.create_root_state(env)
+        cdef vector[float] p
+
+        a = self.mcts_game_step(env, &root, model, &p)
+        self.draw_tree(&root, tree_depth)
+        return p, a
 
     def end(self):
         pass

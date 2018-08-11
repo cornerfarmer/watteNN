@@ -176,7 +176,10 @@ cdef class ModelRating:
                 self.env.set_state(&self.eval_games[i])
                 self.env.current_player = start_player
 
-                possible_opposite_cards = list(range(self.env.cards.size()))
+                possible_opposite_cards = []
+                for card in self.env.cards:
+                    possible_opposite_cards.append(card.id)
+
                 for card in self.env.players[1].hand_cards:
                     possible_opposite_cards.remove(card.id)
 
@@ -186,7 +189,7 @@ cdef class ModelRating:
                 for hand_cards in combinations:
                     opposite_hand_card_combinations.push_back(HandCards())
                     for hand_card in hand_cards:
-                        opposite_hand_card_combinations.back().push_back(self.env.cards[hand_card])
+                        opposite_hand_card_combinations.back().push_back(self.env.all_cards[hand_card])
 
                 winner = ((1 - self.calc_exploitability_in_game(model, &opposite_hand_card_combinations)) if start_player == 1 else self.calc_exploitability_in_game(model, &opposite_hand_card_combinations))
                # if start_player == 1 and self.eval_games[i].player0_hand_cards[0].id == 1 and self.eval_games[i].player0_hand_cards[1].id == 3 and self.eval_games[i].player0_hand_cards[2].id == 5:
@@ -207,7 +210,9 @@ cdef class ModelRating:
             start_player = rand() % 2
             self.env.current_player = start_player
 
-            possible_opposite_cards = list(range(self.env.cards.size()))
+            possible_opposite_cards = []
+            for card in self.env.cards:
+                possible_opposite_cards.append(card.id)
             for card in self.env.players[1].hand_cards:
                 possible_opposite_cards.remove(card.id)
 
@@ -217,7 +222,7 @@ cdef class ModelRating:
             for hand_cards in combinations:
                 opposite_hand_card_combinations.push_back(HandCards())
                 for hand_card in hand_cards:
-                    opposite_hand_card_combinations.back().push_back(self.env.cards[hand_card])
+                    opposite_hand_card_combinations.back().push_back(self.env.all_cards[hand_card])
 
             winner = ((1 - self.calc_exploitability_in_game(model, &opposite_hand_card_combinations)) if start_player == 1 else self.calc_exploitability_in_game(model, &opposite_hand_card_combinations))
            # if start_player == 1 and self.eval_games[i].player0_hand_cards[0].id == 1 and self.eval_games[i].player0_hand_cards[1].id == 3 and self.eval_games[i].player0_hand_cards[2].id == 5:

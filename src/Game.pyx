@@ -146,7 +146,7 @@ cdef class Game:
             for card in hand_cards:
                 self.env.set_state(&game_state)
                 self.env.step(card.id, &obs)
-                next_id, win_prob = self.game_tree_step(model, obs, dot, node, output.p[card.id] / sum, joint_prob * output.p[card.id] / sum, next_id, key + "," + str(card.id), table, tree_only, table[node_key][index] if tree_only else 0)
+                next_id, win_prob = self.game_tree_step(model, obs, dot, node, output.p[card.id], joint_prob * output.p[card.id] / sum, next_id, key + "," + str(card.id), table, tree_only, table[node_key][index] if tree_only else 0)
                 win_prob_per_action.append(win_prob if current_player is 0 else (1 - win_prob))
                 total_win_prob += win_prob * output.p[card.id] / sum
                 index += 1
