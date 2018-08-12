@@ -7,7 +7,7 @@ from src.Model cimport Model
 
 from keras.models import Sequential, clone_model
 from keras.layers import Dense, Activation, Input, LeakyReLU
-from keras.layers import Conv2D, MaxPooling2D, Merge, Flatten, BatchNormalization, add, Multiply, Lambda
+from keras.layers import Conv2D, MaxPooling2D, Merge, Flatten, BatchNormalization, add, Multiply, Lambda, Activation
 from keras.layers.merge import concatenate
 from keras.models import Model as RealKerasModel
 from keras.models import load_model
@@ -92,12 +92,13 @@ cdef class KerasModel(Model):
         #policy_out = Dense(64, activation='relu')(policy_out)
         #policy_out = Dense(128, activation='relu')(policy_out)
         policy_out = Dense(hidden_neurons, activation='relu')(policy_out)
-        policy_out = Dense(32, activation='softmax')(policy_out)
+        policy_out = Dense(32, activation='linear')(policy_out)
         def slice(x):
             return x[:, :, :, 0]
         input_slice = Lambda(slice)(input_1)
         input_slice = Flatten()(input_slice)
         policy_out = Multiply()([policy_out, input_slice])
+        policy_out = Activation('softmax')(policy_out)
 
         value_out = concatenate([convnet, input_2])
         #value_out = Dense(64, activation='relu')(value_out)
