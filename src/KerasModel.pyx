@@ -128,6 +128,7 @@ cdef class KerasModel(Model):
         cdef np.ndarray play_output1 = np.zeros([s, 32])
         cdef np.ndarray play_output2 = np.zeros([s, 1])
 
+        play_weights = [np.zeros([s]), np.zeros([s])]
 
         cdef np.ndarray choose_input1 = np.zeros([s, 4, 8, self.choose_input_sets_size])
 
@@ -151,6 +152,10 @@ cdef class KerasModel(Model):
 
                 play_output1[play_index] = storage.data[sample_index].output.p
                 play_output2[play_index][0] = storage.data[sample_index].output.v
+
+                play_weights[0][play_index] = storage.data[sample_index].weight_p
+                play_weights[1][play_index] = storage.data[sample_index].weight_v
+
                 play_index += 1
             else:
                 choose_input1[choose_index] = storage.data[sample_index].obs.sets
@@ -171,9 +176,9 @@ cdef class KerasModel(Model):
 
         #print("Loss ", self.model.test_on_batch([input1, input2], [output1, output2]))
         cdef vector[float] loss
-        loss.push_back(self.play_model.fit([play_input1, play_input2], [play_output1, play_output2], epochs=epochs, batch_size=min(play_index, 8)).history['loss'][-1])
+        loss.push_back(self.play_model.fit([play_input1, play_input2], [play_output1, play_output2], epochs=epochs, batch_size=min(play_index, 30), sample_weight=play_weights).history['loss'][-1])
         if choose_index > 0:
-            loss.push_back(self.choose_model.fit([choose_input1], [choose_output1, choose_output2], epochs=epochs, batch_size=min(choose_index, 8)).history['loss'][-1])
+            loss.push_back(self.choose_model.fit([choose_input1], [choose_output1, choose_output2], epochs=epochs, batch_size=min(choose_index, 30)).history['loss'][-1])
         else:
             loss.push_back(0)
         #print("Loss ", self.model.test_on_batch([input1, input2], [output1, output2]))

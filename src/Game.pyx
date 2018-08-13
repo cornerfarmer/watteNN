@@ -179,18 +179,19 @@ cdef class Game:
                     self.game_tree_step(model, obs, dot, None, 0, 1, 0, "", table, False, 0)
                 print(i)
 
+            print(table['-4,5,7,'])
 
             print("Squashing probs")
             for key in table.keys():
                 new_probs = []
-                prob_sum = 0
+                prob_max = -1
                 for card in range(len(table[key][0][1])):
                     result_sum = 0
                     for guess in table[key]:
                         result_sum += guess[0] * guess[1][card]
-                    new_probs.append(exp(result_sum))
-                    prob_sum += new_probs[-1]
-                table[key] = [prob / prob_sum for prob in new_probs]
+                    new_probs.append(result_sum)
+                    prob_max = max(prob_max, new_probs[-1])
+                table[key] = [1 if prob == prob_max else 0 for prob in new_probs]
 
             with open("tree-cache.pk", 'wb') as handle:
                 pickle.dump(table, handle)
@@ -214,5 +215,6 @@ cdef class Game:
         fig, ax = plt.subplots(figsize=(18, 5))
         ax.imshow(plt.imread(sio), interpolation="bilinear")
 
+        return table
     def test(self):
         pass

@@ -151,14 +151,12 @@ cdef class MCTS:
         cdef int child_n
         cdef float p_max = -2
         cdef int p_max_id = 0
+        cdef float current_p
         p.clear()
         for i in range(root.childs.size()):
             p.push_back(self.calc_q(&root.childs[i], root.current_player, &child_n))
-            if p.back() > p_max:
-                p_max = p.back()
-                p_max_id = i
 
-        p[0][p_max_id] = 1
+        #weights[]
         #for i in range(root.childs.size()):
         #    p[0][i] = (p_max - p[0][i] < 0.1)
 
@@ -185,7 +183,7 @@ cdef class MCTS:
         cdef Observation obs
         cdef State game_state
         cdef Card* card
-        cdef int last_player, i
+        cdef int last_player, i, j
 
         env.reset(&obs)
         if self.objective_opponent:
@@ -198,23 +196,26 @@ cdef class MCTS:
         cdef int storage_index
 
         while not env.is_done():
-            storage_index = storage.add_item()
-            storage.data[storage_index].obs = obs
 
-            storage.data[storage_index].output.v = 1 if env.current_player is 0 else -1
-            values.push_back(storage_index)
 
             game_state = env.get_state()
             a = self.mcts_game_step(env, &root, model, &p)
             env.set_state(&game_state)
 
-            for i in range(32):
-                storage.data[storage_index].output.p[i] = 0
-
-            i = 0
+            j = 0
             for card in env.players[env.current_player].hand_cards:
-                storage.data[storage_index].output.p[card.id] = p[i]
-                i += 1
+                storage_index = storage.add_item()
+                storage.data[storage_index].obs = obs
+
+                storage.data[storage_index].output.v = 1 if env.current_player is 0 else -1
+                storage.data[storage_index].weight_v = 1.0 / env.players[env.current_player].hand_cards.size()
+
+                for i in range(32):
+                    storage.data[storage_index].output.p[i] = (i == card.id)
+                storage.data[storage_index].weight_p = (p[j] + 1) / 2
+
+                values.push_back(storage_index)
+                j += 1
 
             #print(np.array(storage.data[storage_index].obs.sets)[:,:,0])
             #print(storage.data[storage_index].output.p)
