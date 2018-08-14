@@ -143,18 +143,20 @@ cdef class Game:
             total_win_prob = 0
             current_player = self.env.current_player
             index = 0
+            model_probs = []
             for card in hand_cards:
                 self.env.set_state(&game_state)
                 self.env.step(card.id, &obs)
-                next_id, win_prob = self.game_tree_step(model, obs, dot, node, output.p[card.id], joint_prob * output.p[card.id] / sum, next_id, key + "," + str(card.id), table, tree_only, table[node_key][index] if tree_only else 0)
+                next_id, win_prob = self.game_tree_step(model, obs, dot, node, output.p[card.id], joint_prob * output.p[card.id] / sum, next_id, key + "," + str(card.id), table, tree_only, table[node_key][1][index] if tree_only else 0)
                 win_prob_per_action.append(win_prob if current_player is 0 else (1 - win_prob))
                 total_win_prob += win_prob * output.p[card.id] / sum
                 index += 1
+                model_probs.append(output.p[card.id])
 
-        if not tree_only:
-            if node_key not in table:
-                table[node_key] = []
-            table[node_key].append([joint_prob, win_prob_per_action])
+            if not tree_only:
+                if node_key not in table:
+                    table[node_key] = [model_probs, []]
+                table[node_key][1].append([joint_prob, win_prob_per_action])
 
         return next_id, total_win_prob
 
@@ -171,27 +173,38 @@ cdef class Game:
         if not use_cache:
             table = {}
             for i in range(modelRating.eval_games.size()):
+                print(i)
                 for start_player in range(2):
                     self.env.set_state(&modelRating.eval_games[i])
                     self.env.current_player = start_player
 
                     self.env.regenerate_obs(&obs)
                     self.game_tree_step(model, obs, dot, None, 0, 1, 0, "", table, False, 0)
-                print(i)
 
-            print(table['-4,5,7,'])
+
+            print(table['-4,7,13,'])
 
             print("Squashing probs")
+            avg_diff = 0
+            max_diff = 0
+            max_key = ""
             for key in table.keys():
                 new_probs = []
                 prob_max = -1
-                for card in range(len(table[key][0][1])):
+                for card in range(len(table[key][1][0][1])):
                     result_sum = 0
-                    for guess in table[key]:
+                    for guess in table[key][1]:
                         result_sum += guess[0] * guess[1][card]
-                    new_probs.append(result_sum)
+                    new_probs.append(result_sum / len(table[key][1]))
                     prob_max = max(prob_max, new_probs[-1])
-                table[key] = [1 if prob == prob_max else 0 for prob in new_probs]
+                table[key][1] = new_probs
+
+                for card in range(len(table[key][0])):
+                    avg_diff += (prob_max - table[key][1][card]) * table[key][0][card]
+                    if max_diff < (prob_max - table[key][1][card]) * table[key][0][card]:
+                        max_diff = (prob_max - table[key][1][card]) * table[key][0][card]
+                        max_key = key
+            avg_diff /= len(table.keys())
 
             with open("tree-cache.pk", 'wb') as handle:
                 pickle.dump(table, handle)
@@ -199,22 +212,23 @@ cdef class Game:
             with open("tree-cache.pk", 'rb') as handle:
                 table = pickle.load(handle)
 
-        print("Generating tree")
-        self.env.set_state(&modelRating.eval_games[tree_ind])
-        self.env.current_player = 0
-        self.env.regenerate_obs(&obs)
-        self.game_tree_step(model, obs, dot, None, 0, 1, 0, "", table, True, 0)
-        png_str = dot.create_png(prog='dot')
-        dot.write_svg('tree.svg')
+        if tree_ind is not None:
+            print("Generating tree")
+            self.env.set_state(&modelRating.eval_games[tree_ind])
+            self.env.current_player = 0
+            self.env.regenerate_obs(&obs)
+            self.game_tree_step(model, obs, dot, None, 0, 1, 0, "", table, True, 0)
+            png_str = dot.create_png(prog='dot')
+            dot.write_svg('tree.svg')
 
-        sio = BytesIO()
-        sio.write(png_str)
-        sio.seek(0)
+            sio = BytesIO()
+            sio.write(png_str)
+            sio.seek(0)
 
-        # plot the image
-        fig, ax = plt.subplots(figsize=(18, 5))
-        ax.imshow(plt.imread(sio), interpolation="bilinear")
+            # plot the image
+            fig, ax = plt.subplots(figsize=(18, 5))
+            ax.imshow(plt.imread(sio), interpolation="bilinear")
 
-        return table
+        return table, avg_diff, [max_diff, max_key]
     def test(self):
         pass

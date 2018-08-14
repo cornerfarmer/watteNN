@@ -59,8 +59,10 @@ class WatteNNTask(taskplan.Task):
                 self.best_model.copy_weights_from(self.model)
 
         if self.preset.get_bool("minimal_env") and current_iteration % self.preset.get_int("exploit_interval") == 0:
+            table, avg_diff, max_diff = self.game.draw_game_tree(self.best_model, self.rating, False, None)
+
             tensorboard_writer.add_summary(tf.Summary(value=[
-                tf.Summary.Value(tag="exploitability", simple_value=self.rating.calc_exploitability(self.best_model))
+                tf.Summary.Value(tag="pbe", simple_value=avg_diff)
             ]), current_iteration)
 
     def load(self, path):

@@ -15,6 +15,7 @@ from keras import optimizers
 from keras.losses import mean_absolute_error
 import keras.backend as K
 from libc.stdlib cimport rand
+from keras.engine.topology import Layer
 
 import numpy as np
 cimport numpy as np
@@ -23,6 +24,21 @@ import time
 
 cdef extern from "<string>" namespace "std":
     string to_string(int val)
+
+class SelectiveSoftmax(Layer):
+    def __init__(self, **kwargs):
+        super(SelectiveSoftmax, self).__init__(**kwargs)
+
+    def build(self, input_shape):
+        super(SelectiveSoftmax, self).build(input_shape)
+
+    def call(self, inputs):
+        exp = K.exp(inputs[0] - K.max(inputs[0], -1, True))
+        exp *= inputs[1]
+        return exp / K.sum(exp, -1, True)
+
+    def compute_output_shape(self, input_shape):
+        return input_shape[0]
 
 cdef class KerasModel(Model):
     def __init__(self, env, hidden_neurons=128):
@@ -97,8 +113,7 @@ cdef class KerasModel(Model):
             return x[:, :, :, 0]
         input_slice = Lambda(slice)(input_1)
         input_slice = Flatten()(input_slice)
-        policy_out = Multiply()([policy_out, input_slice])
-        policy_out = Activation('softmax')(policy_out)
+        policy_out = SelectiveSoftmax()([policy_out, input_slice])
 
         value_out = concatenate([convnet, input_2])
         #value_out = Dense(64, activation='relu')(value_out)
