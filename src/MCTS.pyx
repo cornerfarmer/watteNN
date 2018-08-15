@@ -13,6 +13,8 @@ import pydot_ng as pydot
 from io import BytesIO
 cimport cython
 from src.Storage cimport Storage
+from libc.stdlib cimport srand
+from libc.time cimport time
 
 cdef class MCTS:
 
@@ -57,10 +59,6 @@ cdef class MCTS:
                 n[0] = state.n
                 return state.w / state.n
         else:
-            if state.childs.size() == 0 and self.high_q_for_unvisited_nodes:
-                n[0] = 1
-                return 1
-
             q_sum = 0
             n_sum = 0
 
@@ -69,7 +67,7 @@ cdef class MCTS:
                 n_sum += n_child
 
             n[0] = n_sum
-            return 0 if n_sum is 0 else q_sum / n_sum
+            return -1 if n_sum is 0 else q_sum / n_sum
 
     @cython.cdivision(True)
     cdef float mcts_sample(self, WattenEnv env, MCTSState* state, Model model, int* player):
@@ -287,6 +285,8 @@ cdef class MCTS:
     cpdef draw_game_tree(self, ModelRating rating, WattenEnv env, Model model, int game_index, int tree_depth, pre_actions):
         env.set_state(&rating.eval_games[game_index])
         env.current_player = 0
+
+        srand(time(NULL))
 
         for action in pre_actions:
             env.step(env.players[env.current_player].hand_cards[action].id)

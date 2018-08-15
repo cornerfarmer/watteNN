@@ -230,3 +230,20 @@ cdef class ModelRating:
             exploitability += (-1 if winner == 1 else 1)
 
         return <float>exploitability / number_of_games
+
+    cpdef find(self, first_player, second_player):
+        for i in range(self.eval_games.size()):
+            self.env.set_state(&self.eval_games[i])
+
+            first_key = ""
+            for card in self.env.players[0].hand_cards:
+                first_key += self.env.filename_from_card(self.env.all_cards[card.id]).decode('utf-8') + ","
+
+            second_key = ""
+            for card in self.env.players[1].hand_cards:
+                second_key += self.env.filename_from_card(self.env.all_cards[card.id]).decode('utf-8') + ","
+
+            if first_key == first_player and second_key == second_player:
+                return i
+        return -1
+
