@@ -12,6 +12,9 @@ cdef class KerasModel(Model):
     cdef object clean_opt_weights
     cdef int play_input_sets_size
     cdef int choose_input_sets_size
+    cdef int batch_size
+    cdef float lr
+    cdef float momentum
 
     cdef void _build_choose_model(self, WattenEnv env, int hidden_neurons)
     cdef void _build_play_model(self, WattenEnv env, int hidden_neurons)

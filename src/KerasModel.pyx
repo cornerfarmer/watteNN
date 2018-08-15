@@ -41,12 +41,15 @@ class SelectiveSoftmax(Layer):
         return input_shape[0]
 
 cdef class KerasModel(Model):
-    def __init__(self, env, hidden_neurons=128):
+    def __init__(self, env, hidden_neurons=128, batch_size=30, lr=0.04, momentum=0.9):
+        self.lr = lr
+        self.momentum = momentum
 
         self._build_choose_model(env, hidden_neurons)
         self._build_play_model(env, hidden_neurons)
 
         self.clean_opt_weights = None
+        self.batch_size = batch_size
 
     cdef void _build_choose_model(self, WattenEnv env, int hidden_neurons):
         self.choose_input_sets_size = env.get_input_sets_size(ActionType.CHOOSE_VALUE)
@@ -78,7 +81,7 @@ cdef class KerasModel(Model):
 
         self.choose_model = RealKerasModel(inputs=[input_1], outputs=[policy_out, value_out])
 
-        adam = optimizers.SGD(lr=0.04, momentum=0.9)
+        adam = optimizers.SGD(lr=self.lr, momentum=self.momentum)
         #adam = optimizers.Adam()
         self.choose_model.compile(optimizer=adam,
                       loss='mean_absolute_error',
@@ -126,7 +129,7 @@ cdef class KerasModel(Model):
         def customLoss(yTrue, yPred):
             return mean_absolute_error(yTrue, yPred) + 0.01 * K.max(yPred, axis=-1)
 
-        adam = optimizers.SGD(lr=0.04, momentum=0.9)
+        adam = optimizers.SGD(lr=self.lr, momentum=self.momentum)
         #adam = optimizers.Adam()
         self.play_model.compile(optimizer=adam,
                       loss=[customLoss, 'mean_squared_error'],
@@ -136,7 +139,7 @@ cdef class KerasModel(Model):
         cdef bool use_random_selection = (number_of_samples is 0)
         number_of_samples = min(number_of_samples, storage.number_of_samples)
 
-        cdef int s = storage.data.size() if use_random_selection else number_of_samples
+        cdef int s = storage.number_of_samples if use_random_selection else number_of_samples
         cdef np.ndarray play_input1 = np.zeros([s, 4, 8, self.play_input_sets_size])
         cdef np.ndarray play_input2 = np.zeros([s, 4])
 
@@ -150,16 +153,15 @@ cdef class KerasModel(Model):
         cdef np.ndarray choose_output1 = np.zeros([s, 32])
         cdef np.ndarray choose_output2 = np.zeros([s, 1])
 
-
         #if self.clean_opt_weights is not None:
         #    self.model.optimizer.set_weights(self.clean_opt_weights)
 
         cdef int play_index = 0, choose_index = 0, sample_index = 0
         for i in range(s):
             if use_random_selection:
-                sample_index = i
-            else:
                 sample_index = rand() % storage.number_of_samples
+            else:
+                sample_index = i
 
             if storage.data[sample_index].obs.type is ActionType.DRAW_CARD:
                 play_input1[play_index] = storage.data[sample_index].obs.sets
@@ -191,9 +193,9 @@ cdef class KerasModel(Model):
 
         #print("Loss ", self.model.test_on_batch([input1, input2], [output1, output2]))
         cdef vector[float] loss
-        loss.push_back(self.play_model.fit([play_input1, play_input2], [play_output1, play_output2], epochs=epochs, batch_size=min(play_index, 30), sample_weight=play_weights).history['loss'][-1])
+        loss.push_back(self.play_model.fit([play_input1, play_input2], [play_output1, play_output2], epochs=epochs, batch_size=min(play_index, self.batch_size), sample_weight=play_weights).history['loss'][-1])
         if choose_index > 0:
-            loss.push_back(self.choose_model.fit([choose_input1], [choose_output1, choose_output2], epochs=epochs, batch_size=min(choose_index, 30)).history['loss'][-1])
+            loss.push_back(self.choose_model.fit([choose_input1], [choose_output1, choose_output2], epochs=epochs, batch_size=min(choose_index, self.batch_size)).history['loss'][-1])
         else:
             loss.push_back(0)
         #print("Loss ", self.model.test_on_batch([input1, input2], [output1, output2]))

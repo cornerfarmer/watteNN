@@ -1,20 +1,24 @@
 [
   {
     "name": "Default",
-    "creation_time": 1533646564.381098,
+    "abstract": true,
     "config": {
-      "exploit_interval": 100,
-      "storage_size": 10000,
+      "batch_size": 30,
+      "lr": 0.04,
+      "momentum": 0.9,
       "episodes": 75,
+      "epochs": 1,
+      "exploit_interval": 100,
+      "hidden_neurons": 128,
+      "mcts_sims": 40,
+      "minimal_env": false,
       "objective_opponent": false,
       "sample_size": 1000,
-      "minimal_env": false,
       "save_interval": 0,
-      "hidden_neurons": 128,
-      "mcts_sims": 40
+      "storage_size": 10000
     },
-    "abstract": true,
-    "uuid": "75c5f09b-cafd-43c7-be1d-53cae4879d55"
+    "uuid": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "creation_time": 1533646564.381098
   },
   {
     "name": "empty",
@@ -41,5 +45,46 @@
       "minimal_env": true
     },
     "uuid": "25c430ce-a44b-4302-8c01-329b5bbf5d35"
+  },
+  {
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "config": {
+      "epochs": 10,
+      "minimal_env": true,
+      "sample_size": 3500
+    },
+    "uuid": "4ee9e7b2-d02e-4e07-a11d-ce0172da6a0f",
+    "creation_time": 1534278506.585614,
+    "name": "epochs: 10 - minimal_env: True - sample_size: 3500"
+  },
+  {
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "config": {
+      "batch_size": 128,
+      "minimal_env": true,
+      "sample_size": 0,
+      "storage_size": 80000
+    },
+    "uuid": "1296f112-e3df-4875-84ae-2efde3132497",
+    "creation_time": 1534284787.4236,
+    "name": "batch_size: 128 - minimal_env: True - sample_size: 0 - storage_size: 80000"
+  },
+  {
+    "base": "1296f112-e3df-4875-84ae-2efde3132497",
+    "config": {
+      "momentum": 0
+    },
+    "uuid": "57348ed0-173b-474d-b55d-36d2b83c95e2",
+    "creation_time": 1534286806.939842,
+    "name": "batch_size: 128 - minimal_env: True - sample_size: 0 - storage_size: 80000: momentum: 0"
+  },
+  {
+    "base": "1296f112-e3df-4875-84ae-2efde3132497",
+    "config": {
+      "momentum": 0
+    },
+    "uuid": "13b62fd1-6bbc-4a4d-804f-d65e5578dd84",
+    "creation_time": 1534287537.626302,
+    "name": "batch_size: 128 - minimal_env: True - sample_size: 0 - storage_size: 80000: momentum: 0"
   }
 ]

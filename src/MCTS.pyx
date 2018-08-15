@@ -179,15 +179,18 @@ cdef class MCTS:
         state.is_root = True
         return state
 
-    cdef void mcts_game(self, WattenEnv env, Model model, Storage storage):
+    cdef void mcts_game(self, WattenEnv env, Model model, Storage storage, bool new_game=True):
         cdef Observation obs
         cdef State game_state
         cdef Card* card
         cdef int last_player, i, j
 
-        env.reset(&obs)
-        if self.objective_opponent:
-            env.current_player = rand() % 2
+        if new_game:
+            env.reset(&obs)
+            if self.objective_opponent:
+                env.current_player = rand() % 2
+        else:
+            env.regenerate_obs(&obs)
 
         cdef MCTSState root = self.create_root_state(env)
         cdef MCTSState tmp
@@ -294,6 +297,14 @@ cdef class MCTS:
         a = self.mcts_game_step(env, &root, model, &p)
         self.draw_tree(&root, tree_depth)
         return p, a
+
+    cpdef create_storage(self, ModelRating rating, WattenEnv env, Model model, Storage storage, int game_index):
+        env.set_state(&rating.eval_games[game_index])
+        env.current_player = 0
+
+        self.mcts_game(env, model, storage, False)
+        for i in range(storage.data.size()):
+            print(storage.data[i])
 
     def end(self):
         pass

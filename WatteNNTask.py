@@ -20,9 +20,9 @@ class WatteNNTask(taskplan.Task):
         super().__init__(preset, preset_pipe, logger)
         self.sum = 0
         self.env = WattenEnv(self.preset.get_bool("minimal_env"))
-        self.model = KerasModel(self.env, self.preset.get_int("hidden_neurons"))
-        self.best_model = KerasModel(self.env, self.preset.get_int("hidden_neurons"))
-        self.train_model = KerasModel(self.env, self.preset.get_int("hidden_neurons"))
+        self.model = KerasModel(self.env, self.preset.get_int("hidden_neurons"), self.preset.get_int("batch_size"), self.preset.get_float("lr"), self.preset.get_int("momentum"))
+        self.best_model = KerasModel(self.env, self.preset.get_int("hidden_neurons"), self.preset.get_int("batch_size"), self.preset.get_float("lr"), self.preset.get_int("momentum"))
+        self.train_model = KerasModel(self.env, self.preset.get_int("hidden_neurons"), self.preset.get_int("batch_size"), self.preset.get_float("lr"), self.preset.get_int("momentum"))
         self.storage = Storage(self.preset.get_int("storage_size"))
         self.mcts = MCTS(self.preset.get_int("episodes"), self.preset.get_int("mcts_sims"), self.preset.get_bool("objective_opponent"))
         self.game = Game(self.env)
@@ -38,7 +38,7 @@ class WatteNNTask(taskplan.Task):
     def step(self, tensorboard_writer, current_iteration):
         self.mcts.mcts_generate(self.env, self.model, self.storage)
 
-        loss = self.train_model.memorize_storage(self.storage, self.preset.get_int('sample_size') == 0, 1, self.preset.get_int('sample_size'))
+        loss = self.train_model.memorize_storage(self.storage, self.preset.get_int('sample_size') != 0, self.preset.get_int('epochs'), self.preset.get_int('sample_size'))
 
         tensorboard_writer.add_summary(tf.Summary(value=[
             tf.Summary.Value(tag="loss_play", simple_value=loss[0]),
