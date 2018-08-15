@@ -110,7 +110,7 @@ cdef class ModelRating:
             #print([card.id for card in self.env.players[self.env.current_player].hand_cards], obs.hand_cards)
             self.memory.memorize(&obs, &model_output)
         else:
-            self.memory.predict_single(&obs, &model_output)
+            self.memory.predict_single_p(&obs, &model_output)
 
         return self.memory.valid_step(model_output.p, &state.player1_hand_cards)
 
@@ -131,7 +131,7 @@ cdef class ModelRating:
             self.env.set_state(&state)
         else:
             self.env.regenerate_obs(&obs)
-            model.predict_single(&obs, &output)
+            model.predict_single_p(&obs, &output)
 
             step = model.valid_step(output.p, &self.env.players[self.env.current_player].hand_cards)
 
@@ -145,7 +145,7 @@ cdef class ModelRating:
                 for card in possible_hand_cards[0][i]:
                     obs.sets[<int>card.color][<int>card.value][0] = 1
 
-                model.predict_single(&obs, &output)
+                model.predict_single_p(&obs, &output)
 
                 theoretical_step = model.valid_step(output.p, &possible_hand_cards[0][i])
                 if step == theoretical_step:

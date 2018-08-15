@@ -63,7 +63,7 @@ cdef class LookUp(Model):
             storage.data.clear()
         return vector[float]()
 
-    cdef void predict_single(self, Observation* obs, ModelOutput* output):
+    cdef void predict_single_p(self, Observation* obs, ModelOutput* output):
         key = self.generate_key(obs)
 
         cdef int i

@@ -109,7 +109,7 @@ cdef class Solver:
             self.model.memorize(&obs, &model_output)
         else:
             #tmp = model_output
-            self.model.predict_single(&obs, &model_output)
+            self.model.predict_single_p(&obs, &model_output)
 
            # for i in range(32):
             #    if model_output.p[i] != tmp.p[i]:

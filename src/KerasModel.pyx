@@ -47,6 +47,7 @@ cdef class KerasModel(Model):
 
         self._build_choose_model(env, hidden_neurons)
         self._build_play_model(env, hidden_neurons)
+        self._build_value_model(env, hidden_neurons)
 
         self.clean_opt_weights = None
         self.batch_size = batch_size
@@ -118,13 +119,7 @@ cdef class KerasModel(Model):
         input_slice = Flatten()(input_slice)
         policy_out = SelectiveSoftmax()([policy_out, input_slice])
 
-        value_out = concatenate([convnet, input_2])
-        #value_out = Dense(64, activation='relu')(value_out)
-        #value_out = Dense(128, activation='relu')(value_out)
-        value_out = Dense(hidden_neurons, activation='relu')(value_out)
-        value_out = Dense(1, activation='tanh')(value_out)
-
-        self.play_model = RealKerasModel(inputs=[input_1, input_2], outputs=[policy_out, value_out])
+        self.play_model = RealKerasModel(inputs=[input_1, input_2], outputs=[policy_out])
 
         def customLoss(yTrue, yPred):
             return mean_absolute_error(yTrue, yPred) + 0.01 * K.max(yPred, axis=-1)
@@ -132,7 +127,26 @@ cdef class KerasModel(Model):
         adam = optimizers.SGD(lr=self.lr, momentum=self.momentum)
         #adam = optimizers.Adam()
         self.play_model.compile(optimizer=adam,
-                      loss=[customLoss, 'mean_squared_error'],
+                      loss=[customLoss],
+                      metrics=['accuracy'])
+
+    cdef void _build_value_model(self, WattenEnv env, int hidden_neurons):
+        input_1 = Input((4, 8, 3))
+        convnet = input_1
+        convnet = Flatten()(convnet)
+
+        input_2 = Input((4,))
+
+        value_out = concatenate([convnet, input_2])
+        value_out = Dense(hidden_neurons, activation='relu')(value_out)
+        value_out = Dense(1, activation='tanh')(value_out)
+
+        self.value_model = RealKerasModel(inputs=[input_1, input_2], outputs=[value_out])
+
+        adam = optimizers.SGD(lr=self.lr, momentum=self.momentum)
+        #adam = optimizers.Adam()
+        self.value_model.compile(optimizer=adam,
+                      loss=['mean_squared_error'],
                       metrics=['accuracy'])
 
     cpdef vector[float] memorize_storage(self, Storage storage, bool clear_afterwards=True, int epochs=1, int number_of_samples=0):
@@ -140,13 +154,20 @@ cdef class KerasModel(Model):
         number_of_samples = min(number_of_samples, storage.number_of_samples)
 
         cdef int s = storage.number_of_samples if use_random_selection else number_of_samples
+        print(s, storage.number_of_samples)
         cdef np.ndarray play_input1 = np.zeros([s, 4, 8, self.play_input_sets_size])
         cdef np.ndarray play_input2 = np.zeros([s, 4])
 
         cdef np.ndarray play_output1 = np.zeros([s, 32])
-        cdef np.ndarray play_output2 = np.zeros([s, 1])
 
-        play_weights = [np.zeros([s]), np.zeros([s])]
+        play_weights = [np.zeros([s])]
+
+
+        cdef np.ndarray value_input1 = np.zeros([s, 4, 8, 3])
+        cdef np.ndarray value_input2 = np.zeros([s, 4])
+
+        cdef np.ndarray value_output1 = np.zeros([s, 1])
+
 
         cdef np.ndarray choose_input1 = np.zeros([s, 4, 8, self.choose_input_sets_size])
 
@@ -156,44 +177,53 @@ cdef class KerasModel(Model):
         #if self.clean_opt_weights is not None:
         #    self.model.optimizer.set_weights(self.clean_opt_weights)
 
-        cdef int play_index = 0, choose_index = 0, sample_index = 0
+        cdef int play_index = 0, choose_index = 0, sample_index = 0, value_index = 0
         for i in range(s):
             if use_random_selection:
                 sample_index = rand() % storage.number_of_samples
             else:
                 sample_index = i
 
-            if storage.data[sample_index].obs.type is ActionType.DRAW_CARD:
-                play_input1[play_index] = storage.data[sample_index].obs.sets
-                play_input2[play_index] = storage.data[sample_index].obs.scalars
 
-                play_output1[play_index] = storage.data[sample_index].output.p
-                play_output2[play_index][0] = storage.data[sample_index].output.v
+            if storage.data[sample_index].value_net:
+                value_input1[value_index] = storage.data[sample_index].obs.sets
+                value_input2[value_index] = storage.data[sample_index].obs.scalars
 
-                play_weights[0][play_index] = storage.data[sample_index].weight_p
-                play_weights[1][play_index] = storage.data[sample_index].weight_v
+                value_output1[value_index][0] = storage.data[sample_index].output.v
 
-                play_index += 1
+                value_index += 1
             else:
-                choose_input1[choose_index] = storage.data[sample_index].obs.sets
+                if storage.data[sample_index].obs.type is ActionType.DRAW_CARD:
+                    play_input1[play_index] = storage.data[sample_index].obs.sets
+                    play_input2[play_index] = storage.data[sample_index].obs.scalars
+                    play_output1[play_index] = storage.data[sample_index].output.p
 
-                choose_output1[choose_index] = storage.data[sample_index].output.p
-                choose_output2[choose_index][0] = storage.data[sample_index].output.v
-                choose_index += 1
+                    play_weights[0][play_index] = storage.data[sample_index].weight
+                    play_index += 1
+                else:
+                    choose_input1[choose_index] = storage.data[sample_index].obs.sets
+
+                    choose_output1[choose_index] = storage.data[sample_index].output.p
+                    choose_output2[choose_index][0] = storage.data[sample_index].output.v
+                    choose_index += 1
 
         play_input1.resize([play_index, 4, 8, self.play_input_sets_size])
         play_input2.resize([play_index, 4])
         play_output1.resize([play_index, 32])
-        play_output2.resize([play_index, 1])
+        play_weights[0].resize([play_index])
+
+        value_input1.resize([value_index, 4, 8, 3])
+        value_input2.resize([value_index, 4])
+        value_output1.resize([value_index, 1])
 
         choose_input1.resize([choose_index, 4, 8, self.choose_input_sets_size])
         choose_output1.resize([choose_index, 32])
         choose_output2.resize([choose_index, 1])
 
-
         #print("Loss ", self.model.test_on_batch([input1, input2], [output1, output2]))
         cdef vector[float] loss
-        loss.push_back(self.play_model.fit([play_input1, play_input2], [play_output1, play_output2], epochs=epochs, batch_size=min(play_index, self.batch_size), sample_weight=play_weights).history['loss'][-1])
+        loss.push_back(self.play_model.fit([play_input1, play_input2], [play_output1], epochs=epochs, batch_size=min(play_index, self.batch_size), sample_weight=play_weights[0]).history['loss'][-1])
+        loss.push_back(self.value_model.fit([value_input1, value_input2], [value_output1], epochs=epochs, batch_size=min(value_index, self.batch_size)).history['loss'][-1])
         if choose_index > 0:
             loss.push_back(self.choose_model.fit([choose_input1], [choose_output1, choose_output2], epochs=epochs, batch_size=min(choose_index, self.batch_size)).history['loss'][-1])
         else:
@@ -207,10 +237,10 @@ cdef class KerasModel(Model):
         #        weight.fill(0)
 
         if clear_afterwards:
-            storage.data.clear()
+            storage.clear()
         return loss
 
-    cdef void predict_single(self, Observation* obs, ModelOutput* output):
+    cdef void predict_single_p(self, Observation* obs, ModelOutput* output):
         cdef int i
 
         if obs.type is ActionType.DRAW_CARD:
@@ -220,17 +250,24 @@ cdef class KerasModel(Model):
             inputs = [np.array([obs.sets])]
             outputs = self.choose_model.predict(inputs)
 
-        output.p = outputs[0][0]
-        output.v = outputs[1][0][0]
+        output.p = outputs[0]
+
+    cdef float predict_single_v(self, Observation* full_obs):
+        inputs = [np.array([full_obs.sets]), np.array([full_obs.scalars])]
+        outputs = self.value_model.predict(inputs)
+        return outputs[0][0]
 
     cpdef void copy_weights_from(self, Model other_model):
         self.choose_model.set_weights((<KerasModel>other_model).choose_model.get_weights())
         self.play_model.set_weights((<KerasModel>other_model).play_model.get_weights())
+        self.value_model.set_weights((<KerasModel>other_model).value_model.get_weights())
 
     cpdef void load(self, filename):
         self.play_model.load_weights(filename + "-play")
         self.choose_model.load_weights(filename + "-choose")
+        self.value_model.load_weights(filename + "-value")
 
     cpdef void save(self, filename):
         self.play_model.save(filename + "-play")
         self.choose_model.save(filename + "-choose")
+        self.value_model.save(filename + "-value")

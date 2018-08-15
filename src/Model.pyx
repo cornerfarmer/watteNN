@@ -13,8 +13,15 @@ cdef class Model:
     cpdef vector[float] memorize_storage(self, Storage storage, bool clear_afterwards=True, int epochs=1, int number_of_samples=0):
         raise NotImplementedError('subclasses must override memorize_storage()!')
 
-    cdef void predict_single(self, Observation* obs, ModelOutput* output):
-        raise NotImplementedError('subclasses must override predict_single()!')
+    cdef void predict_single_p(self, Observation* obs, ModelOutput* output):
+        raise NotImplementedError('subclasses must override predict_single_p()!')
+
+    cdef float predict_single_v(self, Observation* full_obs):
+        raise NotImplementedError('subclasses must override predict_single_v()!')
+
+    cdef void predict_single(self, Observation* full_obs, Observation* obs, ModelOutput* output):
+        self.predict_single_p(obs, output)
+        output.v = self.predict_single_v(full_obs)
 
     cdef int valid_step(self, float* values, vector[Card*]* hand_cards):
         cdef float max_value

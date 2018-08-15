@@ -55,7 +55,14 @@ cdef class Storage:
                         row.append(env.filename_from_card(env.all_cards[j]).decode('utf-8'))
 
                 row.append(self.data[i].output.v)
-                row.append(self.data[i].weight_p)
-                row.append(self.data[i].weight_v)
+                row.append(self.data[i].weight)
+                row.append(self.data[i].value_net)
 
                 writer.writerow(row)
+
+    cdef void clear(self):
+        self.data.clear()
+        self.next_index = 0
+        self.number_of_samples = 0
+        if self.max_samples != 0:
+            self.data.resize(self.max_samples)

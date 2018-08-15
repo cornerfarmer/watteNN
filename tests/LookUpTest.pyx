@@ -22,7 +22,7 @@ class LookUpTest(unittest.TestCase):
         model.memorize(&obs, &output)
 
         cdef ModelOutput prediction
-        model.predict_single(&obs, &prediction)
+        model.predict_single_p(&obs, &prediction)
         self.assertEqual(prediction.p, output.p, "Wrong probability memorized")
         self.assertEqual(prediction.v, output.v, "Wrong value memorized")
 
@@ -49,7 +49,7 @@ class LookUpTest(unittest.TestCase):
         output.p[12] = 0.5
         output.v = -0.25
         cdef ModelOutput prediction
-        model.predict_single(&obs, &prediction)
+        model.predict_single_p(&obs, &prediction)
         self.assertEqual(prediction.p, output.p, "Wrong probability memorized")
         self.assertEqual(prediction.v, output.v, "Wrong value memorized")
 
@@ -66,7 +66,7 @@ class LookUpTest(unittest.TestCase):
         output.v = 0
 
         cdef ModelOutput prediction
-        model.predict_single(&obs, &prediction)
+        model.predict_single_p(&obs, &prediction)
         self.assertEqual(prediction.p, output.p, "Wrong probability memorized")
         self.assertEqual(prediction.v, output.v, "Wrong value memorized")
 

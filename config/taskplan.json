@@ -86,5 +86,18 @@
     "uuid": "13b62fd1-6bbc-4a4d-804f-d65e5578dd84",
     "creation_time": 1534287537.626302,
     "name": "batch_size: 128 - minimal_env: True - sample_size: 0 - storage_size: 80000: momentum: 0"
+  },
+  {
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "config": {
+      "batch_size": 128,
+      "lr": 0.1,
+      "minimal_env": true,
+      "sample_size": 0,
+      "storage_size": 80000
+    },
+    "uuid": "c0ec1542-bf1a-4ff7-8366-c6f89e6cc88a",
+    "creation_time": 1534371518.090695,
+    "name": "batch_size: 128 - lr: 0.1 - minimal_env: True - sample_size: 0 - storage_size: 80000"
   }
 ]

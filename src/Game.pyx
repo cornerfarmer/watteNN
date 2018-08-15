@@ -37,14 +37,14 @@ cdef class Game:
                 game_length += 1
 
             if self.env.current_player == 0:
-                agent1.predict_single(&obs, &output)
-                if self.env.next_action_type == ActionType.DRAW_CARD:
-                    v_p1 += output.v
+                agent1.predict_single_p(&obs, &output)
+                #if self.env.next_action_type == ActionType.DRAW_CARD:
+                #    v_p1 += output.v
                 a = agent1.valid_step(output.p, &self.env.players[self.env.current_player].hand_cards)
             else:
-                agent2.predict_single(&obs, &output)
-                if self.env.next_action_type == ActionType.DRAW_CARD:
-                    v_p2 += output.v
+                agent2.predict_single_p(&obs, &output)
+                #if self.env.next_action_type == ActionType.DRAW_CARD:
+                #    v_p2 += output.v
                 a = agent2.valid_step(output.p, &self.env.players[self.env.current_player].hand_cards)
 
             self.env.step(a, &obs)
@@ -134,7 +134,7 @@ cdef class Game:
         if self.env.is_done():
             total_win_prob = 1 if self.env.last_winner is 0 else 0
         else:
-            model.predict_single(&obs, &output)
+            model.predict_single_p(&obs, &output)
             game_state = self.env.get_state()
 
             sum = 0

@@ -7,7 +7,7 @@ from gym_watten.envs.watten_env import WattenEnv
 env = WattenEnv(True)
 rating = ModelRating(env)
 model = KerasModel(env, 128)
-model.load('results/maskedSoftmax/minimal_env: True - sample_size: 3500/0/best-model')
+model.load('results/mctsFix/batch_size: 128 - minimal_env: True - sample_size: 0 - storage_size: 80000/0/best-model')
 
 game = Game(env)
 table, avg_diff, max_diff = game.draw_game_tree(model, rating, False, 53)

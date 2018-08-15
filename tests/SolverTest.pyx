@@ -30,7 +30,7 @@ class SolverTest(unittest.TestCase):
         cdef Observation obs
         cdef ModelOutput output
         env.regenerate_obs(&obs)
-        solver.model.predict_single(&obs, &output)
+        solver.model.predict_single_p(&obs, &output)
         print(output.p)
 
         print(rating.calc_exploitability(solver.model))

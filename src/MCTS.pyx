@@ -70,7 +70,7 @@ cdef class MCTS:
             return -1 if n_sum is 0 else q_sum / n_sum
 
     @cython.cdivision(True)
-    cdef float mcts_sample(self, WattenEnv env, MCTSState* state, Model model, int* player):
+    cdef float mcts_sample(self, WattenEnv env, MCTSState* state, Model model):
         cdef int current_player, i
         cdef float max_u
         cdef float u, v
@@ -80,13 +80,13 @@ cdef class MCTS:
         if self.is_state_leaf_node(state):
             if state.end_v != 0:
                 v = state.end_v
-                player[0] = -1
             else:
                 env.set_state(&state.env_state)
 
                 if model is not None:
                     env.regenerate_obs(&self._obs)
-                    model.predict_single(&self._obs, &self._prediction)
+                    env.regenerate_full_obs(&self._full_obs)
+                    model.predict_single(&self._full_obs, &self._obs, &self._prediction)
                 #else:
                 #    p, v = [1] *32, 0
 
@@ -98,9 +98,8 @@ cdef class MCTS:
                     self.add_state(state, self._prediction.p[card.id], env, 0 if not env.is_done() else (1 if env.last_winner == 0 else -1))
                     env.set_state(&state.env_state)
 
-                v = self._prediction.v
-                state.v = self._prediction.v
-                player[0] = state.current_player
+                v = self._prediction.v * (-1 if state.current_player == 1 else 1)
+                state.v = v
 
         else:
 
@@ -108,14 +107,10 @@ cdef class MCTS:
                 p.push_back(state.childs[i].p)
             max_child = &state.childs[self.softmax_step(&p)]
 
-            v = self.mcts_sample(env, max_child, model, player)
+            v = self.mcts_sample(env, max_child, model)
 
-        if player[0] == state.current_player:
-            state.w += v
-            state.n += 1
-        elif player[0] == -1:
-            state.w += v * (-1 if state.current_player == 1 else 1)
-            state.n += 1
+        state.w += v
+        state.n += 1
         return v
 
     cdef int softmax_step(self, vector[float]* p):
@@ -142,9 +137,9 @@ cdef class MCTS:
         if steps == 0:
             steps = self.mcts_sims
 
-        cdef int i, player
+        cdef int i
         for i in range(steps):
-            self.mcts_sample(env, root, model, &player)
+            self.mcts_sample(env, root, model)
 
         cdef int child_n
         cdef float p_max = -2
@@ -152,7 +147,7 @@ cdef class MCTS:
         cdef float current_p
         p.clear()
         for i in range(root.childs.size()):
-            p.push_back(self.calc_q(&root.childs[i], root.current_player, &child_n))
+            p.push_back((root.childs[i].w / root.childs[i].n * (-1 if root.current_player == 1 else 1)) if root.childs[i].n > 0 else -1)
 
         #weights[]
         #for i in range(root.childs.size()):
@@ -178,7 +173,7 @@ cdef class MCTS:
         return state
 
     cdef void mcts_game(self, WattenEnv env, Model model, Storage storage, bool new_game=True):
-        cdef Observation obs
+        cdef Observation obs, full_obs
         cdef State game_state
         cdef Card* card
         cdef int last_player, i, j
@@ -198,24 +193,26 @@ cdef class MCTS:
 
         while not env.is_done():
 
-
             game_state = env.get_state()
             a = self.mcts_game_step(env, &root, model, &p)
             env.set_state(&game_state)
 
+            env.regenerate_full_obs(&full_obs)
+            storage_index = storage.add_item()
+            storage.data[storage_index].obs = full_obs
+            storage.data[storage_index].output.v = 1 if env.current_player is 0 else -1
+            storage.data[storage_index].value_net = True
+            values.push_back(storage_index)
+
             j = 0
             for card in env.players[env.current_player].hand_cards:
-                storage_index = storage.add_item()
-                storage.data[storage_index].obs = obs
-
-                storage.data[storage_index].output.v = 1 if env.current_player is 0 else -1
-                storage.data[storage_index].weight_v = 1.0 / env.players[env.current_player].hand_cards.size()
-
-                for i in range(32):
-                    storage.data[storage_index].output.p[i] = (i == card.id)
-                storage.data[storage_index].weight_p = (p[j] + 1) / 2
-
-                values.push_back(storage_index)
+                if p[j] > -1:
+                    storage_index = storage.add_item()
+                    storage.data[storage_index].obs = obs
+                    for i in range(32):
+                        storage.data[storage_index].output.p[i] = (i == card.id)
+                    storage.data[storage_index].weight = (p[j] + 1) / 2
+                    storage.data[storage_index].value_net = False
                 j += 1
 
             #print(np.array(storage.data[storage_index].obs.sets)[:,:,0])

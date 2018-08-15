@@ -42,7 +42,8 @@ class WatteNNTask(taskplan.Task):
 
         tensorboard_writer.add_summary(tf.Summary(value=[
             tf.Summary.Value(tag="loss_play", simple_value=loss[0]),
-            tf.Summary.Value(tag="loss_choose", simple_value=loss[1])
+            tf.Summary.Value(tag="loss_value", simple_value=loss[1]),
+            tf.Summary.Value(tag="loss_choose", simple_value=loss[2])
         ]), current_iteration)
 
         if current_iteration % 1 == 0:

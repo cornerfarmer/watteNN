@@ -24,5 +24,5 @@ cdef struct MCTSState:
 cdef struct StorageItem:
     Observation obs
     ModelOutput output
-    float weight_p
-    float weight_v
+    float weight
+    bool value_net

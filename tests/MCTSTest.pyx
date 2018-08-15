@@ -187,8 +187,7 @@ class MCTSTest(unittest.TestCase):
 
         cdef MCTSState root = mcts.create_root_state(env)
 
-        cdef int player
-        cdef float v = mcts.mcts_sample(env, &root, model, &player)
+        cdef float v = mcts.mcts_sample(env, &root, model)
 
         self.assertEqual(root.childs.size(), 3, "No child created")
         for i in range(3):
@@ -199,7 +198,6 @@ class MCTSTest(unittest.TestCase):
         self.assertEqual(root.n, 1, "Wrong n")
         self.assertEqual(root.w, -0.25, "Wrong w")
         self.assertEqual(v, -0.25, "Wrong v")
-        self.assertEqual(player, 0, "Wrong player")
 
     def test_mcts_sample_step(self):
         cdef MCTS mcts = MCTS()
@@ -224,8 +222,7 @@ class MCTSTest(unittest.TestCase):
 
         cdef MCTSState* child = &root.childs[0]
 
-        cdef int player
-        cdef float v = mcts.mcts_sample(env, &root, model, &player)
+        cdef float v = mcts.mcts_sample(env, &root, model)
 
         self.assertEqual(child.childs.size(), 3, "No child created")
         self.assertEqual(child.childs[0].current_player, 0, "Wrong current player, child 0")
@@ -237,7 +234,6 @@ class MCTSTest(unittest.TestCase):
         self.assertEqual(root.n, 1, "Wrong n")
         self.assertEqual(root.w, -0.25, "Wrong w")
         self.assertEqual(v, 0.5, "Wrong v")
-        self.assertEqual(player, 1, "Wrong player")
 
     def test_mcts_sample_end_v(self):
         cdef MCTS mcts = MCTS()
@@ -263,8 +259,7 @@ class MCTSTest(unittest.TestCase):
 
         cdef MCTSState* child = &root.childs[0]
 
-        cdef int player
-        cdef float v = mcts.mcts_sample(env, &root, model, &player)
+        cdef float v = mcts.mcts_sample(env, &root, model)
 
         self.assertEqual(child.childs.size(), 0, "Child created")
         self.assertEqual(root.n, 2, "Wrong n")
@@ -272,7 +267,6 @@ class MCTSTest(unittest.TestCase):
         self.assertEqual(child.n, 1, "Wrong n")
         self.assertEqual(child.w, 1, "Wrong w")
         self.assertEqual(v, 1, "Wrong v")
-        self.assertEqual(player, -1, "Wrong player")
 
 
     def test_mcts_game_step(self):

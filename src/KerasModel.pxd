@@ -8,7 +8,7 @@ from src cimport ModelOutput, Experience
 from src.Model cimport Model
 
 cdef class KerasModel(Model):
-    cdef object play_model, choose_model
+    cdef object play_model, choose_model, value_model
     cdef object clean_opt_weights
     cdef int play_input_sets_size
     cdef int choose_input_sets_size
@@ -18,8 +18,10 @@ cdef class KerasModel(Model):
 
     cdef void _build_choose_model(self, WattenEnv env, int hidden_neurons)
     cdef void _build_play_model(self, WattenEnv env, int hidden_neurons)
+    cdef void _build_value_model(self, WattenEnv env, int hidden_neurons)
     cpdef vector[float] memorize_storage(self, Storage storage, bool clear_afterwards=?, int epochs=?, int number_of_samples=?)
-    cdef void predict_single(self, Observation* obs, ModelOutput* output)
+    cdef void predict_single_p(self, Observation* obs, ModelOutput* output)
+    cdef float predict_single_v(self, Observation* full_obs)
     cpdef void copy_weights_from(self, Model other_model)
     cpdef void load(self, filename)
     cpdef void save(self, filename)
