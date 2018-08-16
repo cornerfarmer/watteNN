@@ -18,7 +18,7 @@ from libc.time cimport time
 
 cdef class MCTS:
 
-    def __cinit__(self, episodes=75, mcts_sims=20, objective_opponent=False, exploration=1, high_q_for_unvisited_nodes=False):
+    def __cinit__(self, episodes=75, mcts_sims=20, objective_opponent=False, exploration=0.1, high_q_for_unvisited_nodes=False):
         self.episodes = episodes
         self.mcts_sims = mcts_sims
         self.objective_opponent = objective_opponent
@@ -105,7 +105,7 @@ cdef class MCTS:
 
             for i in range(state.childs.size()):
                 p.push_back(state.childs[i].p)
-            max_child = &state.childs[self.softmax_step(&p)]
+            max_child = &state.childs[self.softmax_step(&p, state.is_root)]
 
             v = self.mcts_sample(env, max_child, model)
 
@@ -113,7 +113,11 @@ cdef class MCTS:
         state.n += 1
         return v
 
-    cdef int softmax_step(self, vector[float]* p):
+    cdef int softmax_step(self, vector[float]* p, bool do_exploration=False):
+
+        if do_exploration and <float>rand() / RAND_MAX < self.exploration:
+            return rand() % p.size()
+
         cdef float psum = 0
         for i in range(p.size()):
             psum += p[0][i]
@@ -157,7 +161,7 @@ cdef class MCTS:
         for i in range(root.childs.size()):
             p_step.push_back(root.childs[i].p)
 
-        return self.softmax_step(&p_step)
+        return self.softmax_step(&p_step, True)
 
 
     cdef MCTSState create_root_state(self, WattenEnv env):

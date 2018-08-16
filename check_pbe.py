@@ -10,7 +10,7 @@ model = KerasModel(env, 128)
 model.load('results/mctsFix/batch_size: 128 - minimal_env: True - sample_size: 0 - storage_size: 80000/0/best-model')
 
 game = Game(env)
-table, avg_diff, max_diff = game.draw_game_tree(model, rating, False, 53)
+table, avg_diff, max_diff = game.draw_game_tree(model, rating, False, 335)
 
 print(table['-4,7,13,'])
 print(avg_diff, max_diff)

@@ -182,7 +182,7 @@ cdef class Game:
                     self.game_tree_step(model, obs, dot, None, 0, 1, 0, "", table, False, 0)
 
 
-            print(table['-4,7,13,'])
+            print(table[',13-4,12,15,'])
 
             print("Squashing probs")
             avg_diff = 0

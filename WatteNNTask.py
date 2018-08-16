@@ -24,7 +24,7 @@ class WatteNNTask(taskplan.Task):
         self.best_model = KerasModel(self.env, self.preset.get_int("hidden_neurons"), self.preset.get_int("batch_size"), self.preset.get_float("lr"), self.preset.get_int("momentum"))
         self.train_model = KerasModel(self.env, self.preset.get_int("hidden_neurons"), self.preset.get_int("batch_size"), self.preset.get_float("lr"), self.preset.get_int("momentum"))
         self.storage = Storage(self.preset.get_int("storage_size"))
-        self.mcts = MCTS(self.preset.get_int("episodes"), self.preset.get_int("mcts_sims"), self.preset.get_bool("objective_opponent"))
+        self.mcts = MCTS(self.preset.get_int("episodes"), self.preset.get_int("mcts_sims"), self.preset.get_bool("objective_opponent"), exploration=self.preset.get_float("exploration"))
         self.game = Game(self.env)
         self.train_model.copy_weights_from(self.model)
         self.best_model.copy_weights_from(self.model)
