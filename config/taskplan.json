@@ -4,18 +4,19 @@
     "abstract": true,
     "config": {
       "batch_size": 30,
-      "lr": 0.04,
-      "momentum": 0.9,
       "episodes": 75,
       "epochs": 1,
       "exploit_interval": 100,
       "hidden_neurons": 128,
+      "lr": 0.04,
       "mcts_sims": 40,
       "minimal_env": false,
+      "momentum": 0.9,
       "objective_opponent": false,
       "sample_size": 1000,
       "save_interval": 0,
-      "storage_size": 10000
+      "storage_size": 10000,
+      "exploration": 0.1
     },
     "uuid": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
     "creation_time": 1533646564.381098
