@@ -117,6 +117,10 @@ cdef class Game:
         for card in hand_cards:
             node_key += str(card.id) + ","
 
+        opponent_key = ""
+        for card in self.env.players[1 - self.env.current_player].hand_cards:
+            opponent_key += str(card.id) + ","
+
         if tree_only:
             text = "P0: " + str([self.env.filename_from_card(card).decode("utf-8")  for card in self.env.players[0].hand_cards]) + " (" + str(self.env.players[0].tricks) + ")" + (" -" if self.env.current_player is 0 else "") + '\n'
             text += "P1: " + str([self.env.filename_from_card(card).decode("utf-8")  for card in self.env.players[1].hand_cards]) + " (" + str(self.env.players[1].tricks) + ")" + (" -" if self.env.current_player is 1 else "") + '\n'
@@ -137,26 +141,29 @@ cdef class Game:
             model.predict_single_p(&obs, &output)
             game_state = self.env.get_state()
 
-            sum = 0
-            for card in hand_cards:
-                sum += output.p[card.id]
             total_win_prob = 0
             current_player = self.env.current_player
             index = 0
             model_probs = []
             for card in hand_cards:
+                if abs(1 - output.p[card.id]) < 0.01:
+                    output.p[card.id] = 1
+                if abs(0 - output.p[card.id]) < 0.01:
+                    output.p[card.id] = 0
                 self.env.set_state(&game_state)
                 self.env.step(card.id, &obs)
-                next_id, win_prob = self.game_tree_step(model, obs, dot, node, output.p[card.id], joint_prob * output.p[card.id] / sum, next_id, key + "," + str(card.id), table, tree_only, table[node_key][1][index] if tree_only else 0)
+                next_id, win_prob = self.game_tree_step(model, obs, dot, node, output.p[card.id], joint_prob * output.p[card.id], next_id, key + "," + str(card.id), table, tree_only, table[node_key][1][index] if tree_only else 0)
                 win_prob_per_action.append(win_prob if current_player is 0 else (1 - win_prob))
-                total_win_prob += win_prob * output.p[card.id] / sum
+                total_win_prob += win_prob * output.p[card.id]
                 index += 1
                 model_probs.append(output.p[card.id])
 
             if not tree_only:
+                if node_key == ',7-4,12,15,':
+                    print(joint_prob)
                 if node_key not in table:
                     table[node_key] = [model_probs, []]
-                table[node_key][1].append([joint_prob, win_prob_per_action])
+                table[node_key][1].append([joint_prob, win_prob_per_action, opponent_key])
 
         return next_id, total_win_prob
 
@@ -174,12 +181,11 @@ cdef class Game:
             table = {}
             for i in range(modelRating.eval_games.size()):
                 print(i)
-                for start_player in range(2):
-                    self.env.set_state(&modelRating.eval_games[i])
-                    self.env.current_player = start_player
+                self.env.set_state(&modelRating.eval_games[i])
+                self.env.current_player = 0
 
-                    self.env.regenerate_obs(&obs)
-                    self.game_tree_step(model, obs, dot, None, 0, 1, 0, "", table, False, 0)
+                self.env.regenerate_obs(&obs)
+                self.game_tree_step(model, obs, dot, None, 0, 1, 0, "", table, False, 0)
 
 
             print(table[',13-4,12,15,'])
@@ -201,6 +207,8 @@ cdef class Game:
 
                 for card in range(len(table[key][0])):
                     avg_diff += (prob_max - table[key][1][card]) * table[key][0][card]
+                    if (prob_max - table[key][1][card]) * table[key][0][card] > 0.01:
+                        print((prob_max - table[key][1][card]) * table[key][0][card], key)
                     if max_diff < (prob_max - table[key][1][card]) * table[key][0][card]:
                         max_diff = (prob_max - table[key][1][card]) * table[key][0][card]
                         max_key = key

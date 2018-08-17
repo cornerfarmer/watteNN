@@ -20,6 +20,7 @@ cdef class MCTS:
     cdef ModelOutput _prediction
     cdef Observation _obs
     cdef Observation _full_obs
+    cdef object timing
 
     cdef void add_state(self, MCTSState* parent, float p, WattenEnv env, int end_v=?)
     cdef bool is_state_leaf_node(self, MCTSState* state)

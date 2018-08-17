@@ -15,6 +15,7 @@ cimport cython
 from src.Storage cimport Storage
 from libc.stdlib cimport srand
 from libc.time cimport time
+import time as pytime
 
 cdef class MCTS:
 
@@ -24,6 +25,7 @@ cdef class MCTS:
         self.objective_opponent = objective_opponent
         self.exploration = exploration
         self.high_q_for_unvisited_nodes = high_q_for_unvisited_nodes
+        self.timing = [0, 0, 0]
 
     cdef void add_state(self, MCTSState* parent, float p, WattenEnv env, int end_v=0):
         parent.childs.push_back(MCTSState())
@@ -217,6 +219,8 @@ cdef class MCTS:
                         storage.data[storage_index].output.p[i] = (i == card.id)
                     storage.data[storage_index].weight = (p[j] + 1) / 2
                     storage.data[storage_index].value_net = False
+                    if obs.sets[0][4][0] == 1 and obs.sets[1][4][0] == 1 and obs.sets[1][7][0] == 1 and obs.sets[1][5][1] == 1:
+                        print(storage.data[storage_index].weight, storage.data[storage_index].output.p)
                 j += 1
 
             #print(np.array(storage.data[storage_index].obs.sets)[:,:,0])
@@ -303,9 +307,14 @@ cdef class MCTS:
         env.set_state(&rating.eval_games[game_index])
         env.current_player = 0
 
+        start = pytime.time()
         self.mcts_game(env, model, storage, False)
-        for i in range(storage.data.size()):
-            print(storage.data[i])
+        end = pytime.time()
+        print(end - start)
+        print(self.timing)
+
+        #for i in range(storage.data.size()):
+        #    print(storage.data[i])
 
     def end(self):
         pass
