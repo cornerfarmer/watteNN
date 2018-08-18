@@ -119,7 +119,14 @@ cdef class KerasModel(Model):
         input_slice = Flatten()(input_slice)
         policy_out = SelectiveSoftmax()([policy_out, input_slice])
 
-        self.play_model = RealKerasModel(inputs=[input_1, input_2], outputs=[policy_out])
+        scale_out = concatenate([convnet, input_2])
+        scale_out = Dense(hidden_neurons, activation='relu')(scale_out)
+        scale_out = Dense(1, activation='elu')(scale_out)
+        def add_one(x):
+            return x + 1
+        scale_out = Lambda(add_one)(scale_out)
+
+        self.play_model = RealKerasModel(inputs=[input_1, input_2], outputs=[policy_out, scale_out])
 
         def customLoss(yTrue, yPred):
             return mean_absolute_error(yTrue, yPred) + 0.01 * K.max(yPred, axis=-1)
@@ -127,7 +134,7 @@ cdef class KerasModel(Model):
         adam = optimizers.SGD(lr=self.lr, momentum=self.momentum)
         #adam = optimizers.Adam()
         self.play_model.compile(optimizer=adam,
-                      loss=[customLoss],
+                      loss=[customLoss, 'mean_squared_error'],
                       metrics=['accuracy'])
 
     cdef void _build_value_model(self, WattenEnv env, int hidden_neurons):
@@ -159,6 +166,7 @@ cdef class KerasModel(Model):
         cdef np.ndarray play_input2 = np.zeros([s, 4])
 
         cdef np.ndarray play_output1 = np.zeros([s, 32])
+        cdef np.ndarray play_output2 = np.zeros([s, 1])
 
         play_weights = [np.zeros([s])]
 
@@ -197,6 +205,7 @@ cdef class KerasModel(Model):
                     play_input1[play_index] = storage.data[sample_index].obs.sets
                     play_input2[play_index] = storage.data[sample_index].obs.scalars
                     play_output1[play_index] = storage.data[sample_index].output.p
+                    play_output2[play_index] = storage.data[sample_index].output.scale
 
                     play_weights[0][play_index] = storage.data[sample_index].weight
                     play_index += 1
@@ -210,6 +219,7 @@ cdef class KerasModel(Model):
         play_input1.resize([play_index, 4, 8, self.play_input_sets_size])
         play_input2.resize([play_index, 4])
         play_output1.resize([play_index, 32])
+        play_output2.resize([play_index, 1])
         play_weights[0].resize([play_index])
 
         value_input1.resize([value_index, 4, 8, 3])
@@ -222,7 +232,7 @@ cdef class KerasModel(Model):
 
         #print("Loss ", self.model.test_on_batch([input1, input2], [output1, output2]))
         cdef vector[float] loss
-        loss.push_back(self.play_model.fit([play_input1, play_input2], [play_output1], epochs=epochs, batch_size=min(play_index, self.batch_size), sample_weight=play_weights[0]).history['loss'][-1])
+        loss.push_back(self.play_model.fit([play_input1, play_input2], [play_output1, play_output2], epochs=epochs, batch_size=min(play_index, self.batch_size), sample_weight=[play_weights[0], np.ones_like(play_weights[0])]).history['loss'][-1])
         loss.push_back(self.value_model.fit([value_input1, value_input2], [value_output1], epochs=epochs, batch_size=min(value_index, self.batch_size)).history['loss'][-1])
         if choose_index > 0:
             loss.push_back(self.choose_model.fit([choose_input1], [choose_output1, choose_output2], epochs=epochs, batch_size=min(choose_index, self.batch_size)).history['loss'][-1])
@@ -250,7 +260,8 @@ cdef class KerasModel(Model):
             inputs = [np.array([obs.sets])]
             outputs = self.choose_model.predict(inputs)
 
-        output.p = outputs[0]
+        output.p = outputs[0][0]
+        output.scale = outputs[1][0]
 
     cdef float predict_single_v(self, Observation* full_obs):
         inputs = [np.array([full_obs.sets]), np.array([full_obs.scalars])]

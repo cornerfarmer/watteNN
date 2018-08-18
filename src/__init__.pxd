@@ -5,6 +5,7 @@ from libcpp.vector cimport vector
 cdef struct ModelOutput:
     float p[32]
     float v
+    float scale
 
 cdef struct Experience:
     ModelOutput output
@@ -20,6 +21,7 @@ cdef struct MCTSState:
     float end_v
     int current_player
     bool is_root
+    float scale
 
 cdef struct StorageItem:
     Observation obs

@@ -278,9 +278,10 @@ class MCTSTest(unittest.TestCase):
         env.seed(42)
         env.reset()
         cdef MCTSState root = mcts.create_root_state(env)
+        cdef float scale
 
         cdef vector[float] p
-        mcts.mcts_game_step(env, &root, model, &p, 300)
+        mcts.mcts_game_step(env, &root, model, &p, &scale, 300)
         mcts.draw_tree(&root)
 
         self.assertGreater(p[1], p[0], "Second card has not highest prob")
@@ -299,7 +300,8 @@ class MCTSTest(unittest.TestCase):
         cdef MCTSState root = mcts.create_root_state(env)
 
         cdef vector[float] p
-        cdef int a = mcts.mcts_game_step(env, &root, model, &p)
+        cdef float scale
+        cdef int a = mcts.mcts_game_step(env, &root, model, &p, &scale)
 
         self.assertGreater(p[0], p[1], "First card has not highest prob")
         self.assertGreater(p[0], p[2], "First card has not highest prob")

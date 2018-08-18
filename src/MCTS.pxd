@@ -22,12 +22,12 @@ cdef class MCTS:
     cdef Observation _full_obs
     cdef object timing
 
-    cdef void add_state(self, MCTSState* parent, float p, WattenEnv env, int end_v=?)
+    cdef void add_state(self, MCTSState* parent, float p, WattenEnv env, int end_v=?, float scale=?)
     cdef bool is_state_leaf_node(self, MCTSState* state)
     cdef float calc_q(self, MCTSState* state, int player, int* n)
     cdef float mcts_sample(self, WattenEnv env, MCTSState* state, Model model)
     cdef int softmax_step(self, vector[float]* p, bool do_exploration=?)
-    cdef int mcts_game_step(self, WattenEnv env, MCTSState* root, Model model, vector[float]* p, int steps=?)
+    cdef int mcts_game_step(self, WattenEnv env, MCTSState* root, Model model, vector[float]* p, float* scale, int steps=?)
     cdef MCTSState create_root_state(self, WattenEnv env)
     cdef void mcts_game(self, WattenEnv env, Model model, Storage storage, bool new_game=?)
     cpdef void mcts_generate(self, WattenEnv env, Model model, Storage storage)

@@ -9,7 +9,7 @@ extensions = []
 
 def add_extensions(path):
     for file in glob.glob(path + "/*.pyx"):
-        extensions.append(Extension(file.replace('/', '.')[:file.find('.pyx')], [file], language="c++", include_dirs=["/home/domin/.local/lib/python3.6/site-packages", np.get_include()]))
+        extensions.append(Extension(file.replace('/', '.')[:file.find('.pyx')], [file], extra_compile_args=["-std=c++14"], language="c++", include_dirs=["/home/domin/.local/lib/python3.6/site-packages", np.get_include()]))
 
 add_extensions('src')
 add_extensions('tests')

@@ -27,7 +27,7 @@ cdef class MCTS:
         self.high_q_for_unvisited_nodes = high_q_for_unvisited_nodes
         self.timing = [0, 0, 0]
 
-    cdef void add_state(self, MCTSState* parent, float p, WattenEnv env, int end_v=0):
+    cdef void add_state(self, MCTSState* parent, float p, WattenEnv env, int end_v=0, float scale=1):
         parent.childs.push_back(MCTSState())
         parent.childs.back().n = 0
         parent.childs.back().w = 0
@@ -37,39 +37,12 @@ cdef class MCTS:
         parent.childs.back().current_player = env.current_player
         parent.childs.back().end_v = end_v
         parent.childs.back().is_root = False
+        parent.childs.back().scale = scale
 
 
     cdef bool is_state_leaf_node(self, MCTSState* state):
         return state.childs.size() == 0
 
-
-    cdef float calc_q(self, MCTSState* state, int player, int* n):
-        cdef int i, n_sum, n_child
-        cdef float q_sum
-        if state.end_v != 0:
-            n[0] = 1
-            return state.end_v * (-1 if player == 1 else 1)
-        elif state.current_player == player:
-            if state.n == 0:
-                if self.high_q_for_unvisited_nodes:
-                    n[0] = 1
-                    return 1
-                else:
-                    n[0] = 0
-                    return -1
-            else:
-                n[0] = state.n
-                return state.w / state.n
-        else:
-            q_sum = 0
-            n_sum = 0
-
-            for i in range(state.childs.size()):
-                q_sum += self.calc_q(&state.childs[i], player, &n_child) * n_child
-                n_sum += n_child
-
-            n[0] = n_sum
-            return -1 if n_sum is 0 else q_sum / n_sum
 
     @cython.cdivision(True)
     cdef float mcts_sample(self, WattenEnv env, MCTSState* state, Model model):
@@ -97,7 +70,7 @@ cdef class MCTS:
 
                 for card in self._hand_cards:
                     env.step(card.id, &self._obs)
-                    self.add_state(state, self._prediction.p[card.id], env, 0 if not env.is_done() else (1 if env.last_winner == 0 else -1))
+                    self.add_state(state, self._prediction.p[card.id], env, 0 if not env.is_done() else (1 if env.last_winner == 0 else -1), self._prediction.scale)
                     env.set_state(&state.env_state)
 
                 v = self._prediction.v * (-1 if state.current_player == 1 else 1)
@@ -139,7 +112,7 @@ cdef class MCTS:
                 return i
         return p.size() - 1
 
-    cdef int mcts_game_step(self, WattenEnv env, MCTSState* root, Model model, vector[float]* p, int steps=0):
+    cdef int mcts_game_step(self, WattenEnv env, MCTSState* root, Model model, vector[float]* p, float* scale, int steps=0):
         if steps == 0:
             steps = self.mcts_sims
 
@@ -154,7 +127,7 @@ cdef class MCTS:
         p.clear()
         for i in range(root.childs.size()):
             p.push_back((root.childs[i].w / root.childs[i].n * (-1 if root.current_player == 1 else 1)) if root.childs[i].n > 0 else -1)
-
+        scale[0] = root.childs[0].scale
         #weights[]
         #for i in range(root.childs.size()):
         #    p[0][i] = (p_max - p[0][i] < 0.1)
@@ -196,11 +169,12 @@ cdef class MCTS:
         cdef vector[int] values
         cdef vector[float] p
         cdef int storage_index
+        cdef float scale
 
         while not env.is_done():
 
             game_state = env.get_state()
-            a = self.mcts_game_step(env, &root, model, &p)
+            a = self.mcts_game_step(env, &root, model, &p, &scale)
             env.set_state(&game_state)
 
             env.regenerate_full_obs(&full_obs)
@@ -217,8 +191,9 @@ cdef class MCTS:
                     storage.data[storage_index].obs = obs
                     for i in range(32):
                         storage.data[storage_index].output.p[i] = (i == card.id)
-                    storage.data[storage_index].weight = (p[j] + 1) / 2
+                    storage.data[storage_index].weight = (p[j] + 1) / 2 * 1 / scale
                     storage.data[storage_index].value_net = False
+                    storage.data[storage_index].output.scale = (p[j] + 1) / 2
                     if obs.sets[0][4][0] == 1 and obs.sets[1][4][0] == 1 and obs.sets[1][7][0] == 1 and obs.sets[1][5][1] == 1:
                         print(storage.data[storage_index].weight, storage.data[storage_index].output.p)
                 j += 1
@@ -298,8 +273,9 @@ cdef class MCTS:
 
         cdef MCTSState root = self.create_root_state(env)
         cdef vector[float] p
+        cdef float scale
 
-        a = self.mcts_game_step(env, &root, model, &p)
+        a = self.mcts_game_step(env, &root, model, &p, &scale)
         self.draw_tree(&root, tree_depth)
         return p, a
 
