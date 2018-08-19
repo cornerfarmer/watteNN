@@ -20,6 +20,8 @@ cdef class KerasModel(Model):
     cdef void _build_play_model(self, WattenEnv env, int hidden_neurons)
     cdef void _build_value_model(self, WattenEnv env, int hidden_neurons)
     cpdef vector[float] memorize_storage(self, Storage storage, bool clear_afterwards=?, int epochs=?, int number_of_samples=?)
+    cdef void predict_p(self, vector[Observation]* obs, vector[ModelOutput]* output)
+    cdef void predict_v(self, vector[Observation]* full_obs, vector[ModelOutput]* output)
     cdef void predict_single_p(self, Observation* obs, ModelOutput* output)
     cdef float predict_single_v(self, Observation* full_obs)
     cpdef void copy_weights_from(self, Model other_model)

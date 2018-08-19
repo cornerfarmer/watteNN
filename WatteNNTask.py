@@ -13,6 +13,7 @@ from src.KerasModel import KerasModel
 from src.Game import Game
 from src.ModelRating import ModelRating
 from gym_watten.envs.watten_env import WattenEnv
+import time as pytime
 
 class WatteNNTask(taskplan.Task):
 
@@ -24,7 +25,7 @@ class WatteNNTask(taskplan.Task):
         self.best_model = KerasModel(self.env, self.preset.get_int("hidden_neurons"), self.preset.get_int("batch_size"), self.preset.get_float("lr"), self.preset.get_int("momentum"))
         self.train_model = KerasModel(self.env, self.preset.get_int("hidden_neurons"), self.preset.get_int("batch_size"), self.preset.get_float("lr"), self.preset.get_int("momentum"))
         self.storage = Storage(self.preset.get_int("storage_size"))
-        self.mcts = MCTS(self.preset.get_int("episodes"), self.preset.get_int("mcts_sims"), self.preset.get_bool("objective_opponent"), exploration=self.preset.get_float("exploration"))
+        self.mcts = MCTS(self.preset.get_int("episodes"), self.preset.get_int("mcts_sims"), exploration=self.preset.get_float("exploration"))
         self.game = Game(self.env)
         self.train_model.copy_weights_from(self.model)
         self.best_model.copy_weights_from(self.model)
@@ -36,9 +37,13 @@ class WatteNNTask(taskplan.Task):
         self.model.save(str(path / Path('model')))
 
     def step(self, tensorboard_writer, current_iteration):
+        start = pytime.time()
         self.mcts.mcts_generate(self.env, self.model, self.storage)
+        print("1", pytime.time() - start)
 
+        start = pytime.time()
         loss = self.train_model.memorize_storage(self.storage, self.preset.get_int('sample_size') != 0, self.preset.get_int('epochs'), self.preset.get_int('sample_size'))
+        print("2", pytime.time() - start)
 
         tensorboard_writer.add_summary(tf.Summary(value=[
             tf.Summary.Value(tag="loss_play", simple_value=loss[0]),
@@ -46,7 +51,8 @@ class WatteNNTask(taskplan.Task):
             tf.Summary.Value(tag="loss_choose", simple_value=loss[2])
         ]), current_iteration)
 
-        if current_iteration % 1 == 0:
+        self.model.copy_weights_from(self.train_model)
+        if False and current_iteration % 1 == 0:
             self.model.copy_weights_from(self.train_model)
 
             rating_value = self.game.compare_rand_games(self.model, self.best_model, 500)
@@ -60,6 +66,7 @@ class WatteNNTask(taskplan.Task):
                 self.best_model.copy_weights_from(self.model)
 
         if self.preset.get_bool("minimal_env") and current_iteration % self.preset.get_int("exploit_interval") == 0:
+            self.best_model.copy_weights_from(self.model)
             table, avg_diff, max_diff = self.game.draw_game_tree(self.best_model, self.rating, False, None)
 
             tensorboard_writer.add_summary(tf.Summary(value=[

@@ -1,104 +1,117 @@
 [
   {
-    "name": "Default",
-    "abstract": true,
     "config": {
+      "exploration": 0.1,
       "batch_size": 30,
       "episodes": 75,
       "epochs": 1,
-      "exploit_interval": 100,
       "hidden_neurons": 128,
-      "lr": 0.04,
-      "mcts_sims": 40,
-      "minimal_env": false,
       "momentum": 0.9,
+      "save_interval": 0,
+      "exploit_interval": 100,
+      "lr": 0.04,
       "objective_opponent": false,
       "sample_size": 1000,
-      "save_interval": 0,
-      "storage_size": 10000,
-      "exploration": 0.1
+      "mcts_sims": 40,
+      "minimal_env": false,
+      "storage_size": 10000
     },
+    "abstract": true,
+    "name": "Default",
     "uuid": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
     "creation_time": 1533646564.381098
   },
   {
-    "name": "empty",
-    "creation_time": 1533646719.383332,
     "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "name": "empty",
     "config": {},
+    "creation_time": 1533646719.383332,
     "uuid": "54a7b6e6-6817-4d93-945f-1f5687c9048e"
   },
   {
-    "name": "minimal_env: True",
-    "creation_time": 1533749672.289856,
     "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "name": "minimal_env: True",
     "config": {
       "minimal_env": true
     },
+    "creation_time": 1533749672.289856,
     "uuid": "0b0a34f9-f0ee-408f-9d83-c81c3459ac80"
   },
   {
-    "name": "minimal_env: True - sample_size: 3500",
-    "creation_time": 1534115546.917558,
     "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "name": "minimal_env: True - sample_size: 3500",
     "config": {
       "sample_size": 3500,
       "minimal_env": true
     },
+    "creation_time": 1534115546.917558,
     "uuid": "25c430ce-a44b-4302-8c01-329b5bbf5d35"
   },
   {
     "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "name": "epochs: 10 - minimal_env: True - sample_size: 3500",
     "config": {
-      "epochs": 10,
+      "sample_size": 3500,
       "minimal_env": true,
-      "sample_size": 3500
+      "epochs": 10
     },
-    "uuid": "4ee9e7b2-d02e-4e07-a11d-ce0172da6a0f",
     "creation_time": 1534278506.585614,
-    "name": "epochs: 10 - minimal_env: True - sample_size: 3500"
+    "uuid": "4ee9e7b2-d02e-4e07-a11d-ce0172da6a0f"
   },
   {
     "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "name": "batch_size: 128 - minimal_env: True - sample_size: 0 - storage_size: 80000",
     "config": {
-      "batch_size": 128,
-      "minimal_env": true,
       "sample_size": 0,
-      "storage_size": 80000
+      "batch_size": 128,
+      "storage_size": 80000,
+      "minimal_env": true
     },
-    "uuid": "1296f112-e3df-4875-84ae-2efde3132497",
     "creation_time": 1534284787.4236,
-    "name": "batch_size: 128 - minimal_env: True - sample_size: 0 - storage_size: 80000"
+    "uuid": "1296f112-e3df-4875-84ae-2efde3132497"
   },
   {
     "base": "1296f112-e3df-4875-84ae-2efde3132497",
+    "name": "batch_size: 128 - minimal_env: True - sample_size: 0 - storage_size: 80000: momentum: 0",
     "config": {
       "momentum": 0
     },
-    "uuid": "57348ed0-173b-474d-b55d-36d2b83c95e2",
     "creation_time": 1534286806.939842,
-    "name": "batch_size: 128 - minimal_env: True - sample_size: 0 - storage_size: 80000: momentum: 0"
+    "uuid": "57348ed0-173b-474d-b55d-36d2b83c95e2"
   },
   {
     "base": "1296f112-e3df-4875-84ae-2efde3132497",
+    "name": "batch_size: 128 - minimal_env: True - sample_size: 0 - storage_size: 80000: momentum: 0",
     "config": {
       "momentum": 0
     },
-    "uuid": "13b62fd1-6bbc-4a4d-804f-d65e5578dd84",
     "creation_time": 1534287537.626302,
-    "name": "batch_size: 128 - minimal_env: True - sample_size: 0 - storage_size: 80000: momentum: 0"
+    "uuid": "13b62fd1-6bbc-4a4d-804f-d65e5578dd84"
   },
   {
     "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "name": "batch_size: 128 - lr: 0.1 - minimal_env: True - sample_size: 0 - storage_size: 80000",
     "config": {
+      "sample_size": 0,
       "batch_size": 128,
       "lr": 0.1,
       "minimal_env": true,
-      "sample_size": 0,
       "storage_size": 80000
     },
-    "uuid": "c0ec1542-bf1a-4ff7-8366-c6f89e6cc88a",
     "creation_time": 1534371518.090695,
-    "name": "batch_size: 128 - lr: 0.1 - minimal_env: True - sample_size: 0 - storage_size: 80000"
+    "uuid": "c0ec1542-bf1a-4ff7-8366-c6f89e6cc88a"
+  },
+  {
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "name": "sample_size: 0 - batch_size: 128 - episodes: 100 - minimal_env: True - lr: 0.1",
+    "config": {
+      "episodes": 100,
+      "minimal_env": true,
+      "batch_size": 128,
+      "lr": 0.1,
+      "sample_size": 0
+    },
+    "uuid": "10ec41ba-6629-4bec-9607-163b49fddfa5",
+    "creation_time": 1534687189.370132
   }
 ]

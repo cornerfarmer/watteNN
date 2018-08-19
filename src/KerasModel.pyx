@@ -250,6 +250,7 @@ cdef class KerasModel(Model):
             storage.clear()
         return loss
 
+
     cdef void predict_single_p(self, Observation* obs, ModelOutput* output):
         cdef int i
 
@@ -267,6 +268,34 @@ cdef class KerasModel(Model):
         inputs = [np.array([full_obs.sets]), np.array([full_obs.scalars])]
         outputs = self.value_model.predict(inputs)
         return outputs[0][0]
+
+
+    cdef void predict_p(self, vector[Observation]* obs, vector[ModelOutput]* output):
+        cdef int i
+
+        #if obs.type is ActionType.DRAW_CARD:
+        inputs = [np.zeros([obs.size(), 4, 8, self.play_input_sets_size]), np.zeros([obs.size(), 4])]
+        for i in range(obs.size()):
+            inputs[0][i] = obs[0][i].sets
+            inputs[1][i] = obs[0][i].scalars
+        outputs = self.play_model.predict(inputs)
+        #else:
+        #    inputs = [np.array([obs.sets])]
+        #    outputs = self.choose_model.predict(inputs)
+
+        for i in range(output.size()):
+            output[0][i].p = outputs[0][i]
+            output[0][i].scale = outputs[1][i]
+
+    cdef void predict_v(self, vector[Observation]* full_obs, vector[ModelOutput]* output):
+        inputs = [np.zeros([full_obs.size(), 4, 8, 3]), np.zeros([full_obs.size(), 4])]
+        for i in range(full_obs.size()):
+            inputs[0][i] = full_obs[0][i].sets
+            inputs[1][i] = full_obs[0][i].scalars
+        outputs = self.value_model.predict(inputs)
+
+        for i in range(output.size()):
+            output[0][i].v = outputs[i]
 
     cpdef void copy_weights_from(self, Model other_model):
         self.choose_model.set_weights((<KerasModel>other_model).choose_model.get_weights())

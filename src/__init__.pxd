@@ -11,8 +11,8 @@ cdef struct Experience:
     ModelOutput output
     int n
 
-cdef struct MCTSState:
-    vector[MCTSState] childs
+cdef cppclass MCTSState:
+    vector[MCTSState*] childs
     int n
     float w
     float v
@@ -22,6 +22,7 @@ cdef struct MCTSState:
     int current_player
     bool is_root
     float scale
+    MCTSState* parent
 
 cdef struct StorageItem:
     Observation obs

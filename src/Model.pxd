@@ -8,6 +8,9 @@ from src cimport ModelOutput, Experience
 
 cdef class Model:
     cpdef vector[float] memorize_storage(self, Storage storage, bool clear_afterwards=?, int epochs=?, int number_of_samples=?)
+    cdef void predict_p(self, vector[Observation]* obs, vector[ModelOutput]* output)
+    cdef void predict_v(self, vector[Observation]* full_obs, vector[ModelOutput]* output)
+    cdef void predict(self, vector[Observation]* full_obs, vector[Observation]* obs, vector[ModelOutput]* output)
     cdef void predict_single_p(self, Observation* obs, ModelOutput* output)
     cdef float predict_single_v(self, Observation* full_obs)
     cdef void predict_single(self, Observation* full_obs, Observation* obs, ModelOutput* output)

@@ -13,6 +13,16 @@ cdef class Model:
     cpdef vector[float] memorize_storage(self, Storage storage, bool clear_afterwards=True, int epochs=1, int number_of_samples=0):
         raise NotImplementedError('subclasses must override memorize_storage()!')
 
+    cdef void predict_p(self, vector[Observation]* obs, vector[ModelOutput]* output):
+        raise NotImplementedError('subclasses must override predict_p()!')
+
+    cdef void predict_v(self, vector[Observation]* full_obs, vector[ModelOutput]* output):
+        raise NotImplementedError('subclasses must override predict_v()!')
+
+    cdef void predict(self, vector[Observation]* full_obs, vector[Observation]* obs, vector[ModelOutput]* output):
+        self.predict_p(obs, output)
+        self.predict_v(full_obs, output)
+
     cdef void predict_single_p(self, Observation* obs, ModelOutput* output):
         raise NotImplementedError('subclasses must override predict_single_p()!')
 
