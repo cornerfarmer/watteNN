@@ -129,7 +129,12 @@ cdef class KerasModel(Model):
         self.play_model = RealKerasModel(inputs=[input_1, input_2], outputs=[policy_out, scale_out])
 
         def customLoss(yTrue, yPred):
-            return mean_absolute_error(yTrue, yPred) + 0.01 * K.max(yPred, axis=-1)
+            a = 0.1
+            loss_sq = 0.5 * 1 / a * K.square(yPred - yTrue)
+            loss_abs = K.abs(yPred - yTrue) - 0.5 * 1 / a * a ** 2
+            use_abs = K.abs(yPred - yTrue) > a
+            loss = K.mean(K.cast(use_abs, 'float32') * loss_abs + (1 - K.cast(use_abs, 'float32')) * loss_sq, axis=-1)
+            return loss + 0.01 * K.max(yPred, axis=-1)
 
         adam = optimizers.SGD(lr=self.lr, momentum=self.momentum)
         #adam = optimizers.Adam()
