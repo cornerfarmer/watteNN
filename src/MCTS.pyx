@@ -183,7 +183,7 @@ cdef class MCTSWorker:
         for i in range(self.root.childs.size()):
             p_step.push_back(self.root.childs[i].p)
 
-        action[0] = self.softmax_step(&p_step, True)
+        action[0] = self.softmax_step(&p_step, False)
         return True
 
 
