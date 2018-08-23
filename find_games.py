@@ -3,4 +3,4 @@ from gym_watten.envs.watten_env import WattenEnv
 
 env = WattenEnv(True)
 rating = ModelRating(env)
-print(rating.find("EO,GO,GK,", "EU,GU,GA,"))
+print(rating.find("EO,EK,GK,", "GU,GO,GA,"))

@@ -6,11 +6,11 @@ from gym_watten.envs.watten_env import WattenEnv
 
 env = WattenEnv(True)
 rating = ModelRating(env)
-model = KerasModel(env, 128)
-model.load('results/dualWeighting/batch_size: 128 - lr: 0.1 - minimal_env: True - sample_size: 0 - storage_size: 80000/0/best-model')
+model = KerasModel(env, 128, clip=0.85)
+model.load('results/momentumFix/batch_size: 128 - clip: 0.85 - episodes: 100 - lr: 0.1 - minimal_env: True - sample_size: 0/0/best-model')
 
 game = Game(env)
-table, avg_diff, max_diff = game.draw_game_tree(model, rating, False, 335)#374
+table, avg_diff, max_diff = game.draw_game_tree(model, rating, False, 249)#335
 
 print(table[',13-4,12,15,'])
 print(avg_diff, max_diff)

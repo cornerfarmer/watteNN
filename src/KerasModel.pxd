@@ -15,6 +15,8 @@ cdef class KerasModel(Model):
     cdef int batch_size
     cdef float lr
     cdef float momentum
+    cdef float clip
+    cdef float equalizer
 
     cdef void _build_choose_model(self, WattenEnv env, int hidden_neurons)
     cdef void _build_play_model(self, WattenEnv env, int hidden_neurons)

@@ -41,7 +41,7 @@ class SelectiveSoftmax(Layer):
         return input_shape[0]
 
 cdef class KerasModel(Model):
-    def __init__(self, env, hidden_neurons=128, batch_size=30, lr=0.04, momentum=0.9):
+    def __init__(self, env, hidden_neurons=128, batch_size=30, lr=0.04, momentum=0.9, clip=2, equalizer=0.01):
         self.lr = lr
         self.momentum = momentum
 
@@ -51,6 +51,8 @@ cdef class KerasModel(Model):
 
         self.clean_opt_weights = None
         self.batch_size = batch_size
+        self.clip = clip
+        self.equalizer = equalizer
 
     cdef void _build_choose_model(self, WattenEnv env, int hidden_neurons):
         self.choose_input_sets_size = env.get_input_sets_size(ActionType.CHOOSE_VALUE)
@@ -134,7 +136,7 @@ cdef class KerasModel(Model):
             loss_abs = K.abs(yPred - yTrue) - 0.5 * 1 / a * a ** 2
             use_abs = K.abs(yPred - yTrue) > a
             loss = K.mean(K.cast(use_abs, 'float32') * loss_abs + (1 - K.cast(use_abs, 'float32')) * loss_sq, axis=-1)
-            return loss + 0.01 * K.max(yPred, axis=-1)
+            return loss + self.equalizer * K.max(yPred, axis=-1)
 
         adam = optimizers.SGD(lr=self.lr, momentum=self.momentum)
         #adam = optimizers.Adam()
@@ -266,7 +268,10 @@ cdef class KerasModel(Model):
             inputs = [np.array([obs.sets])]
             outputs = self.choose_model.predict(inputs)
 
-        output.p = outputs[0][0]
+        if np.max(outputs[0][0]) >= self.clip:
+            output.p = (outputs[0][0] >= self.clip)
+        else:
+            output.p = outputs[0][0]
         output.scale = outputs[1][0]
 
     cdef float predict_single_v(self, Observation* full_obs):
@@ -289,7 +294,10 @@ cdef class KerasModel(Model):
         #    outputs = self.choose_model.predict(inputs)
 
         for i in range(output.size()):
-            output[0][i].p = outputs[0][i]
+            if np.max(outputs[0][i]) >= self.clip:
+                output[0][i].p = (outputs[0][i] >= self.clip)
+            else:
+                output[0][i].p = outputs[0][i]
             output[0][i].scale = outputs[1][i]
 
     cdef void predict_v(self, vector[Observation]* full_obs, vector[ModelOutput]* output):

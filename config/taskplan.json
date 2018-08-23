@@ -1,23 +1,25 @@
 [
   {
+    "name": "Default",
+    "abstract": true,
     "config": {
-      "exploration": 0.1,
       "batch_size": 30,
+      "clip": 2,
       "episodes": 75,
       "epochs": 1,
-      "hidden_neurons": 128,
-      "momentum": 0.9,
-      "save_interval": 0,
       "exploit_interval": 100,
+      "exploration": 0.1,
+      "hidden_neurons": 128,
       "lr": 0.04,
-      "objective_opponent": false,
-      "sample_size": 1000,
       "mcts_sims": 40,
       "minimal_env": false,
-      "storage_size": 10000
+      "momentum": 0.9,
+      "objective_opponent": false,
+      "sample_size": 1000,
+      "save_interval": 0,
+      "storage_size": 10000,
+      "equalizer": 0.01
     },
-    "abstract": true,
-    "name": "Default",
     "uuid": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
     "creation_time": 1533646564.381098
   },
@@ -113,5 +115,19 @@
     },
     "uuid": "10ec41ba-6629-4bec-9607-163b49fddfa5",
     "creation_time": 1534687189.370132
+  },
+  {
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "config": {
+      "batch_size": 128,
+      "clip": 0.85,
+      "episodes": 100,
+      "lr": 0.1,
+      "minimal_env": true,
+      "sample_size": 0
+    },
+    "uuid": "2291f50a-ec37-44f1-9a8f-664576a64f71",
+    "creation_time": 1534952590.451647,
+    "name": "batch_size: 128 - clip: 0.85 - episodes: 100 - lr: 0.1 - minimal_env: True - sample_size: 0"
   }
 ]

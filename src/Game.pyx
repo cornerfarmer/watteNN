@@ -117,6 +117,9 @@ cdef class Game:
         for card in hand_cards:
             node_key += str(card.id) + ","
 
+        if node_key == ',14,4-5,13,':
+            print(obs)
+
         opponent_key = ""
         for card in self.env.players[1 - self.env.current_player].hand_cards:
             opponent_key += str(card.id) + ","
@@ -188,7 +191,8 @@ cdef class Game:
                 self.game_tree_step(model, obs, dot, None, 0, 1, 0, "", table, False, 0)
 
 
-            print(table[',13-4,12,15,'])
+            #print(table[',13-4,12,15,'])
+            print(table[',6-12,13,15,'])
 
             print("Squashing probs")
             avg_diff = 0
