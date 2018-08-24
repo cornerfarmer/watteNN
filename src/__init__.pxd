@@ -1,6 +1,7 @@
 from gym_watten.envs.watten_env cimport State, Observation
 from libcpp cimport bool
 from libcpp.vector cimport vector
+from libcpp.string cimport string
 
 cdef struct ModelOutput:
     float p[32]
@@ -29,3 +30,5 @@ cdef struct StorageItem:
     ModelOutput output
     float weight
     bool value_net
+    string key
+    float equalizer_weight

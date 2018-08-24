@@ -44,15 +44,15 @@ cdef class KerasModel(Model):
     def __init__(self, env, hidden_neurons=128, batch_size=30, lr=0.04, momentum=0.9, clip=2, equalizer=0.01):
         self.lr = lr
         self.momentum = momentum
+        self.clean_opt_weights = None
+        self.batch_size = batch_size
+        self.clip = clip
+        self.equalizer = equalizer
 
         self._build_choose_model(env, hidden_neurons)
         self._build_play_model(env, hidden_neurons)
         self._build_value_model(env, hidden_neurons)
 
-        self.clean_opt_weights = None
-        self.batch_size = batch_size
-        self.clip = clip
-        self.equalizer = equalizer
 
     cdef void _build_choose_model(self, WattenEnv env, int hidden_neurons):
         self.choose_input_sets_size = env.get_input_sets_size(ActionType.CHOOSE_VALUE)
@@ -128,7 +128,7 @@ cdef class KerasModel(Model):
             return x + 1
         scale_out = Lambda(add_one)(scale_out)
 
-        self.play_model = RealKerasModel(inputs=[input_1, input_2], outputs=[policy_out, scale_out])
+        self.play_model = RealKerasModel(inputs=[input_1, input_2], outputs=[policy_out, scale_out, policy_out])
 
         def customLoss(yTrue, yPred):
             a = 0.1
@@ -136,12 +136,15 @@ cdef class KerasModel(Model):
             loss_abs = K.abs(yPred - yTrue) - 0.5 * 1 / a * a ** 2
             use_abs = K.abs(yPred - yTrue) > a
             loss = K.mean(K.cast(use_abs, 'float32') * loss_abs + (1 - K.cast(use_abs, 'float32')) * loss_sq, axis=-1)
-            return loss + self.equalizer * K.max(yPred, axis=-1)
+            return loss
+
+        def equalizeLoss(yTrue, yPred):
+            return self.equalizer * K.max(yPred, axis=-1)
 
         adam = optimizers.SGD(lr=self.lr, momentum=self.momentum)
         #adam = optimizers.Adam()
         self.play_model.compile(optimizer=adam,
-                      loss=[customLoss, 'mean_squared_error'],
+                      loss=[customLoss, 'mean_squared_error', equalizeLoss],
                       metrics=['accuracy'])
 
     cdef void _build_value_model(self, WattenEnv env, int hidden_neurons):
@@ -175,7 +178,7 @@ cdef class KerasModel(Model):
         cdef np.ndarray play_output1 = np.zeros([s, 32])
         cdef np.ndarray play_output2 = np.zeros([s, 1])
 
-        play_weights = [np.zeros([s])]
+        play_weights = [np.zeros([s]), np.zeros([s])]
 
 
         cdef np.ndarray value_input1 = np.zeros([s, 4, 8, 3])
@@ -215,6 +218,7 @@ cdef class KerasModel(Model):
                     play_output2[play_index] = storage.data[sample_index].output.scale
 
                     play_weights[0][play_index] = storage.data[sample_index].weight
+                    play_weights[1][play_index] = 1.0 / storage.key_numbers[str(storage.data[sample_index].key)] * storage.data[sample_index].equalizer_weight
                     play_index += 1
                 else:
                     choose_input1[choose_index] = storage.data[sample_index].obs.sets
@@ -228,6 +232,7 @@ cdef class KerasModel(Model):
         play_output1.resize([play_index, 32])
         play_output2.resize([play_index, 1])
         play_weights[0].resize([play_index])
+        play_weights[1].resize([play_index])
 
         value_input1.resize([value_index, 4, 8, 3])
         value_input2.resize([value_index, 4])
@@ -236,10 +241,10 @@ cdef class KerasModel(Model):
         choose_input1.resize([choose_index, 4, 8, self.choose_input_sets_size])
         choose_output1.resize([choose_index, 32])
         choose_output2.resize([choose_index, 1])
-
+        print(play_weights[1])
         #print("Loss ", self.model.test_on_batch([input1, input2], [output1, output2]))
         cdef vector[float] loss
-        loss.push_back(self.play_model.fit([play_input1, play_input2], [play_output1, play_output2], epochs=epochs, batch_size=min(play_index, self.batch_size), sample_weight=[play_weights[0], np.ones_like(play_weights[0])]).history['loss'][-1])
+        loss.push_back(self.play_model.fit([play_input1, play_input2], [play_output1, play_output2, play_output1], epochs=epochs, batch_size=min(play_index, self.batch_size), sample_weight=[play_weights[0], np.ones_like(play_weights[0]), play_weights[1]]).history['loss'][-1])
         loss.push_back(self.value_model.fit([value_input1, value_input2], [value_output1], epochs=epochs, batch_size=min(value_index, self.batch_size)).history['loss'][-1])
         if choose_index > 0:
             loss.push_back(self.choose_model.fit([choose_input1], [choose_output1, choose_output2], epochs=epochs, batch_size=min(choose_index, self.batch_size)).history['loss'][-1])

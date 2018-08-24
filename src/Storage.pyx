@@ -7,18 +7,37 @@ cdef class Storage:
         self.max_samples = max_samples
         self.next_index = 0
         self.number_of_samples = 0
+        self.key_numbers = {}
         if self.max_samples != 0:
             self.data.resize(max_samples)
 
-    cdef int add_item(self):
+    cdef int add_item(self, string key):
+        pyKey = str(key)
         cdef int new_index
         if self.max_samples is 0:
             self.data.push_back(StorageItem())
+            self.data.back().key = key
+            if key != "":
+                if pyKey in self.key_numbers:
+                    self.key_numbers[pyKey] += 1
+                else:
+                    self.key_numbers[pyKey] = 1
+
             self.number_of_samples = self.data.size()
             return self.data.size() - 1
         else:
             new_index = self.next_index
+            if self.number_of_samples > self.next_index and not self.data[self.next_index].value_net:
+                self.key_numbers[str(self.data[self.next_index].key)] -= 1
+
             self.data[self.next_index] = StorageItem()
+            self.data[self.next_index].key = key
+            if pyKey != "":
+                if pyKey in self.key_numbers:
+                    self.key_numbers[pyKey] += 1
+                else:
+                    self.key_numbers[pyKey] = 1
+
             self.next_index += 1
             self.number_of_samples = max(self.number_of_samples, self.next_index)
             self.next_index %= self.max_samples

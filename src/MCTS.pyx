@@ -17,6 +17,10 @@ from libc.stdlib cimport srand
 from libc.time cimport time
 import time as pytime
 from cpython.mem cimport PyMem_Malloc, PyMem_Free
+from libcpp.string cimport string
+
+cdef extern from "<string>" namespace "std":
+    string to_string(int val)
 
 cdef class PredictionQueue:
     def __cinit__(self):
@@ -210,6 +214,7 @@ cdef class MCTSWorker:
         cdef int storage_index, a
         cdef float scale
         cdef env_is_done = False
+        cdef string key
 
         while not env_is_done:
             finished = self.mcts_game_step(env, queue, &p, &scale, &a)
@@ -219,7 +224,7 @@ cdef class MCTSWorker:
 
             env.regenerate_obs(&obs)
             env.regenerate_full_obs(&full_obs)
-            storage_index = storage.add_item()
+            storage_index = storage.add_item("")
             storage.data[storage_index].obs = full_obs
             storage.data[storage_index].output.v = 1 if env.current_player is 0 else -1
             storage.data[storage_index].value_net = True
@@ -228,15 +233,22 @@ cdef class MCTSWorker:
             j = 0
             for card in env.players[env.current_player].hand_cards:
                 if p[j] > -1:
-                    storage_index = storage.add_item()
+                    key = <char*>""
+                    for k in range(obs.sets[0][0].size()):
+                        for i in range(32):
+                            if obs.sets[i / 8][i % 8][k] == 1:
+                                key += to_string(i) + <char*>","
+                        key += <char*>";"
+                    storage_index = storage.add_item(key)
                     storage.data[storage_index].obs = obs
                     for i in range(32):
                         storage.data[storage_index].output.p[i] = (i == card.id)
                     storage.data[storage_index].weight = (p[j] + 1) / 2 * 1 / scale
+                    storage.data[storage_index].equalizer_weight = 1.0 / scale
                     storage.data[storage_index].value_net = False
                     storage.data[storage_index].output.scale = (p[j] + 1) / 2
-                    #if obs.sets[0][4][0] == 1 and obs.sets[1][4][0] == 1 and obs.sets[1][7][0] == 1 and obs.sets[1][5][1] == 1:
-                    if obs.sets[0][5][0] == 1 and obs.sets[1][5][0] == 1 and obs.sets[1][6][2] == 1 and obs.sets[0][4][3] == 1:
+                    if obs.sets[0][4][0] == 1 and obs.sets[1][4][0] == 1 and obs.sets[1][7][0] == 1 and obs.sets[1][5][1] == 1:
+                    #if obs.sets[0][5][0] == 1 and obs.sets[1][5][0] == 1 and obs.sets[1][6][2] == 1 and obs.sets[0][4][3] == 1:
                         print(storage.data[storage_index].weight, storage.data[storage_index].output.p, p)
                 j += 1
 
