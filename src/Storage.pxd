@@ -3,6 +3,7 @@ from libcpp.string cimport string
 from libcpp cimport bool
 from src cimport MCTSState, StorageItem
 from gym_watten.envs.watten_env cimport WattenEnv
+from libcpp.string cimport string
 
 cdef class Storage:
     cdef vector[StorageItem] data

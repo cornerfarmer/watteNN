@@ -21,9 +21,9 @@ class WatteNNTask(taskplan.Task):
         super().__init__(preset, preset_pipe, logger)
         self.sum = 0
         self.env = WattenEnv(self.preset.get_bool("minimal_env"))
-        self.model = KerasModel(self.env, self.preset.get_int("hidden_neurons"), self.preset.get_int("batch_size"), self.preset.get_float("lr"), self.preset.get_float("momentum"), self.preset.get_float("clip"), self.preset.get_float("equalizer"))
-        self.best_model = KerasModel(self.env, self.preset.get_int("hidden_neurons"), self.preset.get_int("batch_size"), self.preset.get_float("lr"), self.preset.get_float("momentum"), self.preset.get_float("clip"), self.preset.get_float("equalizer"))
-        self.train_model = KerasModel(self.env, self.preset.get_int("hidden_neurons"), self.preset.get_int("batch_size"), self.preset.get_float("lr"), self.preset.get_float("momentum"), self.preset.get_float("clip"), self.preset.get_float("equalizer"))
+        self.model = KerasModel(self.env, self.preset.get_int("hidden_neurons"), self.preset.get_int("batch_size"), self.preset.get_float("lr"), self.preset.get_float("momentum"), 0.15, self.preset.get_float("equalizer"))
+        self.best_model = KerasModel(self.env, self.preset.get_int("hidden_neurons"), self.preset.get_int("batch_size"), self.preset.get_float("lr"), self.preset.get_float("momentum"), 0.15, self.preset.get_float("equalizer"))
+        self.train_model = KerasModel(self.env, self.preset.get_int("hidden_neurons"), self.preset.get_int("batch_size"), self.preset.get_float("lr"), self.preset.get_float("momentum"), 0.15, self.preset.get_float("equalizer"))
         self.storage = Storage(self.preset.get_int("storage_size"))
         self.mcts = MCTS(self.preset.get_int("episodes"), self.preset.get_int("mcts_sims"), exploration=self.preset.get_float("exploration"))
         self.game = Game(self.env)

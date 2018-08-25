@@ -295,7 +295,8 @@ cdef class MCTS:
                     if not current_worker.finished:
                         finished = False
 
-            queue.do_prediction(env, model, self.worker)
+            if not finished:
+                queue.do_prediction(env, model, self.worker)
 
 
     cdef void draw_tree(self, MCTSState* root, int tree_depth=5, object tree_path=[]):

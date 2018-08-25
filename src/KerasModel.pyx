@@ -41,7 +41,7 @@ class SelectiveSoftmax(Layer):
         return input_shape[0]
 
 cdef class KerasModel(Model):
-    def __init__(self, env, hidden_neurons=128, batch_size=30, lr=0.04, momentum=0.9, clip=2, equalizer=0.01):
+    def __init__(self, env, hidden_neurons=128, batch_size=30, lr=0.04, momentum=0.9, clip=0, equalizer=0.01):
         self.lr = lr
         self.momentum = momentum
         self.clean_opt_weights = None
@@ -273,10 +273,8 @@ cdef class KerasModel(Model):
             inputs = [np.array([obs.sets])]
             outputs = self.choose_model.predict(inputs)
 
-        if np.max(outputs[0][0]) >= self.clip:
-            output.p = (outputs[0][0] >= self.clip)
-        else:
-            output.p = outputs[0][0]
+        self._clip_output(outputs[0])
+        output.p = outputs[0][0]
         output.scale = outputs[1][0]
 
     cdef float predict_single_v(self, Observation* full_obs):
@@ -297,13 +295,20 @@ cdef class KerasModel(Model):
         #else:
         #    inputs = [np.array([obs.sets])]
         #    outputs = self.choose_model.predict(inputs)
-
+        self._clip_output(outputs[0])
         for i in range(output.size()):
-            if np.max(outputs[0][i]) >= self.clip:
-                output[0][i].p = (outputs[0][i] >= self.clip)
-            else:
-                output[0][i].p = outputs[0][i]
+            output[0][i].p = outputs[0][i]
             output[0][i].scale = outputs[1][i]
+
+    cdef object _clip_output(self, output):
+        col_sum = output.copy()
+        n = np.sum(col_sum >= self.clip, axis=-1)
+        col_sum[col_sum >= self.clip] = 0
+        col_sum = np.sum(col_sum, axis=-1)
+
+        output[output < self.clip] = 0
+        output[output >= self.clip] += np.repeat(np.expand_dims(1 / n * col_sum, axis=-1), output.shape[1], axis=1)[output >= self.clip]
+        return output
 
     cdef void predict_v(self, vector[Observation]* full_obs, vector[ModelOutput]* output):
         inputs = [np.zeros([full_obs.size(), 4, 8, 3]), np.zeros([full_obs.size(), 4])]
