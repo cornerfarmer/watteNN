@@ -33,7 +33,8 @@ class SelectiveSoftmax(Layer):
         super(SelectiveSoftmax, self).build(input_shape)
 
     def call(self, inputs):
-        exp = K.exp(inputs[0] - K.max(inputs[0], -1, True))
+        masked = K.tf.where(K.tf.greater(inputs[1], inputs[1] * 0), inputs[0], K.tf.ones_like(inputs[0]) * K.constant(-np.inf))
+        exp = K.exp(inputs[0] - K.max(masked, -1, True))
         exp *= inputs[1]
         return exp / K.sum(exp, -1, True)
 
