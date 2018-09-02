@@ -149,7 +149,8 @@ cdef class KerasModel(Model):
                       metrics=['accuracy'])
 
     cdef void _build_value_model(self, WattenEnv env, int hidden_neurons):
-        input_1 = Input((4, 8, 3))
+        self.play_input_sets_size = env.get_input_sets_size(ActionType.DRAW_CARD)
+        input_1 = Input((4, 8, self.play_input_sets_size + 1))
         convnet = input_1
         convnet = Flatten()(convnet)
 
@@ -182,7 +183,7 @@ cdef class KerasModel(Model):
         play_weights = [np.zeros([s]), np.zeros([s])]
 
 
-        cdef np.ndarray value_input1 = np.zeros([s, 4, 8, 3])
+        cdef np.ndarray value_input1 = np.zeros([s, 4, 8, self.play_input_sets_size + 1])
         cdef np.ndarray value_input2 = np.zeros([s, 4])
 
         cdef np.ndarray value_output1 = np.zeros([s, 1])
@@ -235,7 +236,7 @@ cdef class KerasModel(Model):
         play_weights[0].resize([play_index])
         play_weights[1].resize([play_index])
 
-        value_input1.resize([value_index, 4, 8, 3])
+        value_input1.resize([value_index, 4, 8, self.play_input_sets_size + 1])
         value_input2.resize([value_index, 4])
         value_output1.resize([value_index, 1])
 
@@ -312,7 +313,7 @@ cdef class KerasModel(Model):
         return output
 
     cdef void predict_v(self, vector[Observation]* full_obs, vector[ModelOutput]* output):
-        inputs = [np.zeros([full_obs.size(), 4, 8, 3]), np.zeros([full_obs.size(), 4])]
+        inputs = [np.zeros([full_obs.size(), 4, 8, self.play_input_sets_size + 1]), np.zeros([full_obs.size(), 4])]
         for i in range(full_obs.size()):
             inputs[0][i] = full_obs[0][i].sets
             inputs[1][i] = full_obs[0][i].scalars

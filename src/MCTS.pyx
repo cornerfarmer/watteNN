@@ -50,13 +50,15 @@ cdef class PredictionQueue:
 
 cdef class MCTSWorker:
 
-    def __cinit__(self, worker_id, mcts_sims=20, exploration=0.1, only_one_step=False):
+    def __cinit__(self, worker_id, mcts_sims=20, exploration=0.1, only_one_step=False, step_exploration=0.1):
         self.worker_id = worker_id
         self.mcts_sims = mcts_sims
         self.exploration = exploration
         self.current_step = 0
         self.prediction_state = NULL
         self.only_one_step = only_one_step
+        self.value_storage = Storage()
+        self.step_exploration = step_exploration
 
     def __dealloc__(self):
         self._clear_nodes()
@@ -74,7 +76,8 @@ cdef class MCTSWorker:
         self.current_step = 0
         self.prediction_state = NULL
         self.finished = False
-        self.values.clear()
+        self.value_storage.clear()
+        self.exploration_mode = False
 
     cdef void add_state(self, MCTSState* parent, float p, WattenEnv env, int end_v=0, float scale=1):
         self.nodes.push_back(new MCTSState())
@@ -118,7 +121,7 @@ cdef class MCTSWorker:
         self.handle_leaf_state(self.prediction_state, v)
 
     cdef bool mcts_sample(self, WattenEnv env, MCTSState* state, PredictionQueue queue):
-        cdef int current_player, i
+        cdef int current_player, i, a
         cdef vector[float] p
         cdef bool finished
         cdef MCTSState* max_child
@@ -138,15 +141,18 @@ cdef class MCTSWorker:
         else:
             for i in range(state.childs.size()):
                 p.push_back(state.childs[i].p)
-            max_child = state.childs[self.softmax_step(&p, state.is_root)]
+
+            if state.is_root and <float>rand() / RAND_MAX < self.exploration:
+                a = rand() % p.size()
+            else:
+                a = self.softmax_step(&p)
+
+            max_child = state.childs[a]
 
             finished = self.mcts_sample(env, max_child, queue)
         return finished
 
-    cdef int softmax_step(self, vector[float]* p, bool do_exploration=False):
-
-        if do_exploration and <float>rand() / RAND_MAX < self.exploration:
-            return rand() % p.size()
+    cdef int softmax_step(self, vector[float]* p):
 
         cdef float psum = 0
         for i in range(p.size()):
@@ -167,10 +173,11 @@ cdef class MCTSWorker:
                 return i
         return p.size() - 1
 
-    cdef bool mcts_game_step(self, WattenEnv env, PredictionQueue queue, vector[float]* p, float* scale, int* action):
+    cdef bool mcts_game_step(self, WattenEnv env, PredictionQueue queue, vector[float]* p, float* scale, int* action, bool* exploration_mode_activated):
 
         cdef int i
         cdef bool finished
+    #if not self.exploration_mode or self.root.current_player == self.exploration_player:
         for i in range(self.current_step, self.mcts_sims):
             finished = self.mcts_sample(env, self.root, queue)
             self.current_step += 1
@@ -184,10 +191,31 @@ cdef class MCTSWorker:
         scale[0] = self.root.childs[0].scale
 
         cdef vector[float] p_step
+        cdef int number_of_zero_p = 0
         for i in range(self.root.childs.size()):
             p_step.push_back(self.root.childs[i].p)
+            if p_step.back() == 0:
+                number_of_zero_p += 1
 
-        action[0] = self.softmax_step(&p_step, False)
+        cdef int r
+        if number_of_zero_p > 0 and <float>rand() / RAND_MAX < self.step_exploration:
+            r = rand() % number_of_zero_p
+
+            for i in range(p_step.size()):
+                if p_step[i] == 0:
+                    if r == 0:
+                        action[0] = i
+                        break
+                    else:
+                        r -= 1
+
+            self.exploration_mode = True
+            self.exploration_player = self.root.current_player
+            exploration_mode_activated[0] = True
+        else:
+            action[0] = self.softmax_step(&p_step)
+            exploration_mode_activated[0] = False
+
         return True
 
 
@@ -215,42 +243,48 @@ cdef class MCTSWorker:
         cdef float scale
         cdef env_is_done = False
         cdef string key
+        cdef bool exploration_mode_activated
 
         while not env_is_done:
-            finished = self.mcts_game_step(env, queue, &p, &scale, &a)
+            finished = self.mcts_game_step(env, queue, &p, &scale, &a, &exploration_mode_activated)
             if not finished:
                 return False
             env.set_state(&self.root.env_state)
 
             env.regenerate_obs(&obs)
             env.regenerate_full_obs(&full_obs)
-            storage_index = storage.add_item("")
-            storage.data[storage_index].obs = full_obs
-            storage.data[storage_index].output.v = 1 if env.current_player is 0 else -1
-            storage.data[storage_index].value_net = True
-            self.values.push_back(storage_index)
 
-            j = 0
-            for card in env.players[env.current_player].hand_cards:
-                if p[j] > -1:
-                    key = <char*>""
-                    for k in range(obs.sets[0][0].size()):
+            if exploration_mode_activated:
+                self.value_storage.clear()
+            else:
+                storage_index = self.value_storage.add_item("")
+                self.value_storage.data[storage_index].obs = full_obs
+                self.value_storage.data[storage_index].output.v = 1 if env.current_player is 0 else -1
+                self.value_storage.data[storage_index].value_net = True
+
+            if not self.exploration_mode or env.current_player == self.exploration_player:
+                j = 0
+                for card in env.players[env.current_player].hand_cards:
+                    if p[j] > -1:
+                        key = <char*>""
+                        for k in range(obs.sets[0][0].size()):
+                            for i in range(32):
+                                if obs.sets[i / 8][i % 8][k] == 1:
+                                    key += to_string(i) + <char*>","
+                            key += <char*>";"
+                        storage_index = storage.add_item(key)
+                        storage.data[storage_index].obs = obs
                         for i in range(32):
-                            if obs.sets[i / 8][i % 8][k] == 1:
-                                key += to_string(i) + <char*>","
-                        key += <char*>";"
-                    storage_index = storage.add_item(key)
-                    storage.data[storage_index].obs = obs
-                    for i in range(32):
-                        storage.data[storage_index].output.p[i] = (i == card.id)
-                    storage.data[storage_index].weight = (p[j] + 1) / 2 * 1 / scale
-                    storage.data[storage_index].equalizer_weight = 1.0 / scale
-                    storage.data[storage_index].value_net = False
-                    storage.data[storage_index].output.scale = (p[j] + 1) / 2
-                    if obs.sets[0][4][0] == 1 and obs.sets[1][4][0] == 1 and obs.sets[1][7][0] == 1 and obs.sets[1][5][1] == 1:
-                    #if obs.sets[0][5][0] == 1 and obs.sets[1][5][0] == 1 and obs.sets[1][6][2] == 1 and obs.sets[0][4][3] == 1:
-                        print(storage.data[storage_index].weight, storage.data[storage_index].output.p, p)
-                j += 1
+                            storage.data[storage_index].output.p[i] = (i == card.id)
+                        storage.data[storage_index].weight = (p[j] + 1) / 2 * 1 / scale
+                        storage.data[storage_index].equalizer_weight = 1.0 / scale
+                        storage.data[storage_index].value_net = False
+                        storage.data[storage_index].output.scale = (p[j] + 1) / 2
+                        #if obs.sets[0][4][0] == 1 and obs.sets[1][4][0] == 1 and obs.sets[1][7][0] == 1 and obs.sets[1][5][1] == 1:
+                        #if obs.sets[0][5][0] == 1 and obs.sets[1][5][0] == 1 and obs.sets[1][6][2] == 1 and obs.sets[0][4][3] == 1:
+                        if obs.sets[0][4][0] == 1 and obs.sets[1][4][0] == 1 and obs.sets[0][7][2] == 1 and obs.sets[1][5][3] == 1:
+                            print(storage.data[storage_index].weight, storage.data[storage_index].output.p, p)
+                    j += 1
 
             env.step(env.players[env.current_player].hand_cards[a].id, &obs)
             self.root = self.root.childs[a]
@@ -261,19 +295,21 @@ cdef class MCTSWorker:
             if self.only_one_step:
                 break
 
-        for i in self.values:
-            storage.data[i].output.v *= (1 if env.last_winner is 0 else -1)
+        for i in range(self.value_storage.number_of_samples):
+            self.value_storage.data[i].output.v *= (1 if env.last_winner is 0 else -1)
+
+        storage.copy_from(self.value_storage)
 
         self.finished = True
         return True
 
 cdef class MCTS:
 
-    def __cinit__(self, episodes=75, mcts_sims=20, exploration=0.1, only_one_step=False):
+    def __cinit__(self, episodes=75, mcts_sims=20, exploration=0.1, only_one_step=False, step_exploration=0.1):
         self.episodes = episodes
         self.worker = []
         for i in range(episodes):
-            self.worker.append(MCTSWorker(i, mcts_sims, exploration, only_one_step))
+            self.worker.append(MCTSWorker(i, mcts_sims, exploration, only_one_step, step_exploration))
 
     cpdef void mcts_generate(self, WattenEnv env, Model model, Storage storage, bool reset_env=True):
         cdef PredictionQueue queue = PredictionQueue()

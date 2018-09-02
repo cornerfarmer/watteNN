@@ -15,4 +15,4 @@ cdef class Storage:
     cdef int add_item(self, string key)
     cpdef void export_csv(self, file_name, WattenEnv env)
     cdef void clear(self)
-
+    cdef void copy_from(self, Storage other_storage)

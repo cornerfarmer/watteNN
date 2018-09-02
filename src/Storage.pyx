@@ -86,3 +86,9 @@ cdef class Storage:
         self.number_of_samples = 0
         if self.max_samples != 0:
             self.data.resize(self.max_samples)
+
+    cdef void copy_from(self, Storage other_storage):
+        cdef int i
+        for i in range(other_storage.number_of_samples):
+            storage_index = self.add_item(other_storage.data[i].key)
+            self.data[storage_index] = other_storage.data[i]

@@ -18,7 +18,7 @@ cdef class PredictionQueue:
     cdef do_prediction(self, WattenEnv env, Model model, object worker)
 
 cdef class MCTSWorker:
-    cdef vector[int] values
+    cdef Storage value_storage
     cdef int current_step
     cdef MCTSState* prediction_state
     cdef MCTSState* root
@@ -28,6 +28,9 @@ cdef class MCTSWorker:
     cdef int mcts_sims
     cdef float exploration
     cdef bool only_one_step
+    cdef bool exploration_mode
+    cdef int exploration_player
+    cdef float step_exploration
 
     cdef Observation _obs
     cdef Observation _full_obs
@@ -39,8 +42,8 @@ cdef class MCTSWorker:
     cdef void handle_leaf_state(self, MCTSState* state, float v)
     cdef void handle_prediction(self, WattenEnv env, ModelOutput* prediction)
     cdef bool mcts_sample(self, WattenEnv env, MCTSState* state, PredictionQueue queue)
-    cdef int softmax_step(self, vector[float]* p, bool do_exploration=?)
-    cdef bool mcts_game_step(self, WattenEnv env, PredictionQueue queue, vector[float]* p, float* scale, int* action)
+    cdef int softmax_step(self, vector[float]* p)
+    cdef bool mcts_game_step(self, WattenEnv env, PredictionQueue queue, vector[float]* p, float* scale, int* action, bool* exploration_mode_activated)
     cdef MCTSState create_root_state(self, WattenEnv env)
     cdef bool mcts_game(self, WattenEnv env, PredictionQueue queue, Storage storage)
 
