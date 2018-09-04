@@ -44,6 +44,8 @@ class WatteNNTask(taskplan.Task):
         start = pytime.time()
         loss = self.train_model.memorize_storage(self.storage, self.preset.get_int('sample_size') != 0, self.preset.get_int('epochs'), self.preset.get_int('sample_size'))
         print("2", pytime.time() - start)
+        if loss[0] > 0.5:
+            raise ArithmeticError()
 
         tensorboard_writer.add_summary(tf.Summary(value=[
             tf.Summary.Value(tag="loss_play", simple_value=loss[0]),

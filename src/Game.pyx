@@ -117,9 +117,6 @@ cdef class Game:
         for card in hand_cards:
             node_key += str(card.id) + ","
 
-        if node_key == ',7,13-4,12,':
-            print(obs)
-
         opponent_key = ""
         for card in self.env.players[1 - self.env.current_player].hand_cards:
             opponent_key += str(card.id) + ","
@@ -155,7 +152,7 @@ cdef class Game:
                     output.p[card.id] = 0
                 self.env.set_state(&game_state)
                 self.env.step(card.id, &obs)
-                next_id, win_prob = self.game_tree_step(model, obs, dot, node, output.p[card.id], joint_prob * output.p[card.id], next_id, key + "," + str(card.id), table, tree_only, table[node_key][1][index] if tree_only else 0)
+                next_id, win_prob = self.game_tree_step(model, obs, dot, node, output.p[card.id], joint_prob * output.p[card.id], next_id, key + "," + str(card.id) + "." + str(current_player), table, tree_only, table[node_key][1][index] if tree_only else 0)
                 win_prob_per_action.append(win_prob if current_player is 0 else (1 - win_prob))
                 total_win_prob += win_prob * output.p[card.id]
                 index += 1
@@ -192,7 +189,7 @@ cdef class Game:
 
 
             #print(table[',13-4,12,15,'])
-            print(table[',6,13-5,12,'])
+            #print(table[',6,13-5,12,'])
 
             print("Squashing probs")
             avg_diff = 0

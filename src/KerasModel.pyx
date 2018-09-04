@@ -95,6 +95,7 @@ cdef class KerasModel(Model):
 
     cdef void _build_play_model(self, WattenEnv env, int hidden_neurons):
         self.play_input_sets_size = env.get_input_sets_size(ActionType.DRAW_CARD)
+        self.play_input_scalars_size = env.get_input_scalars_size(ActionType.DRAW_CARD)
         input_1 = Input((4,8, self.play_input_sets_size))
         convnet = input_1
 
@@ -111,7 +112,7 @@ cdef class KerasModel(Model):
         #convnet = Conv2D(64, (3, 3), activation='relu', padding='same')(convnet)
         convnet = Flatten()(convnet)
 
-        input_2 = Input((4,))
+        input_2 = Input((self.play_input_scalars_size,))
 
         policy_out = concatenate([convnet, input_2])
         #policy_out = Dense(64, activation='relu')(policy_out)
@@ -152,11 +153,12 @@ cdef class KerasModel(Model):
 
     cdef void _build_value_model(self, WattenEnv env, int hidden_neurons):
         self.play_input_sets_size = env.get_input_sets_size(ActionType.DRAW_CARD)
+        self.play_input_scalars_size = env.get_input_scalars_size(ActionType.DRAW_CARD)
         input_1 = Input((4, 8, self.play_input_sets_size + 1))
         convnet = input_1
         convnet = Flatten()(convnet)
 
-        input_2 = Input((4,))
+        input_2 = Input((self.play_input_scalars_size,))
 
         value_out = concatenate([convnet, input_2])
         value_out = Dense(hidden_neurons, activation='relu')(value_out)
@@ -175,9 +177,9 @@ cdef class KerasModel(Model):
         number_of_samples = min(number_of_samples, storage.number_of_samples)
 
         cdef int s = storage.number_of_samples if use_random_selection else number_of_samples
-        print(s, storage.number_of_samples)
+
         cdef np.ndarray play_input1 = np.zeros([s, 4, 8, self.play_input_sets_size])
-        cdef np.ndarray play_input2 = np.zeros([s, 4])
+        cdef np.ndarray play_input2 = np.zeros([s, self.play_input_scalars_size])
 
         cdef np.ndarray play_output1 = np.zeros([s, 32])
         cdef np.ndarray play_output2 = np.zeros([s, 1])
@@ -186,7 +188,7 @@ cdef class KerasModel(Model):
 
 
         cdef np.ndarray value_input1 = np.zeros([s, 4, 8, self.play_input_sets_size + 1])
-        cdef np.ndarray value_input2 = np.zeros([s, 4])
+        cdef np.ndarray value_input2 = np.zeros([s, self.play_input_scalars_size])
 
         cdef np.ndarray value_output1 = np.zeros([s, 1])
 
@@ -223,7 +225,10 @@ cdef class KerasModel(Model):
 
                     play_weights[0][play_index] = storage.data[sample_index].weight
                     play_weights[1][play_index] = 1.0 / storage.key_numbers[str(storage.data[sample_index].key)] * storage.data[sample_index].equalizer_weight
+                    if play_weights[0][play_index] > 10:
+                        print(play_output1[play_index], play_output2[play_index], play_weights[0][play_index], play_weights[1][play_index])
                     play_index += 1
+
                 else:
                     choose_input1[choose_index] = storage.data[sample_index].obs.sets
 
@@ -232,20 +237,20 @@ cdef class KerasModel(Model):
                     choose_index += 1
 
         play_input1.resize([play_index, 4, 8, self.play_input_sets_size])
-        play_input2.resize([play_index, 4])
+        play_input2.resize([play_index, self.play_input_scalars_size])
         play_output1.resize([play_index, 32])
         play_output2.resize([play_index, 1])
         play_weights[0].resize([play_index])
         play_weights[1].resize([play_index])
 
         value_input1.resize([value_index, 4, 8, self.play_input_sets_size + 1])
-        value_input2.resize([value_index, 4])
+        value_input2.resize([value_index, self.play_input_scalars_size])
         value_output1.resize([value_index, 1])
 
         choose_input1.resize([choose_index, 4, 8, self.choose_input_sets_size])
         choose_output1.resize([choose_index, 32])
         choose_output2.resize([choose_index, 1])
-        print(play_weights[1])
+
         #print("Loss ", self.model.test_on_batch([input1, input2], [output1, output2]))
         cdef vector[float] loss
         loss.push_back(self.play_model.fit([play_input1, play_input2], [play_output1, play_output2, play_output1], epochs=epochs, batch_size=min(play_index, self.batch_size), sample_weight=[play_weights[0], np.ones_like(play_weights[0]), play_weights[1]]).history['loss'][-1])
@@ -291,7 +296,7 @@ cdef class KerasModel(Model):
         cdef int i
 
         #if obs.type is ActionType.DRAW_CARD:
-        inputs = [np.zeros([obs.size(), 4, 8, self.play_input_sets_size]), np.zeros([obs.size(), 4])]
+        inputs = [np.zeros([obs.size(), 4, 8, self.play_input_sets_size]), np.zeros([obs.size(), self.play_input_scalars_size])]
         for i in range(obs.size()):
             inputs[0][i] = obs[0][i].sets
             inputs[1][i] = obs[0][i].scalars
@@ -315,7 +320,7 @@ cdef class KerasModel(Model):
         return output
 
     cdef void predict_v(self, vector[Observation]* full_obs, vector[ModelOutput]* output):
-        inputs = [np.zeros([full_obs.size(), 4, 8, self.play_input_sets_size + 1]), np.zeros([full_obs.size(), 4])]
+        inputs = [np.zeros([full_obs.size(), 4, 8, self.play_input_sets_size + 1]), np.zeros([full_obs.size(), self.play_input_scalars_size])]
         for i in range(full_obs.size()):
             inputs[0][i] = full_obs[0][i].sets
             inputs[1][i] = full_obs[0][i].scalars

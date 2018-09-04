@@ -11,6 +11,7 @@ cdef class KerasModel(Model):
     cdef object play_model, choose_model, value_model
     cdef object clean_opt_weights
     cdef int play_input_sets_size
+    cdef int play_input_scalars_size
     cdef int choose_input_sets_size
     cdef int batch_size
     cdef float policy_lr

@@ -27,8 +27,10 @@ cdef class Storage:
             return self.data.size() - 1
         else:
             new_index = self.next_index
-            if self.number_of_samples > self.next_index and not self.data[self.next_index].value_net:
+            if self.number_of_samples > self.next_index:
                 self.key_numbers[str(self.data[self.next_index].key)] -= 1
+                if self.key_numbers[str(self.data[self.next_index].key)] == 0:
+                    del(self.key_numbers[str(self.data[self.next_index].key)])
 
             self.data[self.next_index] = StorageItem()
             self.data[self.next_index].key = key
