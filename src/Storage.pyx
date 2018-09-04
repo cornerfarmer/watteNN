@@ -56,7 +56,16 @@ cdef class Storage:
                 for j in range(len(row), 3):
                     row.append('')
 
-                for k in range(1, self.data[i].obs.sets[0][0].size()):
+                if self.data[i].value_net:
+                    for c in range(4):
+                        for v in range(8):
+                            if self.data[i].obs.sets[c][v][1] == 1:
+                                row.append(env.filename_from_card(env.all_cards[c * 8 + v]).decode('utf-8'))
+
+                    for j in range(len(row), 6):
+                        row.append('')
+
+                for k in range(2 if self.data[i].value_net else 1, self.data[i].obs.sets[0][0].size()):
                     added = False
                     for c in range(4):
                         for v in range(8):

@@ -280,9 +280,9 @@ cdef class MCTSWorker:
                         storage.data[storage_index].equalizer_weight = 1.0 / scale
                         storage.data[storage_index].value_net = False
                         storage.data[storage_index].output.scale = (p[j] + 1) / 2
-                        #if obs.sets[0][4][0] == 1 and obs.sets[1][4][0] == 1 and obs.sets[1][7][0] == 1 and obs.sets[1][5][1] == 1:
+                        if obs.sets[0][4][0] == 1 and obs.sets[1][4][0] == 1 and obs.sets[1][7][0] == 1 and obs.sets[1][5][1] == 1:
                         #if obs.sets[0][5][0] == 1 and obs.sets[1][5][0] == 1 and obs.sets[1][6][2] == 1 and obs.sets[0][4][3] == 1:
-                        if obs.sets[0][4][0] == 1 and obs.sets[1][4][0] == 1 and obs.sets[0][7][2] == 1 and obs.sets[1][5][3] == 1:
+                        #if obs.sets[0][4][0] == 1 and obs.sets[1][4][0] == 1 and obs.sets[0][7][2] == 1 and obs.sets[1][5][3] == 1:
                             print(storage.data[storage_index].weight, storage.data[storage_index].output.p, p)
                     j += 1
 

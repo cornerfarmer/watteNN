@@ -13,8 +13,10 @@ cdef class KerasModel(Model):
     cdef int play_input_sets_size
     cdef int choose_input_sets_size
     cdef int batch_size
-    cdef float lr
-    cdef float momentum
+    cdef float policy_lr
+    cdef float policy_momentum
+    cdef float value_lr
+    cdef float value_momentum
     cdef float clip
     cdef float equalizer
 

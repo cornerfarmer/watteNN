@@ -42,9 +42,11 @@ class SelectiveSoftmax(Layer):
         return input_shape[0]
 
 cdef class KerasModel(Model):
-    def __init__(self, env, hidden_neurons=128, batch_size=30, lr=0.04, momentum=0.9, clip=0, equalizer=0.01):
-        self.lr = lr
-        self.momentum = momentum
+    def __init__(self, env, hidden_neurons=128, batch_size=30, policy_lr=0.04, policy_momentum=0.9, value_lr=0.04, value_momentum=0.9, clip=0, equalizer=0.01):
+        self.policy_lr = policy_lr
+        self.policy_momentum = policy_momentum
+        self.value_lr = value_lr
+        self.value_momentum = value_momentum
         self.clean_opt_weights = None
         self.batch_size = batch_size
         self.clip = clip
@@ -85,7 +87,7 @@ cdef class KerasModel(Model):
 
         self.choose_model = RealKerasModel(inputs=[input_1], outputs=[policy_out, value_out])
 
-        adam = optimizers.SGD(lr=self.lr, momentum=self.momentum)
+        adam = optimizers.SGD(lr=self.policy_lr, momentum=self.policy_momentum)
         #adam = optimizers.Adam()
         self.choose_model.compile(optimizer=adam,
                       loss='mean_absolute_error',
@@ -133,8 +135,8 @@ cdef class KerasModel(Model):
 
         def customLoss(yTrue, yPred):
             a = 0.1
-            loss_sq = 0.5 * 1 / a * K.square(yPred - yTrue)
-            loss_abs = K.abs(yPred - yTrue) - 0.5 * 1 / a * a ** 2
+            loss_sq = 0.5 * 1 / a * K.pow(yPred - yTrue, 10)
+            loss_abs = K.abs(yPred - yTrue) - 0.5 * 1 / a * a ** 10
             use_abs = K.abs(yPred - yTrue) > a
             loss = K.mean(K.cast(use_abs, 'float32') * loss_abs + (1 - K.cast(use_abs, 'float32')) * loss_sq, axis=-1)
             return loss
@@ -142,7 +144,7 @@ cdef class KerasModel(Model):
         def equalizeLoss(yTrue, yPred):
             return self.equalizer * K.max(yPred, axis=-1)
 
-        adam = optimizers.SGD(lr=self.lr, momentum=self.momentum)
+        adam = optimizers.SGD(lr=self.policy_lr, momentum=self.policy_momentum)
         #adam = optimizers.Adam()
         self.play_model.compile(optimizer=adam,
                       loss=[customLoss, 'mean_squared_error', equalizeLoss],
@@ -162,7 +164,7 @@ cdef class KerasModel(Model):
 
         self.value_model = RealKerasModel(inputs=[input_1, input_2], outputs=[value_out])
 
-        adam = optimizers.SGD(lr=self.lr, momentum=self.momentum)
+        adam = optimizers.SGD(lr=self.value_lr, momentum=self.value_momentum)
         #adam = optimizers.Adam()
         self.value_model.compile(optimizer=adam,
                       loss=['mean_squared_error'],

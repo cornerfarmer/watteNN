@@ -192,7 +192,7 @@ cdef class Game:
 
 
             #print(table[',13-4,12,15,'])
-            print(table[',7,13-4,12,'])
+            print(table[',6,13-5,12,'])
 
             print("Squashing probs")
             avg_diff = 0
@@ -208,7 +208,6 @@ cdef class Game:
                     new_probs.append(result_sum / len(table[key][1]))
                     prob_max = max(prob_max, new_probs[-1])
                 table[key][1] = new_probs
-                print(prob_max)
 
                 for card in range(len(table[key][0])):
                     avg_diff += (prob_max - table[key][1][card]) * table[key][0][card]
