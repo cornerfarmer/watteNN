@@ -114,6 +114,11 @@ cdef class Game:
         cdef vector[Card*] hand_cards = self.env.players[self.env.current_player].hand_cards
 
         node_key = key + "-"
+        if self.env.current_player == 1:
+            node_key = node_key.replace('.0', '.2')
+            node_key = node_key.replace('.1', '.0')
+            node_key = node_key.replace('.2', '.1')
+
         for card in hand_cards:
             node_key += str(card.id) + ","
 
@@ -167,7 +172,7 @@ cdef class Game:
 
         return next_id, total_win_prob
 
-    cpdef draw_game_tree(self, Model model, ModelRating modelRating, use_cache, tree_ind):
+    cpdef draw_game_tree(self, Model model, ModelRating modelRating, use_cache, tree_ind, debug_tree_key):
 
         dot = pydot.Dot()
         dot.set('rankdir', 'TB')
@@ -189,7 +194,8 @@ cdef class Game:
 
 
             #print(table[',13-4,12,15,'])
-            #print(table[',6,13-5,12,'])
+            if debug_tree_key is not None:
+                print(table[debug_tree_key])
 
             print("Squashing probs")
             avg_diff = 0

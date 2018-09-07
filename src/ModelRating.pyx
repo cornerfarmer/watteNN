@@ -8,7 +8,7 @@ import itertools
 from libcpp cimport bool
 from libc.string cimport memset
 from libc.stdlib cimport rand
-import sys
+import re
 
 cdef extern from "<algorithm>" namespace "std" nogil:
     const T& max[T](const T& a, const T& b)
@@ -231,19 +231,91 @@ cdef class ModelRating:
 
         return <float>exploitability / number_of_games
 
-    cpdef find(self, first_player, second_player):
-        for i in range(self.eval_games.size()):
-            self.env.set_state(&self.eval_games[i])
+    cpdef find(self, key):
+        m = [listing.strip(',') for listing in key.split('-')]
 
-            first_key = ""
-            for card in self.env.players[0].hand_cards:
-                first_key += self.env.filename_from_card(self.env.all_cards[card.id]).decode('utf-8') + ","
+        own_cards = m[1].split(',')
+        if len(own_cards) == 1 and own_cards[0] == '':
+            own_cards = []
+        opponent_cards = []
 
-            second_key = ""
-            for card in self.env.players[1].hand_cards:
-                second_key += self.env.filename_from_card(self.env.all_cards[card.id]).decode('utf-8') + ","
+        last_tricks = m[0].split(',')
+        if len(last_tricks) == 1 and last_tricks[0] == '':
+            last_tricks = []
 
-            if first_key == first_player and second_key == second_player:
-                return i
-        return -1
+        for i in range(len(last_tricks)):
+            last_tricks[i] = last_tricks[i].split('.')
+            if last_tricks[i][1] == '0':
+                own_cards.append(last_tricks[i][0])
+            else:
+                opponent_cards.append(last_tricks[i][0])
+
+        if len(last_tricks) > 0:
+            current_player = int(last_tricks[0][1])
+        else:
+            current_player = 0
+
+        if current_player == 1:
+            own_cards, opponent_cards = opponent_cards, own_cards
+            for i in range(len(last_tricks)):
+                last_tricks[i][1] = '1' if last_tricks[i][1] is '0' else '0'
+
+        own_cards = [int(card_id) for card_id in own_cards]
+        opponent_cards = [int(card_id) for card_id in opponent_cards]
+
+        missing_cards = []
+        cdef Card* card
+        for card in self.env.cards:
+            if not card.id in own_cards and not card.id in opponent_cards:
+                missing_cards.append(card.id)
+
+        combinations = itertools.combinations(missing_cards, 3 - min(len(opponent_cards), len(own_cards)))
+
+        print("Current: " + str(current_player))
+        print("P0: " + str(own_cards))
+        print("P1: " + str(opponent_cards))
+        print("Missing: " + str(missing_cards) + "\n")
+
+        for combination in combinations:
+            for i in range(self.eval_games.size()):
+                valid = True
+
+                for card in self.eval_games[i].player0_hand_cards:
+                    if not card.id in own_cards and (current_player is 0 or not card.id in combination):
+                        valid = False
+
+                for card in self.eval_games[i].player1_hand_cards:
+                    if not card.id in opponent_cards and (current_player is 1 or not card.id in combination):
+                        valid = False
+
+                if valid:
+                    readable_own = ""
+                    index = 0
+                    for card in self.eval_games[i].player0_hand_cards:
+                        readable_own += self.env.filename_from_card(self.env.all_cards[card.id]).decode('utf-8') + ","
+                        for last_trick in last_tricks:
+                            if last_trick[1] == '0' and int(last_trick[0]) == card.id:
+                                last_trick.append(index)
+                        index += 1
+
+                    readable_opponent = ""
+                    index = 0
+                    for card in self.eval_games[i].player1_hand_cards:
+                        readable_opponent += self.env.filename_from_card(self.env.all_cards[card.id]).decode('utf-8') + ","
+                        for last_trick in last_tricks:
+                            if last_trick[1] == '1' and int(last_trick[0]) == card.id:
+                                last_trick.append(index)
+                        index += 1
+
+                    for j in range(len(last_tricks)):
+                        for k in range(j + 1, len(last_tricks)):
+                            if last_tricks[j][1] == last_tricks[k][1] and last_tricks[j][2] < last_tricks[k][2]:
+                                last_tricks[k][2] -= 1
+
+                    print(str(i) + " -> P0: " + readable_own + " - P1:" + readable_opponent + " - " + str([last_trick[2] for last_trick in last_tricks]))
+                    break
+
+            if not valid:
+                print("Did not found: " + str(combination))
+
 

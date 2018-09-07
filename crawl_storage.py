@@ -7,10 +7,10 @@ from gym_watten.envs.watten_env import WattenEnv
 import pickle
 env = WattenEnv(True)
 rating = ModelRating(env)
-mcts = MCTS(episodes=10000, mcts_sims=40, exploration=0.1, step_exploration=0.5)
+mcts = MCTS(episodes=1, mcts_sims=40, exploration=0.1, step_exploration=0)
 model = KerasModel(env, 128, equalizer=0, clip=0.15, batch_size=128, policy_lr=0.01, policy_momentum=0, value_lr=0.1)
 storage = Storage()
-model.load('results/full_obs_fix/equalizer: 0 - sample_size: 0 - lr: 0.01 - batch_size: 128 - episodes: 100 - minimal_env: True/0/best-model')
+model.load('results/momentumFix/batch_size: 128 - episodes: 100 - equalizer: 0 - minimal_env: True - policy_lr: 0.01 - sample_size: 0 - value_lr: 0.01/0/best-model')
 
 mcts.mcts_generate(env, model, storage)
 #with open("storage.pk", 'wb') as handle:

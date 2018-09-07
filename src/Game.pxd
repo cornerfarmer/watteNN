@@ -16,4 +16,4 @@ cdef class Game:
     cpdef float compare_given_games(self, Model agent1, Model agent2, ModelRating rating)
     cpdef float compare_rand_games(self, Model agent1, Model agent2, int number_of_games)
     cdef game_tree_step(self, Model model, Observation obs, dot, parent_node, prob, joint_prob, next_id, key, table, tree_only, true_edge_prob)
-    cpdef draw_game_tree(self, Model model, ModelRating modelRating, use_cache, tree_ind)
+    cpdef draw_game_tree(self, Model model, ModelRating modelRating, use_cache, tree_ind, debug_tree_key)
