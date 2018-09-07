@@ -191,5 +191,20 @@
     "uuid": "27ecb2a6-ec1e-4f7b-b844-d4ea168014d6",
     "creation_time": 1535805454.458015,
     "name": "batch_size: 128 - episodes: 100 - equalizer: 0 - minimal_env: True - policy_lr: 0.01 - sample_size: 0 - value_lr: 0.01"
+  },
+  {
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "config": {
+      "batch_size": 128,
+      "episodes": 100,
+      "equalizer": 0,
+      "minimal_env": true,
+      "policy_lr": 0.005,
+      "sample_size": 0,
+      "value_lr": 0.01
+    },
+    "uuid": "3cd1f230-3b3e-46f0-9b9c-a2e6905a3d8f",
+    "creation_time": 1536316021.878298,
+    "name": "batch_size: 128 - episodes: 100 - equalizer: 0 - minimal_env: True - policy_lr: 0.005 - sample_size: 0 - value_lr: 0.01"
   }
 ]

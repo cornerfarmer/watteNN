@@ -265,7 +265,7 @@ cdef class MCTSWorker:
             if not self.exploration_mode or env.current_player == self.exploration_player:
                 j = 0
                 for card in env.players[env.current_player].hand_cards:
-                    if p[j] > -2:
+                    if p[j] > -1:
                         key = <char*>""
                         for k in range(obs.sets[0][0].size()):
                             for i in range(32):
