@@ -1,0 +1,9 @@
+{
+  "config": {
+    "projects": {
+      "watteNN": {
+        "task_class_name": "WatteNNTask"
+      }
+    }
+  }
+}

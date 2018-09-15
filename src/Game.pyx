@@ -22,6 +22,9 @@ cdef class Game:
         self.mean_v_p1 = 0
         self.mean_v_p2 = 0
 
+        self.v_loss_sum = 0
+        self.v_loss_n = 0
+
     cpdef int match(self, Model agent1, Model agent2, bool render=False, bool reset=True):
         cdef Observation obs
         cdef ModelOutput output
@@ -112,6 +115,7 @@ cdef class Game:
         cdef ModelOutput output
         cdef State game_state
         cdef vector[Card*] hand_cards = self.env.players[self.env.current_player].hand_cards
+        cdef Observation full_obs
 
         node_key = key + "-"
         if self.env.current_player == 1:
@@ -126,10 +130,15 @@ cdef class Game:
         for card in self.env.players[1 - self.env.current_player].hand_cards:
             opponent_key += str(card.id) + ","
 
+        if not self.env.is_done():
+            self.env.regenerate_full_obs(&full_obs)
+            model.predict_single(&full_obs, &obs, &output)
+
         if tree_only:
             text = "P0: " + str([self.env.filename_from_card(card).decode("utf-8")  for card in self.env.players[0].hand_cards]) + " (" + str(self.env.players[0].tricks) + ")" + (" -" if self.env.current_player is 0 else "") + '\n'
             text += "P1: " + str([self.env.filename_from_card(card).decode("utf-8")  for card in self.env.players[1].hand_cards]) + " (" + str(self.env.players[1].tricks) + ")" + (" -" if self.env.current_player is 1 else "") + '\n'
             text += "T: " + (self.env.filename_from_card(self.env.table_card).decode("utf-8")  if self.env.table_card is not NULL else "-") + '\n'
+            text += "v: " + '%.2f' % output.v + '\n'
             text += '%.4f' % joint_prob + "," + node_key
             node = pydot.Node(str(next_id), label=text)
             dot.add_node(node)
@@ -143,7 +152,7 @@ cdef class Game:
         if self.env.is_done():
             total_win_prob = 1 if self.env.last_winner is 0 else 0
         else:
-            model.predict_single_p(&obs, &output)
+
             game_state = self.env.get_state()
 
             total_win_prob = 0
@@ -151,10 +160,6 @@ cdef class Game:
             index = 0
             model_probs = []
             for card in hand_cards:
-                if abs(1 - output.p[card.id]) < 0.01:
-                    output.p[card.id] = 1
-                if abs(0 - output.p[card.id]) < 0.01:
-                    output.p[card.id] = 0
                 self.env.set_state(&game_state)
                 self.env.step(card.id, &obs)
                 next_id, win_prob = self.game_tree_step(model, obs, dot, node, output.p[card.id], joint_prob * output.p[card.id], next_id, key + "," + str(card.id) + "." + str(current_player), table, tree_only, table[node_key][1][index] if tree_only else 0)
@@ -162,6 +167,10 @@ cdef class Game:
                 total_win_prob += win_prob * output.p[card.id]
                 index += 1
                 model_probs.append(output.p[card.id])
+
+            self.v_loss_sum += abs(output.v - (total_win_prob * 2 - 1) * (1 if current_player is 0 else -1))
+            self.v_loss_n += 1
+            print(joint_prob, abs(output.v  - (total_win_prob * 2 - 1) * (1 if current_player is 0 else -1)), output.v , (total_win_prob * 2 - 1) * (1 if current_player is 0 else -1), key)
 
             if not tree_only:
                 if node_key == ',7-4,12,15,':
@@ -183,15 +192,20 @@ cdef class Game:
         cdef Observation obs
 
         if not use_cache:
+            self.v_loss_sum = 0
+            self.v_loss_n = 0
+
             table = {}
             for i in range(modelRating.eval_games.size()):
-                print(i)
-                self.env.set_state(&modelRating.eval_games[i])
-                self.env.current_player = 0
+                if i == 230:
+                    print(i)
+                    self.env.set_state(&modelRating.eval_games[i])
+                    self.env.current_player = 0
 
-                self.env.regenerate_obs(&obs)
-                self.game_tree_step(model, obs, dot, None, 0, 1, 0, "", table, False, 0)
-
+                    self.env.regenerate_obs(&obs)
+                    self.game_tree_step(model, obs, dot, None, 0, 1, 0, "", table, False, 0)
+            print(self.v_loss_sum, self.v_loss_n)
+            v_loss = self.v_loss_sum / self.v_loss_n
 
             #print(table[',13-4,12,15,'])
             if debug_tree_key is not None:
@@ -244,6 +258,6 @@ cdef class Game:
             fig, ax = plt.subplots(figsize=(18, 5))
             ax.imshow(plt.imread(sio), interpolation="bilinear")
 
-        return table, avg_diff, [max_diff, max_key]
+        return table, avg_diff, [max_diff, max_key], v_loss
     def test(self):
         pass

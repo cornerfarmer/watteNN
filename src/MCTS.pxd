@@ -44,7 +44,7 @@ cdef class MCTSWorker:
     cdef bool mcts_sample(self, WattenEnv env, MCTSState* state, PredictionQueue queue)
     cdef int softmax_step(self, vector[float]* p)
     cdef bool mcts_game_step(self, WattenEnv env, PredictionQueue queue, vector[float]* p, float* scale, int* action, bool* exploration_mode_activated)
-    cdef MCTSState create_root_state(self, WattenEnv env)
+    cdef void create_root_state(self, WattenEnv env, MCTSState* state)
     cdef bool mcts_game(self, WattenEnv env, PredictionQueue queue, Storage storage)
 
 cdef class MCTS:
@@ -55,7 +55,7 @@ cdef class MCTS:
     cdef ModelOutput _prediction
     cdef object worker
 
-    cpdef void mcts_generate(self, WattenEnv env, Model model, Storage storage, bool reset_env=?)
+    cpdef void mcts_generate(self, WattenEnv env, Model model, Storage storage, ModelRating rating, bool reset_env=?)
     cdef void draw_tree(self, MCTSState* root, int tree_depth=?, object tree_path=?)
     cdef object create_nodes(self, MCTSState* root, object dot, int tree_depth, object tree_path, int id=?)
     cpdef draw_game_tree(self, ModelRating rating, WattenEnv env, Model model, Storage storage, int game_index, int tree_depth, pre_actions)

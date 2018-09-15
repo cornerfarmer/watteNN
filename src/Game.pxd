@@ -11,6 +11,8 @@ cdef class Game:
     cdef public float mean_game_length
     cdef public float mean_v_p1
     cdef public float mean_v_p2
+    cdef float v_loss_sum
+    cdef int v_loss_n
 
     cpdef int match(self, Model agent1, Model agent2, bool render=?, bool reset=?)
     cpdef float compare_given_games(self, Model agent1, Model agent2, ModelRating rating)

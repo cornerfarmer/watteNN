@@ -1,3 +1,4 @@
+from keras.callbacks import LambdaCallback
 from libcpp.string cimport string
 from libcpp cimport bool
 from gym_watten.envs.watten_env cimport Observation, WattenEnv, Card, ActionType
@@ -55,6 +56,8 @@ cdef class KerasModel(Model):
         self._build_choose_model(env, hidden_neurons)
         self._build_play_model(env, hidden_neurons)
         self._build_value_model(env, hidden_neurons)
+
+        self.test_obs = {'sets': [[[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [1, 0, 0, 0, 0, 0, 0], [0, 1, 0, 0, 0, 0, 0], [0, 1, 0, 0, 0, 0, 0], [1, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [1, 0, 0, 0, 0, 0, 0], [0, 0, 1, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]]], 'scalars': [0, 0, 0, 0, 0, 0, 0, 0], 'type': 4247724608}
 
 
     cdef void _build_choose_model(self, WattenEnv env, int hidden_neurons):
@@ -162,7 +165,7 @@ cdef class KerasModel(Model):
 
         value_out = concatenate([convnet, input_2])
         value_out = Dense(hidden_neurons, activation='relu')(value_out)
-        value_out = Dense(1, activation='tanh')(value_out)
+        value_out = Dense(1, activation='linear')(value_out)
 
         self.value_model = RealKerasModel(inputs=[input_1, input_2], outputs=[value_out])
 
@@ -171,6 +174,8 @@ cdef class KerasModel(Model):
         self.value_model.compile(optimizer=adam,
                       loss=['mean_squared_error'],
                       metrics=['accuracy'])
+    cpdef predict_v_model(self, epoch, logs):
+        print("\nv: " + str(self.predict_single_v(&self.test_obs)))
 
     cpdef vector[float] memorize_storage(self, Storage storage, bool clear_afterwards=True, int epochs=1, int number_of_samples=0):
         cdef bool use_random_selection = (number_of_samples is 0)
@@ -251,10 +256,16 @@ cdef class KerasModel(Model):
         choose_output1.resize([choose_index, 32])
         choose_output2.resize([choose_index, 1])
 
+
+
+        # Callback to display the target and prediciton
+        testmodelcb = LambdaCallback(on_epoch_end=self.predict_v_model)
+
         #print("Loss ", self.model.test_on_batch([input1, input2], [output1, output2]))
         cdef vector[float] loss
         loss.push_back(self.play_model.fit([play_input1, play_input2], [play_output1, play_output2, play_output1], epochs=epochs, batch_size=min(play_index, self.batch_size), sample_weight=[play_weights[0], np.ones_like(play_weights[0]), play_weights[1]]).history['loss'][-1])
-        loss.push_back(self.value_model.fit([value_input1, value_input2], [value_output1], epochs=epochs, batch_size=min(value_index, self.batch_size)).history['loss'][-1])
+        #loss.push_back(0)
+        loss.push_back(self.value_model.fit([value_input1, value_input2], [value_output1], epochs=epochs, batch_size=min(value_index, self.batch_size), callbacks=[testmodelcb]).history['loss'][-1])
         if choose_index > 0:
             loss.push_back(self.choose_model.fit([choose_input1], [choose_output1, choose_output2], epochs=epochs, batch_size=min(choose_index, self.batch_size)).history['loss'][-1])
         else:
@@ -289,7 +300,7 @@ cdef class KerasModel(Model):
     cdef float predict_single_v(self, Observation* full_obs):
         inputs = [np.array([full_obs.sets]), np.array([full_obs.scalars])]
         outputs = self.value_model.predict(inputs)
-        return outputs[0][0]
+        return np.clip(outputs[0][0], -1, 1)
 
 
     cdef void predict_p(self, vector[Observation]* obs, vector[ModelOutput]* output):
@@ -327,7 +338,7 @@ cdef class KerasModel(Model):
         outputs = self.value_model.predict(inputs)
 
         for i in range(output.size()):
-            output[0][i].v = outputs[i]
+            output[0][i].v = np.clip(outputs[i], -1, 1)
 
     cpdef void copy_weights_from(self, Model other_model):
         self.choose_model.set_weights((<KerasModel>other_model).choose_model.get_weights())

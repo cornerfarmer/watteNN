@@ -108,8 +108,10 @@ cdef class Storage:
                     if self.data[i].output.p[j] == 1:
                         row.append(env.filename_from_card(env.all_cards[j]).decode('utf-8'))
 
-                row.append(self.data[i].output.v)
-                row.append(self.data[i].weight)
+                if self.data[i].value_net:
+                    row.append(self.data[i].output.v)
+                else:
+                    row.append(self.data[i].weight)
                 row.append(self.data[i].value_net)
                 row.append(self.data[i].output.scale)
 

@@ -16,7 +16,6 @@ from src.Storage cimport Storage
 from libc.stdlib cimport srand
 from libc.time cimport time
 import time as pytime
-from cpython.mem cimport PyMem_Malloc, PyMem_Free
 from libcpp.string cimport string
 
 cdef extern from "<string>" namespace "std":
@@ -65,13 +64,13 @@ cdef class MCTSWorker:
 
     cdef void _clear_nodes(self):
         for i in range(self.nodes.size()):
-            PyMem_Free(self.nodes[i])
+            del self.nodes[i]
         self.nodes.clear()
 
     cdef void reset(self, env):
         self._clear_nodes()
         self.nodes.push_back(new MCTSState())
-        self.nodes[0][0] = self.create_root_state(env)
+        self.create_root_state(env, self.nodes[0])
         self.root = self.nodes[0]
         self.current_step = 0
         self.prediction_state = NULL
@@ -219,8 +218,7 @@ cdef class MCTSWorker:
         return True
 
 
-    cdef MCTSState create_root_state(self, WattenEnv env):
-        cdef MCTSState state
+    cdef void create_root_state(self, WattenEnv env, MCTSState* state):
         state.n = 0
         state.w = 0
         state.v = 0
@@ -229,7 +227,6 @@ cdef class MCTSWorker:
         state.current_player = env.current_player
         state.end_v = 0
         state.is_root = True
-        return state
 
     cdef bool mcts_game(self, WattenEnv env, PredictionQueue queue, Storage storage):
         cdef Observation obs, full_obs
@@ -276,7 +273,7 @@ cdef class MCTSWorker:
                         storage.data[storage_index].obs = obs
                         for i in range(32):
                             storage.data[storage_index].output.p[i] = (i == card.id)
-                        storage.data[storage_index].weight = (p[j] + 1) / 2 * 1 / scale
+                        storage.data[storage_index].weight = (p[j] + 1) / 2 #* 1 / scale
                         storage.data[storage_index].equalizer_weight = 1.0 / scale
                         storage.data[storage_index].value_net = False
                         storage.data[storage_index].output.scale = (p[j] + 1) / 2
@@ -311,14 +308,15 @@ cdef class MCTS:
         for i in range(episodes):
             self.worker.append(MCTSWorker(i, mcts_sims, exploration, only_one_step, step_exploration))
 
-    cpdef void mcts_generate(self, WattenEnv env, Model model, Storage storage, bool reset_env=True):
+    cpdef void mcts_generate(self, WattenEnv env, Model model, Storage storage, ModelRating rating, bool reset_env=True):
         cdef PredictionQueue queue = PredictionQueue()
         cdef int i
         cdef MCTSWorker current_worker
         for i in range(len(self.worker)):
             current_worker = <MCTSWorker>(self.worker[i])
             if reset_env:
-                env.reset()
+                #env.reset()
+                env.set_state(&rating.eval_games[230])
             current_worker.reset(env)
 
         cdef bool finished = False
@@ -389,8 +387,11 @@ cdef class MCTS:
         for action in pre_actions:
             env.step(env.players[env.current_player].hand_cards[action].id)
 
+        cdef Observation obs
+        env.regenerate_full_obs(&obs)
+        print(obs)
         start = pytime.time()
-        self.mcts_generate(env, model, storage, False)
+        self.mcts_generate(env, model, storage, rating, False)
         print(pytime.time() - start)
 
         self.draw_tree((<MCTSWorker>(self.worker[0])).nodes[0], tree_depth)

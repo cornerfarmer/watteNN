@@ -38,7 +38,7 @@ class WatteNNTask(taskplan.Task):
 
     def step(self, tensorboard_writer, current_iteration):
         start = pytime.time()
-        self.mcts.mcts_generate(self.env, self.model, self.storage)
+        self.mcts.mcts_generate(self.env, self.model, self.storage, self.rating)
         print("1", pytime.time() - start)
 
         start = pytime.time()
@@ -69,10 +69,14 @@ class WatteNNTask(taskplan.Task):
 
         if self.preset.get_bool("minimal_env") and current_iteration % self.preset.get_int("exploit_interval") == 0:
             self.best_model.copy_weights_from(self.model)
-            table, avg_diff, max_diff = self.game.draw_game_tree(self.best_model, self.rating, False, None, None)
+            table, avg_diff, max_diff, v_loss = self.game.draw_game_tree(self.best_model, self.rating, False, None, None)
 
             tensorboard_writer.add_summary(tf.Summary(value=[
                 tf.Summary.Value(tag="pbe", simple_value=avg_diff)
+            ]), current_iteration)
+
+            tensorboard_writer.add_summary(tf.Summary(value=[
+                tf.Summary.Value(tag="true_loss/v", simple_value=v_loss)
             ]), current_iteration)
 
     def load(self, path):

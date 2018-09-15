@@ -20,6 +20,7 @@ cdef class KerasModel(Model):
     cdef float value_momentum
     cdef float clip
     cdef float equalizer
+    cdef Observation test_obs
 
     cdef void _build_choose_model(self, WattenEnv env, int hidden_neurons)
     cdef void _build_play_model(self, WattenEnv env, int hidden_neurons)
@@ -33,3 +34,4 @@ cdef class KerasModel(Model):
     cpdef void copy_weights_from(self, Model other_model)
     cpdef void load(self, filename)
     cpdef void save(self, filename)
+    cpdef predict_v_model(self, epoch, logs)
