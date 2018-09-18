@@ -69,14 +69,15 @@ class WatteNNTask(taskplan.Task):
 
         if self.preset.get_bool("minimal_env") and current_iteration % self.preset.get_int("exploit_interval") == 0:
             self.best_model.copy_weights_from(self.model)
-            table, avg_diff, max_diff, v_loss = self.game.draw_game_tree(self.best_model, self.rating, False, None, None)
+            table, avg_diff_on, avg_diff_off, max_diff, v_loss_on, v_loss_off, v_based_avg_diff_on, v_based_avg_diff_off = self.game.draw_game_tree(self.best_model, self.rating, False, None, None)
 
             tensorboard_writer.add_summary(tf.Summary(value=[
-                tf.Summary.Value(tag="pbe", simple_value=avg_diff)
-            ]), current_iteration)
-
-            tensorboard_writer.add_summary(tf.Summary(value=[
-                tf.Summary.Value(tag="true_loss/v", simple_value=v_loss)
+                tf.Summary.Value(tag="pbe/on", simple_value=avg_diff_on),
+                tf.Summary.Value(tag="pbe/off", simple_value=avg_diff_off),
+                tf.Summary.Value(tag="true_loss/v/on", simple_value=v_loss_on),
+                tf.Summary.Value(tag="true_loss/v/off", simple_value=v_loss_off),
+                tf.Summary.Value(tag="true_loss/pbe/on", simple_value=v_based_avg_diff_on),
+                tf.Summary.Value(tag="true_loss/pbe/off", simple_value=v_based_avg_diff_off)
             ]), current_iteration)
 
     def load(self, path):
