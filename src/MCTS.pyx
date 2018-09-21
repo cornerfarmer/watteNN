@@ -172,7 +172,7 @@ cdef class MCTSWorker:
                 return i
         return p.size() - 1
 
-    cdef bool mcts_game_step(self, WattenEnv env, PredictionQueue queue, vector[float]* p, float* scale, int* action, bool* exploration_mode_activated):
+    cdef bool mcts_game_step(self, WattenEnv env, PredictionQueue queue, vector[float]* p, float* v, float* scale, int* action, bool* exploration_mode_activated):
 
         cdef int i
         cdef bool finished
@@ -188,6 +188,14 @@ cdef class MCTSWorker:
         for i in range(self.root.childs.size()):
             p.push_back((self.root.childs[i].w / self.root.childs[i].n * (-1 if self.root.current_player == 1 else 1)) if self.root.childs[i].n > 0 else -1)
         scale[0] = self.root.childs[0].scale
+
+        v[0] = 0
+        for i in range(self.root.childs.size()):
+            if self.root.childs[i].end_v != 0:
+                v[0] += self.root.childs[i].p * self.root.childs[i].end_v
+            else:
+                v[0] += self.root.childs[i].p * self.root.childs[i].v
+        v[0] *= (-1 if self.root.current_player == 1 else 1)
 
         cdef vector[float] p_step
         cdef int number_of_zero_p = 0
@@ -237,13 +245,13 @@ cdef class MCTSWorker:
 
         cdef vector[float] p
         cdef int storage_index, a
-        cdef float scale
+        cdef float scale, v
         cdef env_is_done = False
         cdef string key
         cdef bool exploration_mode_activated
 
         while not env_is_done:
-            finished = self.mcts_game_step(env, queue, &p, &scale, &a, &exploration_mode_activated)
+            finished = self.mcts_game_step(env, queue, &p, &v, &scale, &a, &exploration_mode_activated)
             if not finished:
                 return False
             env.set_state(&self.root.env_state)
@@ -256,7 +264,7 @@ cdef class MCTSWorker:
             else:
                 storage_index = self.value_storage.add_item("")
                 self.value_storage.data[storage_index].obs = full_obs
-                self.value_storage.data[storage_index].output.v = 1 if env.current_player is 0 else -1
+                self.value_storage.data[storage_index].output.v = v
                 self.value_storage.data[storage_index].value_net = True
 
             if not self.exploration_mode or env.current_player == self.exploration_player:
@@ -292,8 +300,8 @@ cdef class MCTSWorker:
             if self.only_one_step:
                 break
 
-        for i in range(self.value_storage.number_of_samples):
-            self.value_storage.data[i].output.v *= (1 if env.last_winner is 0 else -1)
+        #for i in range(self.value_storage.number_of_samples):
+        #    self.value_storage.data[i].output.v *= (1 if env.last_winner is 0 else -1)
 
         storage.copy_from(self.value_storage)
 
@@ -315,8 +323,8 @@ cdef class MCTS:
         for i in range(len(self.worker)):
             current_worker = <MCTSWorker>(self.worker[i])
             if reset_env:
-                #env.reset()
-                env.set_state(&rating.eval_games[230])
+                env.reset()
+                #env.set_state(&rating.eval_games[230])
             current_worker.reset(env)
 
         cdef bool finished = False

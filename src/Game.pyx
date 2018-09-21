@@ -170,7 +170,8 @@ cdef class Game:
 
             self.v_loss_sum += abs(output.v - (total_win_prob * 2 - 1) * (1 if current_player is 0 else -1))
             self.v_loss_n += 1
-            print(joint_prob, abs(output.v  - (total_win_prob * 2 - 1) * (1 if current_player is 0 else -1)), output.v , (total_win_prob * 2 - 1) * (1 if current_player is 0 else -1), key)
+            #if abs(output.v - (total_win_prob * 2 - 1) * (1 if current_player is 0 else -1)) > 0.25:
+            #    print(joint_prob, abs(output.v  - (total_win_prob * 2 - 1) * (1 if current_player is 0 else -1)), output.v , (total_win_prob * 2 - 1) * (1 if current_player is 0 else -1), key)
 
             if not tree_only:
                 if node_key == ',7-4,12,15,':
@@ -197,13 +198,12 @@ cdef class Game:
 
             table = {}
             for i in range(modelRating.eval_games.size()):
-                if i == 230:
-                    print(i)
-                    self.env.set_state(&modelRating.eval_games[i])
-                    self.env.current_player = 0
+                print(i)
+                self.env.set_state(&modelRating.eval_games[i])
+                self.env.current_player = 0
 
-                    self.env.regenerate_obs(&obs)
-                    self.game_tree_step(model, obs, dot, None, 0, 1, 0, "", table, False, 0)
+                self.env.regenerate_obs(&obs)
+                self.game_tree_step(model, obs, dot, None, 0, 1, 0, "", table, False, 0)
             print(self.v_loss_sum, self.v_loss_n)
             v_loss = self.v_loss_sum / self.v_loss_n
 
