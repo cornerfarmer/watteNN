@@ -22,8 +22,11 @@ cdef class Game:
         self.mean_v_p1 = 0
         self.mean_v_p2 = 0
 
-        self.v_loss_sum = 0
-        self.v_loss_n = 0
+
+        self.v_loss_on_sum = 0
+        self.v_loss_off_sum = 0
+        self.v_loss_on_n = 0
+        self.v_loss_off_n = 0
 
     cpdef int match(self, Model agent1, Model agent2, bool render=False, bool reset=True):
         cdef Observation obs
@@ -111,7 +114,7 @@ cdef class Game:
 
         return <float>first_player_wins / number_of_games
 
-    cdef game_tree_step(self, Model model, Observation obs, dot, parent_node, prob, joint_prob, next_id, key, table, tree_only, true_edge_prob):
+    cdef game_tree_step(self, Model model, Observation obs, dot, parent_node, prob, joint_prob, next_id, key, table, tree_only, true_edge_prob, exploration_mode):
         cdef ModelOutput output
         cdef State game_state
         cdef vector[Card*] hand_cards = self.env.players[self.env.current_player].hand_cards
@@ -149,6 +152,7 @@ cdef class Game:
             node = None
 
         win_prob_per_action = []
+        v_based_win_prob_per_action = []
         if self.env.is_done():
             total_win_prob = 1 if self.env.last_winner is 0 else 0
         else:
@@ -162,23 +166,50 @@ cdef class Game:
             for card in hand_cards:
                 self.env.set_state(&game_state)
                 self.env.step(card.id, &obs)
-                next_id, win_prob = self.game_tree_step(model, obs, dot, node, output.p[card.id], joint_prob * output.p[card.id], next_id, key + "," + str(card.id) + "." + str(current_player), table, tree_only, table[node_key][1][index] if tree_only else 0)
+
+                if output.p[card.id] == 0:
+                    next_exploration_mode = exploration_mode[:]
+                    next_exploration_mode[current_player] = True
+                    next_joint_prob = 1
+                else:
+                    next_exploration_mode = exploration_mode
+                    next_joint_prob = joint_prob * output.p[card.id]
+
+                next_id, win_prob = self.game_tree_step(model, obs, dot, node, output.p[card.id], next_joint_prob, next_id, key + "," + str(card.id) + "." + str(current_player), table, tree_only, table[node_key][1][index] if tree_only else 0, next_exploration_mode)
+
                 win_prob_per_action.append(win_prob if current_player is 0 else (1 - win_prob))
+                v_based_win_prob_per_action.append(win_prob if current_player is 0 else (1 - win_prob))
                 total_win_prob += win_prob * output.p[card.id]
                 index += 1
                 model_probs.append(output.p[card.id])
 
-            self.v_loss_sum += abs(output.v - (total_win_prob * 2 - 1) * (1 if current_player is 0 else -1))
-            self.v_loss_n += 1
-            #if abs(output.v - (total_win_prob * 2 - 1) * (1 if current_player is 0 else -1)) > 0.25:
-            #    print(joint_prob, abs(output.v  - (total_win_prob * 2 - 1) * (1 if current_player is 0 else -1)), output.v , (total_win_prob * 2 - 1) * (1 if current_player is 0 else -1), key)
+
+
+            exploration_mode_enabled = False
+            for i in range(len(exploration_mode)):
+                if exploration_mode[i]:
+                    exploration_mode_enabled = True
+                    break
+
+
+            v_error = abs(output.v - (total_win_prob * 2 - 1) * (1 if current_player is 0 else -1))
+            if exploration_mode_enabled and exploration_mode[current_player]:
+                self.v_loss_off_sum += v_error
+                self.v_loss_off_n += 1
+            else:
+                self.v_loss_on_sum += v_error
+                self.v_loss_on_n += 1
+
+            #print(joint_prob, abs(output.v  - (total_win_prob * 2 - 1) * (1 if current_player is 0 else -1)), output.v , (total_win_prob * 2 - 1) * (1 if current_player is 0 else -1), key)
 
             if not tree_only:
                 if node_key == ',7-4,12,15,':
                     print(joint_prob)
+
                 if node_key not in table:
-                    table[node_key] = [model_probs, []]
-                table[node_key][1].append([joint_prob, win_prob_per_action, opponent_key])
+                    table[node_key] = [model_probs, [], exploration_mode_enabled and exploration_mode[current_player]]
+
+                table[node_key][1].append([joint_prob if not exploration_mode_enabled or exploration_mode[current_player] else 0, win_prob_per_action, opponent_key, v_based_win_prob_per_action])
 
         return next_id, total_win_prob
 
@@ -193,8 +224,10 @@ cdef class Game:
         cdef Observation obs
 
         if not use_cache:
-            self.v_loss_sum = 0
-            self.v_loss_n = 0
+            self.v_loss_on_sum = 0
+            self.v_loss_off_sum = 0
+            self.v_loss_on_n = 0
+            self.v_loss_off_n = 0
 
             table = {}
             for i in range(modelRating.eval_games.size()):
@@ -203,37 +236,73 @@ cdef class Game:
                 self.env.current_player = 0
 
                 self.env.regenerate_obs(&obs)
-                self.game_tree_step(model, obs, dot, None, 0, 1, 0, "", table, False, 0)
-            print(self.v_loss_sum, self.v_loss_n)
-            v_loss = self.v_loss_sum / self.v_loss_n
+                self.game_tree_step(model, obs, dot, None, 0, 1, 0, "", table, False, 0, [False, False])
+
+            if self.v_loss_on_n > 0:
+                v_loss_on = self.v_loss_on_sum / self.v_loss_on_n
+            else:
+                v_loss_on = 0
+            if self.v_loss_off_n > 0:
+                v_loss_off = self.v_loss_off_sum / self.v_loss_off_n
+            else:
+                v_loss_off = 0
 
             #print(table[',13-4,12,15,'])
             if debug_tree_key is not None:
                 print(table[debug_tree_key])
 
             print("Squashing probs")
-            avg_diff = 0
+
+            avg_diff_on = 0
+            v_based_avg_diff_on = 0
+            avg_diff_on_n = 0
+
+            avg_diff_off = 0
+            v_based_avg_diff_off = 0
+            avg_diff_off_n = 0
+
             max_diff = 0
             max_key = ""
             for key in table.keys():
                 new_probs = []
+                v_based_new_probs = []
                 prob_max = -1
                 for card in range(len(table[key][1][0][1])):
                     result_sum = 0
+                    v_based_result_sum = 0
                     for guess in table[key][1]:
                         result_sum += guess[0] * guess[1][card]
+                        v_based_result_sum += guess[0] * guess[3][card]
+
                     new_probs.append(result_sum / len(table[key][1]))
+                    v_based_new_probs.append(v_based_result_sum / len(table[key][1]))
                     prob_max = max(prob_max, new_probs[-1])
                 table[key][1] = new_probs
 
                 for card in range(len(table[key][0])):
-                    avg_diff += (prob_max - table[key][1][card]) * table[key][0][card]
-                    if (prob_max - table[key][1][card]) * table[key][0][card] > 0.01:
-                        print((prob_max - table[key][1][card]) * table[key][0][card], key)
-                    if max_diff < (prob_max - table[key][1][card]) * table[key][0][card]:
-                        max_diff = (prob_max - table[key][1][card]) * table[key][0][card]
+                    error = (prob_max - new_probs[card]) * table[key][0][card]
+                    v_based_error = (prob_max - v_based_new_probs[card]) * table[key][0][card]
+                    if table[key][2]:
+                        avg_diff_off += error
+                        v_based_avg_diff_off += v_based_error
+                        avg_diff_off_n += 1
+                    else:
+                        avg_diff_on += error
+                        v_based_avg_diff_on += v_based_error
+                        avg_diff_on_n += 1
+
+                    if (prob_max - new_probs[card]) * table[key][0][card] > 0.01:
+                        print((prob_max - new_probs[card]) * table[key][0][card], key)
+                    if max_diff < (prob_max - new_probs[card]) * table[key][0][card]:
+                        max_diff = (prob_max - new_probs[card]) * table[key][0][card]
                         max_key = key
-            avg_diff /= len(table.keys())
+
+            if avg_diff_off_n > 0:
+                avg_diff_off /= avg_diff_off_n
+                v_based_avg_diff_off /= avg_diff_off_n
+            if avg_diff_on_n > 0:
+                avg_diff_on /= avg_diff_on_n
+                v_based_avg_diff_on /= avg_diff_on_n
 
             with open("tree-cache.pk", 'wb') as handle:
                 pickle.dump(table, handle)
@@ -246,7 +315,7 @@ cdef class Game:
             self.env.set_state(&modelRating.eval_games[tree_ind])
             self.env.current_player = 0
             self.env.regenerate_obs(&obs)
-            self.game_tree_step(model, obs, dot, None, 0, 1, 0, "", table, True, 0)
+            self.game_tree_step(model, obs, dot, None, 0, 1, 0, "", table, True, 0, [False, False])
             png_str = dot.create_png(prog='dot')
             dot.write_svg('tree.svg')
 
@@ -258,6 +327,6 @@ cdef class Game:
             fig, ax = plt.subplots(figsize=(18, 5))
             ax.imshow(plt.imread(sio), interpolation="bilinear")
 
-        return table, avg_diff, [max_diff, max_key], v_loss
+        return table, avg_diff_on, avg_diff_off, [max_diff, max_key], v_loss_on, v_loss_off, v_based_avg_diff_on, v_based_avg_diff_off
     def test(self):
         pass
