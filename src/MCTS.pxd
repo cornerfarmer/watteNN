@@ -39,6 +39,7 @@ cdef class MCTSWorker:
     cdef void reset(self, env)
     cdef void add_state(self, MCTSState* parent, float p, WattenEnv env, int end_v=?, float scale=?)
     cdef bool is_state_leaf_node(self, MCTSState* state)
+    cdef void revert_leaf_state(self, MCTSState* state)
     cdef void handle_leaf_state(self, MCTSState* state, float v)
     cdef void handle_prediction(self, WattenEnv env, ModelOutput* prediction)
     cdef bool mcts_sample(self, WattenEnv env, MCTSState* state, PredictionQueue queue)

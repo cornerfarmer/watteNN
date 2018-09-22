@@ -90,20 +90,43 @@ cdef class MCTSWorker:
         self.nodes.back().is_root = False
         self.nodes.back().scale = scale
         self.nodes.back().parent = parent
+        self.nodes.back().is_leaf = True
         parent.childs.push_back(self.nodes.back())
 
     cdef bool is_state_leaf_node(self, MCTSState* state):
         return state.childs.size() == 0
 
-    cdef void handle_leaf_state(self, MCTSState* state, float v):
+    cdef void revert_leaf_state(self, MCTSState* state):
+
+        cdef float p = 1
+        cdef float v = state.v
         while True:
-            state.w += v
-            state.n += 1
+            state.w -= v * p
+            state.n -= p
+            p *= state.p
 
             if state.is_root:
                 break
             else:
                 state = <MCTSState*>state.parent
+
+
+    cdef void handle_leaf_state(self, MCTSState* state, float v):
+        cdef float p = 1
+        if state.n == 0:
+            if not state.is_root and state.parent.is_leaf:
+                self.revert_leaf_state(state.parent)
+                state.parent.is_leaf = False
+
+            while True:
+                state.w += v * p
+                state.n += p
+                p *= state.p
+
+                if state.is_root:
+                    break
+                else:
+                    state = <MCTSState*>state.parent
 
     cdef void handle_prediction(self, WattenEnv env, ModelOutput* prediction):
         env.set_state(&self.prediction_state.env_state)
@@ -196,6 +219,7 @@ cdef class MCTSWorker:
             else:
                 v[0] += self.root.childs[i].p * self.root.childs[i].v
         v[0] *= (-1 if self.root.current_player == 1 else 1)
+        v[0] = self.root.w / self.root.n * (-1 if self.root.current_player == 1 else 1)
 
         cdef vector[float] p_step
         cdef int number_of_zero_p = 0
@@ -235,6 +259,7 @@ cdef class MCTSWorker:
         state.current_player = env.current_player
         state.end_v = 0
         state.is_root = True
+        state.is_leaf = True
 
     cdef bool mcts_game(self, WattenEnv env, PredictionQueue queue, Storage storage):
         cdef Observation obs, full_obs
@@ -259,13 +284,10 @@ cdef class MCTSWorker:
             env.regenerate_obs(&obs)
             env.regenerate_full_obs(&full_obs)
 
-            if exploration_mode_activated:
-                self.value_storage.clear()
-            else:
-                storage_index = self.value_storage.add_item("")
-                self.value_storage.data[storage_index].obs = full_obs
-                self.value_storage.data[storage_index].output.v = v
-                self.value_storage.data[storage_index].value_net = True
+            storage_index = self.value_storage.add_item("")
+            self.value_storage.data[storage_index].obs = full_obs
+            self.value_storage.data[storage_index].output.v = v
+            self.value_storage.data[storage_index].value_net = True
 
             if not self.exploration_mode or env.current_player == self.exploration_player:
                 j = 0
@@ -369,6 +391,7 @@ cdef class MCTS:
     cdef object create_nodes(self, MCTSState* root, object dot, int tree_depth, object tree_path, int id=0):
         text = "N: " + str(root.n) + " (" + str(root.current_player) + ')\n'
         text += "Q: " + str(root.end_v if root.end_v is not 0 or root.n is 0 else root.w / root.n) + '\n'
+        text += "W: " + str(root.w) + '\n'
         text += "P: " + str(root.p) + '\n'
         text += "V: " + str(root.v)
 

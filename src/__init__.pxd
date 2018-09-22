@@ -14,7 +14,7 @@ cdef struct Experience:
 
 cdef cppclass MCTSState:
     vector[MCTSState*] childs
-    int n
+    float n
     float w
     float v
     float p
@@ -24,6 +24,7 @@ cdef cppclass MCTSState:
     bool is_root
     float scale
     MCTSState* parent
+    bool is_leaf
 
 cdef struct StorageItem:
     Observation obs

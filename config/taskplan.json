@@ -302,5 +302,76 @@
     "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
     "name": "episodes: 100 - hidden_neurons: 512 - minimal_env: True - sample_size: 0 - value_lr: 0.01 - batch_size: 128 - policy_lr: 0.01 - equalizer: 0",
     "creation_time": 1537611247.0
+  },
+  {
+    "config": {
+      "mcts_sims": 200,
+      "sample_size": 0,
+      "equalizer": 0,
+      "episodes": 100,
+      "minimal_env": true,
+      "value_lr": 0.01,
+      "batch_size": 128,
+      "policy_lr": 0.01
+    },
+    "uuid": "a8e627c1-c4ec-4241-a4c8-bd422b71a0c4",
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "name": "episodes: 100 - mcts_sims: 200 - value_lr: 0.01 - sample_size: 0 - minimal_env: True - batch_size: 128 - policy_lr: 0.01 - equalizer: 0",
+    "creation_time": 1537632761.0
+  },
+  {
+    "config": {
+      "mcts_sims": 200,
+      "sample_size": 0,
+      "epochs": 10,
+      "equalizer": 0,
+      "episodes": 100,
+      "minimal_env": true,
+      "value_lr": 0.01,
+      "exploit_interval": 20,
+      "batch_size": 128,
+      "policy_lr": 0.01
+    },
+    "uuid": "8993abdc-46a8-457b-ad8d-3920f0b2eba5",
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "name": "episodes: 100 - minimal_env: True - value_lr: 0.01 - sample_size: 0 - mcts_sims: 200 - batch_size: 128 - equalizer: 0 - epochs: 10 - policy_lr: 0.01 - exploit_interval: 20",
+    "creation_time": 1537633040.0
+  },
+  {
+    "config": {
+      "mcts_sims": 500,
+      "sample_size": 0,
+      "epochs": 10,
+      "equalizer": 0,
+      "episodes": 100,
+      "minimal_env": true,
+      "value_lr": 0.01,
+      "exploit_interval": 20,
+      "batch_size": 128,
+      "policy_lr": 0.01
+    },
+    "uuid": "ddd8fdf6-3afa-4c44-b9ea-9bd8d5903dd3",
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "name": "episodes: 100 - minimal_env: True - value_lr: 0.01 - sample_size: 0 - mcts_sims: 500 - batch_size: 128 - equalizer: 0 - epochs: 10 - policy_lr: 0.01 - exploit_interval: 20",
+    "creation_time": 1537633187.0
+  },
+  {
+    "config": {
+      "mcts_sims": 500,
+      "sample_size": 0,
+      "epochs": 10,
+      "equalizer": 0,
+      "episodes": 100,
+      "hidden_neurons": 512,
+      "minimal_env": true,
+      "value_lr": 0.01,
+      "exploit_interval": 20,
+      "batch_size": 128,
+      "policy_lr": 0.01
+    },
+    "uuid": "4411179d-2bf2-41c3-89bb-3620dd00f634",
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "name": "episodes: 100 - hidden_neurons: 512 - minimal_env: True - mcts_sims: 500 - sample_size: 0 - value_lr: 0.01 - batch_size: 128 - equalizer: 0 - epochs: 10 - policy_lr: 0.01 - exploit_interval: 20",
+    "creation_time": 1537638401.0
   }
 ]
