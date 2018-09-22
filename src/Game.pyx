@@ -141,7 +141,7 @@ cdef class Game:
             text = "P0: " + str([self.env.filename_from_card(card).decode("utf-8")  for card in self.env.players[0].hand_cards]) + " (" + str(self.env.players[0].tricks) + ")" + (" -" if self.env.current_player is 0 else "") + '\n'
             text += "P1: " + str([self.env.filename_from_card(card).decode("utf-8")  for card in self.env.players[1].hand_cards]) + " (" + str(self.env.players[1].tricks) + ")" + (" -" if self.env.current_player is 1 else "") + '\n'
             text += "T: " + (self.env.filename_from_card(self.env.table_card).decode("utf-8")  if self.env.table_card is not NULL else "-") + '\n'
-            text += "v: " + '%.2f' % output.v + '\n'
+            text += "v: " + '%.2f' % output.v + ', $TRUE_V$\n'
             text += '%.4f' % joint_prob + "," + node_key
             node = pydot.Node(str(next_id), label=text)
             dot.add_node(node)
@@ -191,6 +191,8 @@ cdef class Game:
                     exploration_mode_enabled = True
                     break
 
+            if node is not None:
+                node.set("label", node.get("label").replace("$TRUE_V$", '%.2f' % ((total_win_prob * 2 - 1) * (1 if current_player is 0 else -1))))
 
             v_error = abs(output.v - (total_win_prob * 2 - 1) * (1 if current_player is 0 else -1))
             if exploration_mode_enabled and exploration_mode[current_player]:
@@ -231,12 +233,13 @@ cdef class Game:
 
             table = {}
             for i in range(modelRating.eval_games.size()):
-                print(i)
-                self.env.set_state(&modelRating.eval_games[i])
-                self.env.current_player = 0
+                if True or i == 230:
+                    print(i)
+                    self.env.set_state(&modelRating.eval_games[i])
+                    self.env.current_player = 0
 
-                self.env.regenerate_obs(&obs)
-                self.game_tree_step(model, obs, dot, None, 0, 1, 0, "", table, False, 0, [False, False])
+                    self.env.regenerate_obs(&obs)
+                    self.game_tree_step(model, obs, dot, None, 0, 1, 0, "", table, False, 0, [False, False])
 
             if self.v_loss_on_n > 0:
                 v_loss_on = self.v_loss_on_sum / self.v_loss_on_n
@@ -267,6 +270,7 @@ cdef class Game:
                 new_probs = []
                 v_based_new_probs = []
                 prob_max = -1
+                v_based_prob_max = -1
                 for card in range(len(table[key][1][0][1])):
                     result_sum = 0
                     v_based_result_sum = 0
@@ -277,11 +281,12 @@ cdef class Game:
                     new_probs.append(result_sum / len(table[key][1]))
                     v_based_new_probs.append(v_based_result_sum / len(table[key][1]))
                     prob_max = max(prob_max, new_probs[-1])
+                    v_based_prob_max = max(v_based_prob_max, v_based_new_probs[-1])
                 table[key][1] = new_probs
 
                 for card in range(len(table[key][0])):
                     error = (prob_max - new_probs[card]) * table[key][0][card]
-                    v_based_error = (prob_max - v_based_new_probs[card]) * table[key][0][card]
+                    v_based_error = (v_based_prob_max - v_based_new_probs[card]) * table[key][0][card]
                     if table[key][2]:
                         avg_diff_off += error
                         v_based_avg_diff_off += v_based_error
