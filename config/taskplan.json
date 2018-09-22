@@ -1,274 +1,306 @@
 [
   {
-    "creation_time": 1533646564.381098,
-    "uuid": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
     "abstract": true,
     "config": {
-      "clip": 0,
-      "minimal_env": false,
-      "equalizer": 0.01,
-      "exploit_interval": 100,
-      "sample_size": 1000,
       "mcts_sims": 40,
-      "value_lr": 0.04,
-      "save_interval": 0,
-      "epochs": 1,
-      "policy_momentum": 0.9,
       "exploration": 0.1,
-      "episodes": 75,
+      "policy_momentum": 0.9,
       "storage_size": 10000,
-      "policy_lr": 0.04,
-      "objective_opponent": false,
-      "value_momentum": 0.9,
-      "hidden_neurons": 128,
+      "epochs": 1,
+      "equalizer": 0.01,
       "step_exploration": 0.1,
-      "batch_size": 30
+      "episodes": 75,
+      "hidden_neurons": 128,
+      "clip": 0,
+      "exploit_interval": 100,
+      "objective_opponent": false,
+      "policy_lr": 0.04,
+      "value_momentum": 0.9,
+      "value_lr": 0.04,
+      "batch_size": 30,
+      "save_interval": 0,
+      "sample_size": 1000,
+      "minimal_env": false
     },
-    "name": "Default"
+    "uuid": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "name": "Default",
+    "creation_time": 1533646564.381098
   },
   {
-    "name": "empty",
-    "creation_time": 1533646719.383332,
-    "uuid": "54a7b6e6-6817-4d93-945f-1f5687c9048e",
     "config": {},
-    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55"
+    "uuid": "54a7b6e6-6817-4d93-945f-1f5687c9048e",
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "name": "empty",
+    "creation_time": 1533646719.383332
   },
   {
-    "name": "minimal_env: True",
-    "creation_time": 1533749672.289856,
-    "uuid": "0b0a34f9-f0ee-408f-9d83-c81c3459ac80",
     "config": {
       "minimal_env": true
     },
-    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55"
+    "uuid": "0b0a34f9-f0ee-408f-9d83-c81c3459ac80",
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "name": "minimal_env: True",
+    "creation_time": 1533749672.289856
   },
   {
-    "name": "minimal_env: True - sample_size: 3500",
-    "creation_time": 1534115546.917558,
-    "uuid": "25c430ce-a44b-4302-8c01-329b5bbf5d35",
     "config": {
       "sample_size": 3500,
       "minimal_env": true
     },
-    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55"
+    "uuid": "25c430ce-a44b-4302-8c01-329b5bbf5d35",
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "name": "minimal_env: True - sample_size: 3500",
+    "creation_time": 1534115546.917558
   },
   {
-    "name": "epochs: 10 - minimal_env: True - sample_size: 3500",
-    "creation_time": 1534278506.585614,
-    "uuid": "4ee9e7b2-d02e-4e07-a11d-ce0172da6a0f",
     "config": {
       "sample_size": 3500,
       "epochs": 10,
       "minimal_env": true
     },
-    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55"
+    "uuid": "4ee9e7b2-d02e-4e07-a11d-ce0172da6a0f",
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "name": "epochs: 10 - minimal_env: True - sample_size: 3500",
+    "creation_time": 1534278506.585614
   },
   {
-    "name": "batch_size: 128 - minimal_env: True - sample_size: 0 - storage_size: 80000",
-    "creation_time": 1534284787.4236,
-    "uuid": "1296f112-e3df-4875-84ae-2efde3132497",
     "config": {
       "sample_size": 0,
+      "storage_size": 80000,
       "batch_size": 128,
-      "minimal_env": true,
-      "storage_size": 80000
-    },
-    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55"
-  },
-  {
-    "name": "batch_size: 128 - minimal_env: True - sample_size: 0 - storage_size: 80000: policy_momentum: 0",
-    "creation_time": 1534286806.939842,
-    "uuid": "57348ed0-173b-474d-b55d-36d2b83c95e2",
-    "config": {
-      "policy_momentum": 0
-    },
-    "base": "1296f112-e3df-4875-84ae-2efde3132497"
-  },
-  {
-    "name": "batch_size: 128 - minimal_env: True - sample_size: 0 - storage_size: 80000: policy_momentum: 0",
-    "creation_time": 1534287537.626302,
-    "uuid": "13b62fd1-6bbc-4a4d-804f-d65e5578dd84",
-    "config": {
-      "policy_momentum": 0
-    },
-    "base": "1296f112-e3df-4875-84ae-2efde3132497"
-  },
-  {
-    "name": "batch_size: 128 - policy_lr: 0.1 - minimal_env: True - sample_size: 0 - storage_size: 80000",
-    "creation_time": 1534371518.090695,
-    "uuid": "c0ec1542-bf1a-4ff7-8366-c6f89e6cc88a",
-    "config": {
-      "policy_lr": 0.1,
-      "batch_size": 128,
-      "sample_size": 0,
-      "minimal_env": true,
-      "storage_size": 80000
-    },
-    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55"
-  },
-  {
-    "name": "sample_size: 0 - batch_size: 128 - episodes: 100 - minimal_env: True - policy_lr: 0.1",
-    "creation_time": 1534687189.370132,
-    "uuid": "10ec41ba-6629-4bec-9607-163b49fddfa5",
-    "config": {
-      "policy_lr": 0.1,
-      "batch_size": 128,
-      "sample_size": 0,
-      "episodes": 100,
       "minimal_env": true
     },
-    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55"
+    "uuid": "1296f112-e3df-4875-84ae-2efde3132497",
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "name": "batch_size: 128 - minimal_env: True - sample_size: 0 - storage_size: 80000",
+    "creation_time": 1534284787.4236
   },
   {
-    "name": "batch_size: 128 - clip: 0.15 - episodes: 100 - policy_lr: 0.1 - minimal_env: True - sample_size: 0",
-    "creation_time": 1534952590.451647,
+    "config": {
+      "policy_momentum": 0
+    },
+    "uuid": "57348ed0-173b-474d-b55d-36d2b83c95e2",
+    "base": "1296f112-e3df-4875-84ae-2efde3132497",
+    "name": "batch_size: 128 - minimal_env: True - sample_size: 0 - storage_size: 80000: policy_momentum: 0",
+    "creation_time": 1534286806.939842
+  },
+  {
+    "config": {
+      "policy_momentum": 0
+    },
+    "uuid": "13b62fd1-6bbc-4a4d-804f-d65e5578dd84",
+    "base": "1296f112-e3df-4875-84ae-2efde3132497",
+    "name": "batch_size: 128 - minimal_env: True - sample_size: 0 - storage_size: 80000: policy_momentum: 0",
+    "creation_time": 1534287537.626302
+  },
+  {
+    "config": {
+      "sample_size": 0,
+      "storage_size": 80000,
+      "policy_lr": 0.1,
+      "minimal_env": true,
+      "batch_size": 128
+    },
+    "uuid": "c0ec1542-bf1a-4ff7-8366-c6f89e6cc88a",
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "name": "batch_size: 128 - policy_lr: 0.1 - minimal_env: True - sample_size: 0 - storage_size: 80000",
+    "creation_time": 1534371518.090695
+  },
+  {
+    "config": {
+      "sample_size": 0,
+      "episodes": 100,
+      "policy_lr": 0.1,
+      "minimal_env": true,
+      "batch_size": 128
+    },
+    "uuid": "10ec41ba-6629-4bec-9607-163b49fddfa5",
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "name": "sample_size: 0 - batch_size: 128 - episodes: 100 - minimal_env: True - policy_lr: 0.1",
+    "creation_time": 1534687189.370132
+  },
+  {
+    "config": {
+      "episodes": 100,
+      "clip": 0.15,
+      "minimal_env": true,
+      "sample_size": 0,
+      "batch_size": 128,
+      "policy_lr": 0.1
+    },
     "uuid": "2291f50a-ec37-44f1-9a8f-664576a64f71",
-    "config": {
-      "clip": 0.15,
-      "batch_size": 128,
-      "minimal_env": true,
-      "sample_size": 0,
-      "episodes": 100,
-      "policy_lr": 0.1
-    },
-    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55"
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "name": "batch_size: 128 - clip: 0.15 - episodes: 100 - policy_lr: 0.1 - minimal_env: True - sample_size: 0",
+    "creation_time": 1534952590.451647
   },
   {
-    "name": "batch_size: 128 - clip: 0.15 - episodes: 100 - equalizer: 0.001 - policy_lr: 0.1 - minimal_env: True - sample_size: 0",
-    "creation_time": 1535014437.582401,
+    "config": {
+      "episodes": 100,
+      "clip": 0.15,
+      "minimal_env": true,
+      "sample_size": 0,
+      "batch_size": 128,
+      "policy_lr": 0.1,
+      "equalizer": 0.001
+    },
     "uuid": "b3261c26-6d30-4368-94da-a8cc35a62a7c",
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "name": "batch_size: 128 - clip: 0.15 - episodes: 100 - equalizer: 0.001 - policy_lr: 0.1 - minimal_env: True - sample_size: 0",
+    "creation_time": 1535014437.582401
+  },
+  {
     "config": {
+      "episodes": 100,
       "clip": 0.15,
       "minimal_env": true,
-      "equalizer": 0.001,
-      "batch_size": 128,
-      "sample_size": 0,
-      "episodes": 100,
-      "policy_lr": 0.1
-    },
-    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55"
-  },
-  {
-    "name": "batch_size: 128 - clip: 0.15 - episodes: 100 - equalizer: 0.001 - policy_lr: 0.01 - minimal_env: True - sample_size: 0",
-    "creation_time": 1535016288.664984,
-    "uuid": "2f563607-0a20-402c-9619-cffb93391564",
-    "config": {
-      "clip": 0.15,
-      "minimal_env": true,
-      "equalizer": 0.001,
-      "batch_size": 128,
-      "sample_size": 0,
-      "episodes": 100,
-      "policy_lr": 0.01
-    },
-    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55"
-  },
-  {
-    "name": "batch_size: 128 - episodes: 100 - equalizer: 0.001 - policy_lr: 0.1 - minimal_env: True - sample_size: 0",
-    "creation_time": 1535040266.988814,
-    "uuid": "979f5e35-f841-4672-abdb-320e550069b5",
-    "config": {
-      "minimal_env": true,
-      "equalizer": 0.001,
-      "batch_size": 128,
-      "sample_size": 0,
-      "episodes": 100,
-      "policy_lr": 0.1
-    },
-    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55"
-  },
-  {
-    "name": "batch_size: 128 - episodes: 100 - equalizer: 0 - minimal_env: True - policy_lr: 0.01 - sample_size: 0 - value_lr: 0.01",
-    "creation_time": 1535805454.458015,
-    "uuid": "27ecb2a6-ec1e-4f7b-b844-d4ea168014d6",
-    "config": {
-      "minimal_env": true,
-      "equalizer": 0,
-      "batch_size": 128,
-      "sample_size": 0,
-      "value_lr": 0.01,
-      "episodes": 100,
-      "policy_lr": 0.01
-    },
-    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55"
-  },
-  {
-    "name": "batch_size: 128 - episodes: 100 - equalizer: 0 - minimal_env: True - policy_lr: 0.005 - sample_size: 0 - value_lr: 0.01",
-    "creation_time": 1536316021.878298,
-    "uuid": "3cd1f230-3b3e-46f0-9b9c-a2e6905a3d8f",
-    "config": {
-      "minimal_env": true,
-      "equalizer": 0,
-      "batch_size": 128,
-      "sample_size": 0,
-      "value_lr": 0.01,
-      "episodes": 100,
-      "policy_lr": 0.005
-    },
-    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55"
-  },
-  {
-    "name": "sample_size: 0 - value_momentum: 0.3 - batch_size: 128 - equalizer: 0 - policy_lr: 0.01 - episodes: 100 - value_lr: 0.001 - minimal_env: True",
-    "creation_time": 1537040738.0,
-    "uuid": "a999dd16-a1aa-47e8-b6d5-08cb9a56cfa6",
-    "config": {
-      "minimal_env": true,
-      "equalizer": 0,
-      "batch_size": 128,
-      "sample_size": 0,
-      "value_momentum": 0.3,
-      "value_lr": 0.001,
-      "episodes": 100,
-      "policy_lr": 0.01
-    },
-    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55"
-  },
-  {
-    "name": "sample_size: 0 - value_momentum: 0.3 - batch_size: 128 - equalizer: 0 - policy_lr: 0.01 - episodes: 100 - value_lr: 0.01 - minimal_env: True",
-    "creation_time": 1537045660.0,
-    "uuid": "5a7e8b91-0f1e-4f7b-a503-e6fa3a74a3d4",
-    "config": {
-      "minimal_env": true,
-      "equalizer": 0,
-      "batch_size": 128,
-      "sample_size": 0,
-      "value_momentum": 0.3,
-      "value_lr": 0.01,
-      "episodes": 100,
-      "policy_lr": 0.01
-    },
-    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55"
-  },
-  {
-    "name": "policy_lr: 0.01 - minimal_env: True - episodes: 100 - equalizer: 0 - value_momentum: 0.3 - batch_size: 128 - value_lr: 0.001 - sample_size: 0 - hidden_neurons: 256",
-    "creation_time": 1537138443.0,
-    "uuid": "b58d2327-987a-49bc-81fc-84c00ec6e0f7",
-    "config": {
-      "minimal_env": true,
-      "equalizer": 0,
-      "batch_size": 128,
-      "sample_size": 0,
-      "value_momentum": 0.3,
-      "hidden_neurons": 256,
-      "value_lr": 0.001,
-      "episodes": 100,
-      "policy_lr": 0.01
-    },
-    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55"
-  },
-  {
-    "name": "minimal_env: True - equalizer: 0 - batch_size: 128 - sample_size: 0 - value_lr: 0.01 - episodes: 100 - policy_lr: 0.01",
-    "uuid": "efc15d71-300d-4d11-bb4d-7fb8fe198441",
-    "config": {
-      "minimal_env": true,
-      "equalizer": 0,
       "sample_size": 0,
       "batch_size": 128,
-      "value_lr": 0.01,
       "policy_lr": 0.01,
-      "episodes": 100
+      "equalizer": 0.001
     },
-    "creation_time": 1537566488.0,
-    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55"
+    "uuid": "2f563607-0a20-402c-9619-cffb93391564",
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "name": "batch_size: 128 - clip: 0.15 - episodes: 100 - equalizer: 0.001 - policy_lr: 0.01 - minimal_env: True - sample_size: 0",
+    "creation_time": 1535016288.664984
+  },
+  {
+    "config": {
+      "episodes": 100,
+      "minimal_env": true,
+      "sample_size": 0,
+      "batch_size": 128,
+      "policy_lr": 0.1,
+      "equalizer": 0.001
+    },
+    "uuid": "979f5e35-f841-4672-abdb-320e550069b5",
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "name": "batch_size: 128 - episodes: 100 - equalizer: 0.001 - policy_lr: 0.1 - minimal_env: True - sample_size: 0",
+    "creation_time": 1535040266.988814
+  },
+  {
+    "config": {
+      "episodes": 100,
+      "minimal_env": true,
+      "sample_size": 0,
+      "value_lr": 0.01,
+      "batch_size": 128,
+      "policy_lr": 0.01,
+      "equalizer": 0
+    },
+    "uuid": "27ecb2a6-ec1e-4f7b-b844-d4ea168014d6",
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "name": "batch_size: 128 - episodes: 100 - equalizer: 0 - minimal_env: True - policy_lr: 0.01 - sample_size: 0 - value_lr: 0.01",
+    "creation_time": 1535805454.458015
+  },
+  {
+    "config": {
+      "episodes": 100,
+      "minimal_env": true,
+      "sample_size": 0,
+      "value_lr": 0.01,
+      "batch_size": 128,
+      "policy_lr": 0.005,
+      "equalizer": 0
+    },
+    "uuid": "3cd1f230-3b3e-46f0-9b9c-a2e6905a3d8f",
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "name": "batch_size: 128 - episodes: 100 - equalizer: 0 - minimal_env: True - policy_lr: 0.005 - sample_size: 0 - value_lr: 0.01",
+    "creation_time": 1536316021.878298
+  },
+  {
+    "config": {
+      "episodes": 100,
+      "minimal_env": true,
+      "value_momentum": 0.3,
+      "value_lr": 0.001,
+      "batch_size": 128,
+      "policy_lr": 0.01,
+      "sample_size": 0,
+      "equalizer": 0
+    },
+    "uuid": "a999dd16-a1aa-47e8-b6d5-08cb9a56cfa6",
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "name": "sample_size: 0 - value_momentum: 0.3 - batch_size: 128 - equalizer: 0 - policy_lr: 0.01 - episodes: 100 - value_lr: 0.001 - minimal_env: True",
+    "creation_time": 1537040738.0
+  },
+  {
+    "config": {
+      "episodes": 100,
+      "minimal_env": true,
+      "value_momentum": 0.3,
+      "value_lr": 0.01,
+      "batch_size": 128,
+      "policy_lr": 0.01,
+      "sample_size": 0,
+      "equalizer": 0
+    },
+    "uuid": "5a7e8b91-0f1e-4f7b-a503-e6fa3a74a3d4",
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "name": "sample_size: 0 - value_momentum: 0.3 - batch_size: 128 - equalizer: 0 - policy_lr: 0.01 - episodes: 100 - value_lr: 0.01 - minimal_env: True",
+    "creation_time": 1537045660.0
+  },
+  {
+    "config": {
+      "episodes": 100,
+      "hidden_neurons": 256,
+      "minimal_env": true,
+      "value_momentum": 0.3,
+      "value_lr": 0.001,
+      "batch_size": 128,
+      "policy_lr": 0.01,
+      "sample_size": 0,
+      "equalizer": 0
+    },
+    "uuid": "b58d2327-987a-49bc-81fc-84c00ec6e0f7",
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "name": "policy_lr: 0.01 - minimal_env: True - episodes: 100 - equalizer: 0 - value_momentum: 0.3 - batch_size: 128 - value_lr: 0.001 - sample_size: 0 - hidden_neurons: 256",
+    "creation_time": 1537138443.0
+  },
+  {
+    "config": {
+      "episodes": 100,
+      "minimal_env": true,
+      "sample_size": 0,
+      "value_lr": 0.01,
+      "batch_size": 128,
+      "policy_lr": 0.01,
+      "equalizer": 0
+    },
+    "uuid": "efc15d71-300d-4d11-bb4d-7fb8fe198441",
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "name": "minimal_env: True - equalizer: 0 - batch_size: 128 - sample_size: 0 - value_lr: 0.01 - episodes: 100 - policy_lr: 0.01",
+    "creation_time": 1537566488.0
+  },
+  {
+    "config": {
+      "sample_size": 0,
+      "equalizer": 0,
+      "episodes": 100,
+      "hidden_neurons": 256,
+      "minimal_env": true,
+      "value_lr": 0.01,
+      "batch_size": 128,
+      "policy_lr": 0.01
+    },
+    "uuid": "c24f73df-2ccc-4913-b45b-cd69165a8955",
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "name": "episodes: 100 - hidden_neurons: 256 - minimal_env: True - sample_size: 0 - value_lr: 0.01 - batch_size: 128 - policy_lr: 0.01 - equalizer: 0",
+    "creation_time": 1537606812.0
+  },
+  {
+    "config": {
+      "sample_size": 0,
+      "equalizer": 0,
+      "episodes": 100,
+      "hidden_neurons": 512,
+      "minimal_env": true,
+      "value_lr": 0.01,
+      "batch_size": 128,
+      "policy_lr": 0.01
+    },
+    "uuid": "3ee6edd2-eb1d-4532-9ae0-6d7723f818d7",
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "name": "episodes: 100 - hidden_neurons: 512 - minimal_env: True - sample_size: 0 - value_lr: 0.01 - batch_size: 128 - policy_lr: 0.01 - equalizer: 0",
+    "creation_time": 1537611247.0
   }
 ]

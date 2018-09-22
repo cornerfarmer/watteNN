@@ -281,7 +281,7 @@ cdef class MCTSWorker:
                         storage.data[storage_index].obs = obs
                         for i in range(32):
                             storage.data[storage_index].output.p[i] = (i == card.id)
-                        storage.data[storage_index].weight = (p[j] + 1) / 2 * 1 / scale
+                        storage.data[storage_index].weight = (p[j] + 1) / 2 #* 1 / scale
                         storage.data[storage_index].equalizer_weight = 1.0 / scale
                         storage.data[storage_index].value_net = False
                         storage.data[storage_index].output.scale = (p[j] + 1) / 2
