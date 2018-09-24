@@ -294,7 +294,7 @@ cdef class MCTSWorker:
 
             exploration_mode_active = self.exploration_mode[0] or self.exploration_mode[1]
 
-            if not exploration_mode_active or self.exploration_mode[env.current_player]:
+            if not exploration_mode_active or not self.exploration_mode[1 - env.current_player]:
                 j = 0
                 for card in env.players[env.current_player].hand_cards:
                     if p[j] > -1:
@@ -309,8 +309,6 @@ cdef class MCTSWorker:
                         for i in range(32):
                             storage.data[storage_index].output.p[i] = (i == card.id)
                         storage.data[storage_index].weight = (p[j] + 1) / 2 #* 1 / scale
-                        if exploration_mode_active and env.current_player != self.exploration_player:
-                            storage.data[storage_index].weight *= 0.1
 
                         storage.data[storage_index].equalizer_weight = 1.0 / scale
                         storage.data[storage_index].value_net = False
