@@ -373,5 +373,67 @@
     "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
     "name": "episodes: 100 - hidden_neurons: 512 - minimal_env: True - mcts_sims: 500 - sample_size: 0 - value_lr: 0.01 - batch_size: 128 - equalizer: 0 - epochs: 10 - policy_lr: 0.01 - exploit_interval: 20",
     "creation_time": 1537638401.0
+  },
+  {
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "config": {
+      "batch_size": 128,
+      "episodes": 100,
+      "equalizer": 0,
+      "minimal_env": true,
+      "policy_lr": 0.1,
+      "sample_size": 0,
+      "step_exploration": 0.2,
+      "value_lr": 0.01
+    },
+    "uuid": "0c3814c5-04cd-4e00-a7f0-d025b5bc1d38",
+    "creation_time": 1537734779.0,
+    "name": "batch_size: 128 - episodes: 100 - equalizer: 0 - minimal_env: True - policy_lr: 0.1 - sample_size: 0 - step_exploration: 0.2 - value_lr: 0.01"
+  },
+  {
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "config": {
+      "batch_size": 128,
+      "episodes": 100,
+      "equalizer": 0,
+      "minimal_env": true,
+      "policy_lr": 0.1,
+      "sample_size": 0,
+      "step_exploration": 0.3,
+      "value_lr": 0.01
+    },
+    "uuid": "6575ee16-5584-43e7-bd7a-b17e041afd59",
+    "creation_time": 1537734791.0,
+    "name": "batch_size: 128 - episodes: 100 - equalizer: 0 - minimal_env: True - policy_lr: 0.1 - sample_size: 0 - step_exploration: 0.3 - value_lr: 0.01"
+  },
+  {
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "config": {
+      "batch_size": 128,
+      "episodes": 100,
+      "equalizer": 0,
+      "minimal_env": true,
+      "policy_lr": 0.1,
+      "sample_size": 0,
+      "value_lr": 0.01
+    },
+    "uuid": "13f713aa-e1fe-48f3-bdb2-0cd56cb43b2e",
+    "creation_time": 1537778535.0,
+    "name": "batch_size: 128 - episodes: 100 - equalizer: 0 - minimal_env: True - policy_lr: 0.1 - sample_size: 0 - value_lr: 0.01"
+  },
+  {
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "config": {
+      "batch_size": 128,
+      "episodes": 100,
+      "equalizer": 0,
+      "minimal_env": true,
+      "policy_lr": 0.1,
+      "sample_size": 0,
+      "value_lr": 0.1
+    },
+    "uuid": "07ee756e-abe3-4bc2-b57a-923a9482c208",
+    "creation_time": 1537779597.0,
+    "name": "batch_size: 128 - episodes: 100 - equalizer: 0 - minimal_env: True - policy_lr: 0.1 - sample_size: 0 - value_lr: 0.1"
   }
 ]

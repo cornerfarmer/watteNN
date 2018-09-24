@@ -6,7 +6,6 @@ from libcpp.string cimport string
 cdef struct ModelOutput:
     float p[32]
     float v
-    float scale
 
 cdef struct Experience:
     ModelOutput output
@@ -22,7 +21,6 @@ cdef cppclass MCTSState:
     float end_v
     int current_player
     bool is_root
-    float scale
     MCTSState* parent
     bool is_leaf
 
@@ -31,5 +29,3 @@ cdef struct StorageItem:
     ModelOutput output
     float weight
     bool value_net
-    string key
-    float equalizer_weight

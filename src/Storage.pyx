@@ -7,38 +7,19 @@ cdef class Storage:
         self.max_samples = max_samples
         self.next_index = 0
         self.number_of_samples = 0
-        self.key_numbers = {}
         if self.max_samples != 0:
             self.data.resize(max_samples)
 
-    cdef int add_item(self, string key):
-        pyKey = str(key)
+    cdef int add_item(self):
         cdef int new_index
         if self.max_samples is 0:
             self.data.push_back(StorageItem())
-            self.data.back().key = key
-            if key != "":
-                if pyKey in self.key_numbers:
-                    self.key_numbers[pyKey] += 1
-                else:
-                    self.key_numbers[pyKey] = 1
 
             self.number_of_samples = self.data.size()
             return self.data.size() - 1
         else:
             new_index = self.next_index
-            if self.number_of_samples > self.next_index:
-                self.key_numbers[str(self.data[self.next_index].key)] -= 1
-                if self.key_numbers[str(self.data[self.next_index].key)] == 0:
-                    del(self.key_numbers[str(self.data[self.next_index].key)])
-
             self.data[self.next_index] = StorageItem()
-            self.data[self.next_index].key = key
-            if pyKey != "":
-                if pyKey in self.key_numbers:
-                    self.key_numbers[pyKey] += 1
-                else:
-                    self.key_numbers[pyKey] = 1
 
             self.next_index += 1
             self.number_of_samples = max(self.number_of_samples, self.next_index)
@@ -113,7 +94,6 @@ cdef class Storage:
                 else:
                     row.append(self.data[i].weight)
                 row.append(self.data[i].value_net)
-                row.append(self.data[i].output.scale)
 
                 writer.writerow(row)
 
@@ -127,5 +107,5 @@ cdef class Storage:
     cdef void copy_from(self, Storage other_storage):
         cdef int i
         for i in range(other_storage.number_of_samples):
-            storage_index = self.add_item(other_storage.data[i].key)
+            storage_index = self.add_item()
             self.data[storage_index] = other_storage.data[i]

@@ -10,9 +10,8 @@ cdef class Storage:
     cdef int max_samples
     cdef int next_index
     cdef int number_of_samples
-    cdef object key_numbers
 
-    cdef int add_item(self, string key)
+    cdef int add_item(self)
     cpdef void export_csv(self, file_name, WattenEnv env)
     cdef void clear(self)
     cdef void copy_from(self, Storage other_storage)

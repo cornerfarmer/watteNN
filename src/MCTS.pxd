@@ -37,14 +37,14 @@ cdef class MCTSWorker:
 
     cdef void _clear_nodes(self)
     cdef void reset(self, env)
-    cdef void add_state(self, MCTSState* parent, float p, WattenEnv env, int end_v=?, float scale=?)
+    cdef void add_state(self, MCTSState* parent, float p, WattenEnv env, int end_v=?)
     cdef bool is_state_leaf_node(self, MCTSState* state)
     cdef void revert_leaf_state(self, MCTSState* state)
     cdef void handle_leaf_state(self, MCTSState* state, float v)
     cdef void handle_prediction(self, WattenEnv env, ModelOutput* prediction)
     cdef bool mcts_sample(self, WattenEnv env, MCTSState* state, PredictionQueue queue)
     cdef int softmax_step(self, vector[float]* p)
-    cdef bool mcts_game_step(self, WattenEnv env, PredictionQueue queue, vector[float]* p, float* v, float* scale, int* action, bool* exploration_mode_activated)
+    cdef bool mcts_game_step(self, WattenEnv env, PredictionQueue queue, vector[float]* p, float* v, int* action, bool* exploration_mode_activated)
     cdef void create_root_state(self, WattenEnv env, MCTSState* state)
     cdef bool mcts_game(self, WattenEnv env, PredictionQueue queue, Storage storage)
 

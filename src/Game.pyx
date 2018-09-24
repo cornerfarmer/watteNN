@@ -155,6 +155,7 @@ cdef class Game:
         v_based_win_prob_per_action = []
         if self.env.is_done():
             total_win_prob = 1 if self.env.last_winner is 0 else 0
+            v_based_total_win_prob = total_win_prob
         else:
 
             game_state = self.env.get_state()
@@ -175,14 +176,15 @@ cdef class Game:
                     next_exploration_mode = exploration_mode
                     next_joint_prob = joint_prob * output.p[card.id]
 
-                next_id, win_prob = self.game_tree_step(model, obs, dot, node, output.p[card.id], next_joint_prob, next_id, key + "," + str(card.id) + "." + str(current_player), table, tree_only, table[node_key][1][index] if tree_only else 0, next_exploration_mode)
+                next_id, win_prob, v_based_win_prob = self.game_tree_step(model, obs, dot, node, output.p[card.id], next_joint_prob, next_id, key + "," + str(card.id) + "." + str(current_player), table, tree_only, table[node_key][1][index] if tree_only else 0, next_exploration_mode)
 
                 win_prob_per_action.append(win_prob if current_player is 0 else (1 - win_prob))
-                v_based_win_prob_per_action.append(win_prob if current_player is 0 else (1 - win_prob))
+                v_based_win_prob_per_action.append(v_based_win_prob if current_player is 0 else (1 - v_based_win_prob))
                 total_win_prob += win_prob * output.p[card.id]
                 index += 1
                 model_probs.append(output.p[card.id])
 
+            v_based_total_win_prob = (output.v * (-1 if current_player is 1 else 1) + 1) / 2
 
 
             exploration_mode_enabled = False
@@ -213,7 +215,7 @@ cdef class Game:
 
                 table[node_key][1].append([joint_prob if not exploration_mode_enabled or not exploration_mode[1 - current_player] else 0, win_prob_per_action, opponent_key, v_based_win_prob_per_action])
 
-        return next_id, total_win_prob
+        return next_id, total_win_prob, v_based_total_win_prob
 
     cpdef draw_game_tree(self, Model model, ModelRating modelRating, use_cache, tree_ind, debug_tree_key):
 
@@ -332,6 +334,7 @@ cdef class Game:
             fig, ax = plt.subplots(figsize=(18, 5))
             ax.imshow(plt.imread(sio), interpolation="bilinear")
 
+        print(avg_diff_on, avg_diff_off, v_based_avg_diff_on, v_based_avg_diff_off)
         return table, avg_diff_on, avg_diff_off, [max_diff, max_key], v_loss_on, v_loss_off, v_based_avg_diff_on, v_based_avg_diff_off
     def test(self):
         pass
