@@ -21,6 +21,7 @@ cdef class KerasModel(Model):
     cdef float clip
     cdef float equalizer
     cdef Observation test_obs
+    cdef Observation test_obs_p
 
     cdef void _build_choose_model(self, WattenEnv env, int hidden_neurons)
     cdef void _build_play_model(self, WattenEnv env, int hidden_neurons)
@@ -35,3 +36,4 @@ cdef class KerasModel(Model):
     cpdef void load(self, filename)
     cpdef void save(self, filename)
     cpdef predict_v_model(self, epoch, logs)
+    cpdef predict_p_model(self, epoch, logs)

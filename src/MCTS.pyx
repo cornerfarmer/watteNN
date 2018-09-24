@@ -58,6 +58,7 @@ cdef class MCTSWorker:
         self.only_one_step = only_one_step
         self.value_storage = Storage()
         self.step_exploration = step_exploration
+        self.exploration_mode.resize(2)
 
     def __dealloc__(self):
         self._clear_nodes()
@@ -76,7 +77,8 @@ cdef class MCTSWorker:
         self.prediction_state = NULL
         self.finished = False
         self.value_storage.clear()
-        self.exploration_mode = False
+        self.exploration_mode[0] = False
+        self.exploration_mode[1] = False
 
     cdef void add_state(self, MCTSState* parent, float p, WattenEnv env, int end_v=0, float scale=1):
         self.nodes.push_back(new MCTSState())
@@ -240,7 +242,7 @@ cdef class MCTSWorker:
                     else:
                         r -= 1
 
-            self.exploration_mode = True
+            self.exploration_mode[self.root.current_player] = True
             self.exploration_player = self.root.current_player
             exploration_mode_activated[0] = True
         else:
@@ -274,6 +276,7 @@ cdef class MCTSWorker:
         cdef env_is_done = False
         cdef string key
         cdef bool exploration_mode_activated
+        cdef bool exploration_mode_active
 
         while not env_is_done:
             finished = self.mcts_game_step(env, queue, &p, &v, &scale, &a, &exploration_mode_activated)
@@ -289,7 +292,9 @@ cdef class MCTSWorker:
             self.value_storage.data[storage_index].output.v = v
             self.value_storage.data[storage_index].value_net = True
 
-            if not self.exploration_mode or env.current_player == self.exploration_player:
+            exploration_mode_active = self.exploration_mode[0] or self.exploration_mode[1]
+
+            if not exploration_mode_active or self.exploration_mode[env.current_player]:
                 j = 0
                 for card in env.players[env.current_player].hand_cards:
                     if p[j] > -1:
@@ -304,6 +309,9 @@ cdef class MCTSWorker:
                         for i in range(32):
                             storage.data[storage_index].output.p[i] = (i == card.id)
                         storage.data[storage_index].weight = (p[j] + 1) / 2 #* 1 / scale
+                        if exploration_mode_active and env.current_player != self.exploration_player:
+                            storage.data[storage_index].weight *= 0.1
+
                         storage.data[storage_index].equalizer_weight = 1.0 / scale
                         storage.data[storage_index].value_net = False
                         storage.data[storage_index].output.scale = (p[j] + 1) / 2
@@ -419,7 +427,7 @@ cdef class MCTS:
             env.step(env.players[env.current_player].hand_cards[action].id)
 
         cdef Observation obs
-        env.regenerate_full_obs(&obs)
+        env.regenerate_obs(&obs)
         print(obs)
         start = pytime.time()
         self.mcts_generate(env, model, storage, rating, False)

@@ -28,8 +28,8 @@ cdef class MCTSWorker:
     cdef int mcts_sims
     cdef float exploration
     cdef bool only_one_step
-    cdef bool exploration_mode
     cdef int exploration_player
+    cdef vector[bool] exploration_mode
     cdef float step_exploration
 
     cdef Observation _obs
