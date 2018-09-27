@@ -92,6 +92,7 @@ cdef class MCTSWorker:
         self.nodes.back().is_root = False
         self.nodes.back().parent = parent
         self.nodes.back().is_leaf = True
+        self.nodes.back().fully_explored = False
         parent.childs.push_back(self.nodes.back())
 
     cdef bool is_state_leaf_node(self, MCTSState* state):
@@ -144,14 +145,17 @@ cdef class MCTSWorker:
         self.handle_leaf_state(self.prediction_state, v)
 
     cdef bool mcts_sample(self, WattenEnv env, MCTSState* state, PredictionQueue queue):
-        cdef int current_player, i, a
+        cdef int current_player, i, a, childs_to_explore
+        cdef float left_p
         cdef vector[float] p
         cdef bool finished
         cdef MCTSState* max_child
+
         if self.is_state_leaf_node(state):
             if state.end_v != 0:
                 self.handle_leaf_state(state, state.end_v)
                 finished = True
+                state.fully_explored = True
             else:
                 env.set_state(&state.env_state)
 
@@ -162,8 +166,22 @@ cdef class MCTSWorker:
                 self.prediction_state = state
                 finished = False
         else:
+            childs_to_explore = 0
+            left_p = 0
             for i in range(state.childs.size()):
-                p.push_back(state.childs[i].p)
+                if state.childs[i].fully_explored:
+                    p.push_back(0)
+                    left_p += state.childs[i].p
+                else:
+                    p.push_back(state.childs[i].p)
+                    childs_to_explore += 1
+
+            if childs_to_explore > 0 and left_p > 0:
+                left_p /= childs_to_explore
+                for i in range(state.childs.size()):
+                    if not state.childs[i].fully_explored:
+                        p[i] += left_p
+
 
             if state.is_root and <float>rand() / RAND_MAX < self.exploration:
                 a = rand() % p.size()
@@ -173,6 +191,16 @@ cdef class MCTSWorker:
             max_child = state.childs[a]
 
             finished = self.mcts_sample(env, max_child, queue)
+
+            if finished:
+
+                state.fully_explored = True
+                for i in range(state.childs.size()):
+                    if not state.childs[i].fully_explored:
+                        state.fully_explored = False
+                        break
+
+
         return finished
 
     cdef int softmax_step(self, vector[float]* p):
@@ -206,6 +234,8 @@ cdef class MCTSWorker:
             self.current_step += 1
             if not finished:
                 return False
+            elif self.root.fully_explored:
+                break
         self.current_step = 0
 
         p.clear()
@@ -260,6 +290,7 @@ cdef class MCTSWorker:
         state.end_v = 0
         state.is_root = True
         state.is_leaf = True
+        state.fully_explored = False
 
     cdef bool mcts_game(self, WattenEnv env, PredictionQueue queue, Storage storage):
         cdef Observation obs, full_obs

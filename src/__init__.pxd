@@ -23,6 +23,7 @@ cdef cppclass MCTSState:
     bool is_root
     MCTSState* parent
     bool is_leaf
+    bool fully_explored
 
 cdef struct StorageItem:
     Observation obs
