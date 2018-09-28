@@ -175,10 +175,12 @@ cdef class KerasModel(Model):
         print("\np: " + str(output.p))
 
     cpdef vector[float] memorize_storage(self, Storage storage, bool clear_afterwards=True, int epochs=1, int number_of_samples=0):
-        cdef bool use_random_selection = (number_of_samples is 0)
+        if number_of_samples == 0:
+            number_of_samples = storage.number_of_samples
+
         number_of_samples = min(number_of_samples, storage.number_of_samples)
 
-        cdef int s = storage.number_of_samples if use_random_selection else number_of_samples
+        cdef int s = number_of_samples
 
         cdef np.ndarray play_input1 = np.zeros([s, 4, 8, self.play_input_sets_size])
         cdef np.ndarray play_input2 = np.zeros([s, self.play_input_scalars_size])
@@ -204,7 +206,7 @@ cdef class KerasModel(Model):
 
         cdef int play_index = 0, choose_index = 0, sample_index = 0, value_index = 0
         for i in range(s):
-            if use_random_selection:
+            if number_of_samples < storage.number_of_samples:
                 sample_index = rand() % storage.number_of_samples
             else:
                 sample_index = i

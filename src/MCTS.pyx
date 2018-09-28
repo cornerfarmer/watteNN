@@ -2,7 +2,6 @@ from gym_watten.envs.watten_env cimport State, WattenEnv, Card, Observation
 from libcpp cimport bool
 from libcpp.vector cimport vector
 from libc.math cimport sqrt, exp
-from libc.stdlib cimport rand, RAND_MAX
 from src.Model cimport Model, ModelOutput
 from src.ModelRating cimport ModelRating
 from src cimport MCTSState, StorageItem
@@ -13,8 +12,6 @@ import pydot_ng as pydot
 from io import BytesIO
 cimport cython
 from src.Storage cimport Storage
-from libc.stdlib cimport srand
-from libc.time cimport time
 import time as pytime
 from libcpp.string cimport string
 
@@ -49,7 +46,7 @@ cdef class PredictionQueue:
 
 cdef class MCTSWorker:
 
-    def __cinit__(self, worker_id, mcts_sims=20, exploration=0.1, only_one_step=False, step_exploration=0.1):
+    def __cinit__(self, worker_id, rng, mcts_sims=20, exploration=0.1, only_one_step=False, step_exploration=0.1):
         self.worker_id = worker_id
         self.mcts_sims = mcts_sims
         self.exploration = exploration
@@ -59,6 +56,7 @@ cdef class MCTSWorker:
         self.value_storage = Storage()
         self.step_exploration = step_exploration
         self.exploration_mode.resize(2)
+        self.rng = rng
 
     def __dealloc__(self):
         self._clear_nodes()
@@ -183,8 +181,8 @@ cdef class MCTSWorker:
                         p[i] += left_p
 
 
-            if state.is_root and <float>rand() / RAND_MAX < self.exploration:
-                a = rand() % p.size()
+            if state.is_root and self.rng.randFloat() < self.exploration:
+                a = self.rng.rand() % p.size()
             else:
                 a = self.softmax_step(&p)
 
@@ -216,7 +214,7 @@ cdef class MCTSWorker:
             for i in range(p.size()):
                 p[0][i] = 1.0 / p.size()
 
-        cdef float r = <float>rand() / RAND_MAX
+        cdef float r = self.rng.randFloat()
 
         for i in range(p.size()):
             r -= p[0][i]
@@ -259,8 +257,8 @@ cdef class MCTSWorker:
                 number_of_zero_p += 1
 
         cdef int r
-        if number_of_zero_p > 0 and <float>rand() / RAND_MAX < self.step_exploration:
-            r = rand() % number_of_zero_p
+        if number_of_zero_p > 0 and self.rng.randFloat() < self.step_exploration:
+            r = self.rng.rand() % number_of_zero_p
 
             for i in range(p_step.size()):
                 if p_step[i] == 0:
@@ -359,11 +357,12 @@ cdef class MCTSWorker:
 
 cdef class MCTS:
 
-    def __cinit__(self, episodes=75, mcts_sims=20, exploration=0.1, only_one_step=False, step_exploration=0.1):
+    def __cinit__(self, rng, episodes=75, mcts_sims=20, exploration=0.1, only_one_step=False, step_exploration=0.1):
         self.episodes = episodes
         self.worker = []
+        self.rng = rng
         for i in range(episodes):
-            self.worker.append(MCTSWorker(i, mcts_sims, exploration, only_one_step, step_exploration))
+            self.worker.append(MCTSWorker(i, self.rng, mcts_sims, exploration, only_one_step, step_exploration))
 
     cpdef void mcts_generate(self, WattenEnv env, Model model, Storage storage, ModelRating rating, bool reset_env=True):
         cdef PredictionQueue queue = PredictionQueue()
@@ -439,8 +438,6 @@ cdef class MCTS:
     cpdef draw_game_tree(self, ModelRating rating, WattenEnv env, Model model, Storage storage, int game_index, int tree_depth, pre_actions):
         env.set_state(&rating.eval_games[game_index])
         env.current_player = 0
-
-        srand(time(NULL))
 
         for action in pre_actions:
             env.step(env.players[env.current_player].hand_cards[action].id)

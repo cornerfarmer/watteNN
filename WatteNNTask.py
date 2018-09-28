@@ -15,6 +15,9 @@ from src.ModelRating import ModelRating
 from gym_watten.envs.watten_env import WattenEnv
 import time as pytime
 
+from src.XorShfGenerator import XorShfGenerator
+
+
 class WatteNNTask(taskplan.Task):
 
     def __init__(self, preset, preset_pipe, logger):
@@ -25,7 +28,8 @@ class WatteNNTask(taskplan.Task):
         self.best_model = KerasModel(self.env, self.preset.get_int("hidden_neurons"), self.preset.get_int("batch_size"), self.preset.get_float("policy_lr"), self.preset.get_float("policy_momentum"), self.preset.get_float("value_lr"), self.preset.get_float("value_momentum"), 0.15, self.preset.get_float("equalizer"))
         self.train_model = KerasModel(self.env, self.preset.get_int("hidden_neurons"), self.preset.get_int("batch_size"), self.preset.get_float("policy_lr"), self.preset.get_float("policy_momentum"), self.preset.get_float("value_lr"), self.preset.get_float("value_momentum"), 0.15, self.preset.get_float("equalizer"))
         self.storage = Storage(self.preset.get_int("storage_size"))
-        self.mcts = MCTS(self.preset.get_int("episodes"), self.preset.get_int("mcts_sims"), exploration=self.preset.get_float("exploration"), step_exploration=self.preset.get_float("step_exploration"))
+        self.rng = XorShfGenerator()
+        self.mcts = MCTS(self.rng, self.preset.get_int("episodes"), self.preset.get_int("mcts_sims"), exploration=self.preset.get_float("exploration"), step_exploration=self.preset.get_float("step_exploration"))
         self.game = Game(self.env)
         self.train_model.copy_weights_from(self.model)
         self.best_model.copy_weights_from(self.model)

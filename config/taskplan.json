@@ -114,5 +114,50 @@
     "uuid": "a71bbe6a-ac2f-44df-a640-614c42e18e68",
     "creation_time": 1537908703.0,
     "name": "policy_lr: 0.2"
+  },
+  {
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "config": {
+      "episodes": 200
+    },
+    "uuid": "8c46fc75-187f-4b2a-b676-0978e223eceb",
+    "creation_time": 1537985813.0,
+    "name": "episodes: 200"
+  },
+  {
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "config": {
+      "policy_lr": 0.05
+    },
+    "uuid": "041465e8-4234-4e47-bab9-6f3a4b069c0d",
+    "creation_time": 1537985991.0,
+    "name": "policy_lr: 0.05"
+  },
+  {
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "config": {
+      "mcts_sims": 80
+    },
+    "uuid": "8d77c0a7-c8bb-4561-b449-a458a73d8dd8",
+    "creation_time": 1537986020.0,
+    "name": "mcts_sims: 80"
+  },
+  {
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "config": {
+      "mcts_sims": 150
+    },
+    "uuid": "1cf98f8d-02f5-4c0c-8397-dc202a902264",
+    "creation_time": 1538126644.0,
+    "name": "mcts_sims: 150"
+  },
+  {
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "config": {
+      "storage_size": 100000
+    },
+    "uuid": "11bc3605-02e9-400b-8dad-650c12d70ddc",
+    "creation_time": 1538178341.0,
+    "name": "storage_size: 100000"
   }
 ]

@@ -311,8 +311,7 @@ cdef class ModelRating:
                         for k in range(j + 1, len(last_tricks)):
                             if last_tricks[j][1] == last_tricks[k][1] and last_tricks[j][2] < last_tricks[k][2]:
                                 last_tricks[k][2] -= 1
-
-                    print(str(i) + " -> P0: " + readable_own + " - P1:" + readable_opponent + " - " + str([last_trick[2] for last_trick in last_tricks]))
+                    print(str(i) + " -> P0: " + readable_own + " - P1:" + readable_opponent + " - " + str([last_trick[-1] for last_trick in last_tricks]))
                     break
 
             if not valid:

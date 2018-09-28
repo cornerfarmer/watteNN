@@ -299,7 +299,7 @@ cdef class Game:
                         avg_diff_on_n += 1
 
                     if (prob_max - new_probs[card]) * table[key][0][card] > 0.01:
-                        print((prob_max - new_probs[card]) * table[key][0][card], key)
+                        print((prob_max - new_probs[card]) * table[key][0][card], key, table[key][2])
                     if max_diff < (prob_max - new_probs[card]) * table[key][0][card]:
                         max_diff = (prob_max - new_probs[card]) * table[key][0][card]
                         max_key = key

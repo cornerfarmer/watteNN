@@ -7,6 +7,7 @@ from src.ModelRating cimport ModelRating
 from src cimport ModelOutput
 from src cimport MCTSState, StorageItem
 from src.Storage cimport Storage
+from src.XorShfGenerator cimport XorShfGenerator
 
 cdef class PredictionQueue:
     cdef vector[Observation] obs_queue
@@ -31,6 +32,7 @@ cdef class MCTSWorker:
     cdef int exploration_player
     cdef vector[bool] exploration_mode
     cdef float step_exploration
+    cdef XorShfGenerator rng
 
     cdef Observation _obs
     cdef Observation _full_obs
@@ -55,6 +57,7 @@ cdef class MCTS:
     cdef vector[Card*] _hand_cards
     cdef ModelOutput _prediction
     cdef object worker
+    cdef XorShfGenerator rng
 
     cpdef void mcts_generate(self, WattenEnv env, Model model, Storage storage, ModelRating rating, bool reset_env=?)
     cdef void draw_tree(self, MCTSState* root, int tree_depth=?, object tree_path=?)
