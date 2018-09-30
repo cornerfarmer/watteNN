@@ -46,7 +46,7 @@ class WatteNNTask(taskplan.Task):
         print("1", pytime.time() - start)
 
         start = pytime.time()
-        loss = self.train_model.memorize_storage(self.storage, self.preset.get_int('sample_size') != 0, self.preset.get_int('epochs'), self.preset.get_int('sample_size'))
+        loss = self.train_model.memorize_storage(self.storage, self.preset.get_bool('clear_samples_after_epoch'), self.preset.get_int('epochs'), self.preset.get_int('sample_size'))
         print("2", pytime.time() - start)
         if loss[0] > 0.5:
             raise ArithmeticError()

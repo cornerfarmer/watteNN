@@ -1,163 +1,188 @@
 [
   {
     "abstract": true,
-    "config": {
-      "mcts_sims": 40,
-      "exploration": 0.1,
-      "policy_momentum": 0.9,
-      "storage_size": 10000,
-      "epochs": 1,
-      "equalizer": 0,
-      "step_exploration": 0.1,
-      "episodes": 100,
-      "hidden_neurons": 128,
-      "clip": 0.15,
-      "exploit_interval": 100,
-      "objective_opponent": false,
-      "policy_lr": 0.1,
-      "value_momentum": 0.9,
-      "value_lr": 0.01,
-      "batch_size": 128,
-      "save_interval": 0,
-      "sample_size": 0,
-      "minimal_env": true
-    },
-    "uuid": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
     "name": "Default",
-    "creation_time": 1533646564.381098
+    "creation_time": 1533646564.381098,
+    "uuid": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "config": {
+      "save_interval": 0,
+      "mcts_sims": 40,
+      "policy_lr": 0.1,
+      "policy_momentum": 0.9,
+      "minimal_env": true,
+      "objective_opponent": false,
+      "clear_samples_after_epoch": false,
+      "hidden_neurons": 128,
+      "batch_size": 128,
+      "episodes": 100,
+      "epochs": 1,
+      "value_momentum": 0.9,
+      "equalizer": 0,
+      "exploit_interval": 100,
+      "exploration": 0.1,
+      "step_exploration": 0.1,
+      "value_lr": 0.01,
+      "storage_size": 10000,
+      "clip": 0.15,
+      "sample_size": 0
+    }
   },
   {
+    "name": "empty",
+    "creation_time": 1537824892.0,
     "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
     "config": {},
-    "uuid": "b960eb06-a46d-4a9e-93b2-252f73794eaf",
-    "creation_time": 1537824892.0,
-    "name": "empty"
+    "uuid": "b960eb06-a46d-4a9e-93b2-252f73794eaf"
   },
   {
+    "name": "hidden_neurons: 256",
+    "creation_time": 1537825039.0,
     "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
     "config": {
       "hidden_neurons": 256
     },
-    "uuid": "246ab00f-45c8-46c2-ae26-563331167f90",
-    "creation_time": 1537825039.0,
-    "name": "hidden_neurons: 256"
+    "uuid": "246ab00f-45c8-46c2-ae26-563331167f90"
   },
   {
+    "name": "mcts_sims: 20",
+    "creation_time": 1537825075.0,
     "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
     "config": {
       "mcts_sims": 20
     },
-    "uuid": "62d82648-7f1e-4c8e-81a2-30c7ffbbf381",
-    "creation_time": 1537825075.0,
-    "name": "mcts_sims: 20"
+    "uuid": "62d82648-7f1e-4c8e-81a2-30c7ffbbf381"
   },
   {
+    "name": "policy_momentum: 0.7",
+    "creation_time": 1537825089.0,
     "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
     "config": {
       "policy_momentum": 0.7
     },
-    "uuid": "067dc703-71d0-4820-a18e-3c1df75ec6da",
-    "creation_time": 1537825089.0,
-    "name": "policy_momentum: 0.7"
+    "uuid": "067dc703-71d0-4820-a18e-3c1df75ec6da"
   },
   {
+    "name": "policy_momentum: 0.5",
+    "creation_time": 1537825101.0,
     "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
     "config": {
       "policy_momentum": 0.5
     },
-    "uuid": "c04e5938-44e9-4b40-921d-a291f62f098f",
-    "creation_time": 1537825101.0,
-    "name": "policy_momentum: 0.5"
+    "uuid": "c04e5938-44e9-4b40-921d-a291f62f098f"
   },
   {
+    "name": "policy_momentum: 0.3",
+    "creation_time": 1537825113.0,
     "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
     "config": {
       "policy_momentum": 0.3
     },
-    "uuid": "0dd71844-5e85-45cc-aa62-77b72ddc1820",
-    "creation_time": 1537825113.0,
-    "name": "policy_momentum: 0.3"
+    "uuid": "0dd71844-5e85-45cc-aa62-77b72ddc1820"
   },
   {
+    "name": "episodes: 500 - storage_size: 50000",
+    "creation_time": 1537825168.0,
     "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
     "config": {
       "episodes": 500,
       "storage_size": 50000
     },
-    "uuid": "8af19b7c-b7d6-4032-b8a8-cc192c8738ee",
-    "creation_time": 1537825168.0,
-    "name": "episodes: 500 - storage_size: 50000"
+    "uuid": "8af19b7c-b7d6-4032-b8a8-cc192c8738ee"
   },
   {
+    "name": "hidden_neurons: 512",
+    "creation_time": 1537908661.0,
     "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
     "config": {
       "hidden_neurons": 512
     },
-    "uuid": "b9b4028c-ab37-4756-a2f8-2580494864b1",
-    "creation_time": 1537908661.0,
-    "name": "hidden_neurons: 512"
+    "uuid": "b9b4028c-ab37-4756-a2f8-2580494864b1"
   },
   {
+    "name": "hidden_neurons: 1024",
+    "creation_time": 1537908672.0,
     "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
     "config": {
       "hidden_neurons": 1024
     },
-    "uuid": "9221c88a-263c-4147-ac1e-91604e1fb22a",
-    "creation_time": 1537908672.0,
-    "name": "hidden_neurons: 1024"
+    "uuid": "9221c88a-263c-4147-ac1e-91604e1fb22a"
   },
   {
+    "name": "policy_lr: 0.2",
+    "creation_time": 1537908703.0,
     "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
     "config": {
       "policy_lr": 0.2
     },
-    "uuid": "a71bbe6a-ac2f-44df-a640-614c42e18e68",
-    "creation_time": 1537908703.0,
-    "name": "policy_lr: 0.2"
+    "uuid": "a71bbe6a-ac2f-44df-a640-614c42e18e68"
   },
   {
+    "name": "episodes: 200",
+    "creation_time": 1537985813.0,
     "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
     "config": {
       "episodes": 200
     },
-    "uuid": "8c46fc75-187f-4b2a-b676-0978e223eceb",
-    "creation_time": 1537985813.0,
-    "name": "episodes: 200"
+    "uuid": "8c46fc75-187f-4b2a-b676-0978e223eceb"
   },
   {
+    "name": "policy_lr: 0.05",
+    "creation_time": 1537985991.0,
     "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
     "config": {
       "policy_lr": 0.05
     },
-    "uuid": "041465e8-4234-4e47-bab9-6f3a4b069c0d",
-    "creation_time": 1537985991.0,
-    "name": "policy_lr: 0.05"
+    "uuid": "041465e8-4234-4e47-bab9-6f3a4b069c0d"
   },
   {
+    "name": "mcts_sims: 80",
+    "creation_time": 1537986020.0,
     "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
     "config": {
       "mcts_sims": 80
     },
-    "uuid": "8d77c0a7-c8bb-4561-b449-a458a73d8dd8",
-    "creation_time": 1537986020.0,
-    "name": "mcts_sims: 80"
+    "uuid": "8d77c0a7-c8bb-4561-b449-a458a73d8dd8"
   },
   {
+    "name": "mcts_sims: 150",
+    "creation_time": 1538126644.0,
     "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
     "config": {
       "mcts_sims": 150
     },
-    "uuid": "1cf98f8d-02f5-4c0c-8397-dc202a902264",
-    "creation_time": 1538126644.0,
-    "name": "mcts_sims: 150"
+    "uuid": "1cf98f8d-02f5-4c0c-8397-dc202a902264"
   },
   {
+    "name": "storage_size: 100000",
+    "creation_time": 1538178341.0,
     "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
     "config": {
       "storage_size": 100000
     },
-    "uuid": "11bc3605-02e9-400b-8dad-650c12d70ddc",
-    "creation_time": 1538178341.0,
-    "name": "storage_size: 100000"
+    "uuid": "11bc3605-02e9-400b-8dad-650c12d70ddc"
+  },
+  {
+    "name": "batch_size: 256 - episodes: 50 - mcts_sims: 100 - clear_samples_after_epoch: True",
+    "creation_time": 1538233155.0,
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "config": {
+      "mcts_sims": 100,
+      "clear_samples_after_epoch": true,
+      "batch_size": 256,
+      "episodes": 50
+    },
+    "uuid": "e7d9727a-bb73-4e71-9c43-99d190c36135"
+  },
+  {
+    "name": "hidden_neurons: 256 - episodes: 50 - mcts_sims: 100 - clear_samples_after_epoch: True",
+    "creation_time": 1538236119.0,
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "config": {
+      "mcts_sims": 100,
+      "clear_samples_after_epoch": true,
+      "hidden_neurons": 256,
+      "episodes": 50
+    },
+    "uuid": "631412f4-fe49-4aa0-ad86-61c33dd7cc9e"
   }
 ]
