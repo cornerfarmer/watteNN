@@ -321,7 +321,7 @@ cdef class MCTSWorker:
 
             exploration_mode_active = self.exploration_mode[0] or self.exploration_mode[1]
 
-            if not exploration_mode_active or not self.exploration_mode[1 - env.current_player]:
+            if not exploration_mode_active or self.exploration_mode[env.current_player]:
                 j = 0
                 for card in env.players[env.current_player].hand_cards:
                     if p[j] > -1:
