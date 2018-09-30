@@ -321,22 +321,24 @@ cdef class MCTSWorker:
 
             exploration_mode_active = self.exploration_mode[0] or self.exploration_mode[1]
 
-            if not exploration_mode_active or self.exploration_mode[env.current_player]:
-                j = 0
-                for card in env.players[env.current_player].hand_cards:
-                    if p[j] > -1:
-                        storage_index = storage.add_item()
-                        storage.data[storage_index].obs = obs
-                        for i in range(32):
-                            storage.data[storage_index].output.p[i] = (i == card.id)
-                        storage.data[storage_index].weight = (p[j] + 1) / 2
+            #
+            j = 0
+            for card in env.players[env.current_player].hand_cards:
+                if p[j] > -1:
+                    storage_index = storage.add_item()
+                    storage.data[storage_index].obs = obs
+                    for i in range(32):
+                        storage.data[storage_index].output.p[i] = (i == card.id)
+                    storage.data[storage_index].weight = (p[j] + 1) / 2
+                    if exploration_mode_active and not self.exploration_mode[env.current_player]:
+                        storage.data[storage_index].weight *= 0.1
 
-                        storage.data[storage_index].value_net = False
-                        #if obs.sets[0][4][0] == 1 and obs.sets[1][4][0] == 1 and obs.sets[1][7][0] == 1 and obs.sets[1][5][1] == 1:
-                        #if obs.sets[0][5][0] == 1 and obs.sets[1][5][0] == 1 and obs.sets[1][6][2] == 1 and obs.sets[0][4][3] == 1:
-                        #if obs.sets[0][4][0] == 1 and obs.sets[1][4][0] == 1 and obs.sets[0][7][2] == 1 and obs.sets[1][5][3] == 1:
-                        #    print(storage.data[storage_index].weight, storage.data[storage_index].output.p, p)
-                    j += 1
+                    storage.data[storage_index].value_net = False
+                    #if obs.sets[0][4][0] == 1 and obs.sets[1][4][0] == 1 and obs.sets[1][7][0] == 1 and obs.sets[1][5][1] == 1:
+                    #if obs.sets[0][5][0] == 1 and obs.sets[1][5][0] == 1 and obs.sets[1][6][2] == 1 and obs.sets[0][4][3] == 1:
+                    #if obs.sets[0][4][0] == 1 and obs.sets[1][4][0] == 1 and obs.sets[0][7][2] == 1 and obs.sets[1][5][3] == 1:
+                    #    print(storage.data[storage_index].weight, storage.data[storage_index].output.p, p)
+                j += 1
 
             env.step(env.players[env.current_player].hand_cards[a].id, &obs)
             self.root = self.root.childs[a]
