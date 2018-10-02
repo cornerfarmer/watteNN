@@ -26,26 +26,31 @@ cdef class ModelRating:
     cdef void _define_eval_games(self):
         self.eval_games.clear()
         hand_card_combinations = itertools.combinations(list(range(self.env.cards.size())), 3)
-        for hand_cards in hand_card_combinations:
-            cards_left = list(range(self.env.cards.size()))
-            for card in hand_cards:
-                cards_left.remove(card)
+        #for hand_cards in hand_card_combinations:
+        hand_cards = list(hand_card_combinations)[10]
+        print(hand_cards)
+        cards_left = list(range(self.env.cards.size()))
+        for card in hand_cards:
+            cards_left.remove(card)
 
-            other_hand_card_combinations = itertools.combinations(cards_left, 3)
-            for other_hand_cards in other_hand_card_combinations:
-                self.eval_games.push_back(State())
-                self.eval_games.back().current_player = 0
-                self.eval_games.back().table_card = NULL
-                #self.eval_games.back().lastTrick.resize(2)
-                self.eval_games.back().player0_tricks = 0
-                self.eval_games.back().player1_tricks = 0
-                self.eval_games.back().type = ActionType.DRAW_CARD if self.env.minimal else ActionType.CHOOSE_VALUE
+        other_hand_card_combinations = itertools.combinations(cards_left, 3)
+        for other_hand_cards in other_hand_card_combinations:
+            self.eval_games.push_back(State())
+            self.eval_games.back().current_player = 0
+            self.eval_games.back().table_card = NULL
+            #self.eval_games.back().lastTrick.resize(2)
+            self.eval_games.back().player0_tricks = 0
+            self.eval_games.back().player1_tricks = 0
+            self.eval_games.back().type = ActionType.DRAW_CARD if self.env.minimal else ActionType.CHOOSE_VALUE
 
-                for card_id in hand_cards:
-                    self.eval_games.back().player0_hand_cards.push_back(self.env.cards[card_id])
+            for card_id in hand_cards:
+                self.eval_games.back().player0_hand_cards.push_back(self.env.cards[card_id])
 
-                for card_id in other_hand_cards:
-                    self.eval_games.back().player1_hand_cards.push_back(self.env.cards[card_id])
+            for card_id in other_hand_cards:
+                self.eval_games.back().player1_hand_cards.push_back(self.env.cards[card_id])
+
+            print(hand_cards, other_hand_cards)
+
 
     cdef vector[float] calc_correct_output_sample(self, State* state, Model model, vector[HandCards]* possible_hand_cards):
         cdef vector[Card*]* hand_cards = &state.player0_hand_cards if state.current_player == 0 else &state.player1_hand_cards
