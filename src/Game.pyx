@@ -331,8 +331,8 @@ cdef class Game:
             sio.seek(0)
 
             # plot the image
-            fig, ax = plt.subplots(figsize=(18, 5))
-            ax.imshow(plt.imread(sio), interpolation="bilinear")
+            #fig, ax = plt.subplots(figsize=(18, 5))
+            #ax.imshow(plt.imread(sio), interpolation="bilinear")
 
         print(avg_diff_on, avg_diff_off, v_based_avg_diff_on, v_based_avg_diff_off)
         return table, avg_diff_on, avg_diff_off, [max_diff, max_key], v_loss_on, v_loss_off, v_based_avg_diff_on, v_based_avg_diff_off

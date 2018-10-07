@@ -185,7 +185,6 @@ cdef class MCTSWorker:
                 a = self.rng.rand() % p.size()
             else:
                 a = self.softmax_step(&p)
-
             max_child = state.childs[a]
 
             finished = self.mcts_sample(env, max_child, queue)
@@ -257,20 +256,9 @@ cdef class MCTSWorker:
                 number_of_zero_p += 1
 
         cdef int r
-        if number_of_zero_p > 0 and self.rng.randFloat() < self.step_exploration:
-            r = self.rng.rand() % number_of_zero_p
-
-            for i in range(p_step.size()):
-                if p_step[i] == 0:
-                    if r == 0:
-                        action[0] = i
-                        break
-                    else:
-                        r -= 1
-
-            self.exploration_mode[self.root.current_player] = True
-            self.exploration_player = self.root.current_player
-            exploration_mode_activated[0] = True
+        if self.rng.randFloat() < self.step_exploration:
+            action[0] = self.rng.rand() % p_step.size()
+            exploration_mode_activated[0] = p_step[action[0]] == 0
         else:
             action[0] = self.softmax_step(&p_step)
             exploration_mode_activated[0] = False
@@ -330,15 +318,20 @@ cdef class MCTSWorker:
                     for i in range(32):
                         storage.data[storage_index].output.p[i] = (i == card.id)
                     storage.data[storage_index].weight = (p[j] + 1) / 2
-                    if exploration_mode_active and not self.exploration_mode[env.current_player]:
-                        storage.data[storage_index].weight *= 0.1
+                    if exploration_mode_active and self.exploration_mode[1 - env.current_player]:
+                        storage.data[storage_index].weight *= 0.01
 
                     storage.data[storage_index].value_net = False
                     #if obs.sets[0][4][0] == 1 and obs.sets[1][4][0] == 1 and obs.sets[1][7][0] == 1 and obs.sets[1][5][1] == 1:
                     #if obs.sets[0][5][0] == 1 and obs.sets[1][5][0] == 1 and obs.sets[1][6][2] == 1 and obs.sets[0][4][3] == 1:
                     #if obs.sets[0][4][0] == 1 and obs.sets[1][4][0] == 1 and obs.sets[0][7][2] == 1 and obs.sets[1][5][3] == 1:
                     #    print(storage.data[storage_index].weight, storage.data[storage_index].output.p, p)
+                    if obs.sets[0][6][0] == 1 and obs.sets[1][4][0] == 1 and obs.sets[0][5][2] == 1 and obs.sets[1][5][3] == 1:
+                        print(storage.data[storage_index].weight, p, self.exploration_mode, exploration_mode_active)
                 j += 1
+            if self.root.childs[a].p == 0:
+                self.exploration_mode[self.root.current_player] = True
+                self.exploration_player = self.root.current_player
 
             env.step(env.players[env.current_player].hand_cards[a].id, &obs)
             self.root = self.root.childs[a]
@@ -413,8 +406,8 @@ cdef class MCTS:
         sio.seek(0)
 
         # plot the image
-        fig, ax = plt.subplots(figsize=(18, 5))
-        ax.imshow(plt.imread(sio), interpolation="bilinear")
+        #fig, ax = plt.subplots(figsize=(18, 5))
+        #ax.imshow(plt.imread(sio), interpolation="bilinear")
 
     cdef object create_nodes(self, MCTSState* root, object dot, int tree_depth, object tree_path, int id=0):
         text = "N: " + str(root.n) + " (" + str(root.current_player) + ')\n'

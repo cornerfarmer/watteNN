@@ -175,14 +175,216 @@
   },
   {
     "name": "hidden_neurons: 256 - episodes: 50 - mcts_sims: 100 - clear_samples_after_epoch: True",
-    "creation_time": 1538236119.0,
     "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
     "config": {
-      "mcts_sims": 100,
       "clear_samples_after_epoch": true,
+      "episodes": 50,
+      "exploit_interval": 500,
       "hidden_neurons": 256,
-      "episodes": 50
+      "mcts_sims": 100
     },
-    "uuid": "631412f4-fe49-4aa0-ad86-61c33dd7cc9e"
+    "uuid": "631412f4-fe49-4aa0-ad86-61c33dd7cc9e",
+    "creation_time": 1538236119.0
+  },
+  {
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "config": {
+      "clear_samples_after_epoch": true,
+      "episodes": 50,
+      "exploit_interval": 500,
+      "mcts_sims": 100
+    },
+    "uuid": "99d4ed70-5ac6-4989-849a-95a868748357",
+    "creation_time": 1538407561.0,
+    "name": "clear_samples_after_epoch: True - episodes: 50 - exploit_interval: 500 - mcts_sims: 100"
+  },
+  {
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "config": {
+      "clear_samples_after_epoch": true,
+      "episodes": 50,
+      "exploit_interval": 500,
+      "mcts_sims": 100,
+      "policy_momentum": 0.99,
+      "step_exploration": 0.3
+    },
+    "uuid": "0e9378b5-0c59-431c-9b64-3c888fe43ec3",
+    "creation_time": 1538558675.0,
+    "name": "clear_samples_after_epoch: True - episodes: 50 - exploit_interval: 500 - mcts_sims: 100 - policy_momentum: 0.99 - step_exploration: 0.3"
+  },
+  {
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "config": {
+      "clear_samples_after_epoch": true,
+      "episodes": 1,
+      "exploit_interval": 500,
+      "mcts_sims": 100,
+      "policy_momentum": 0.99,
+      "step_exploration": 0.3
+    },
+    "uuid": "fdc66e97-18e0-4f64-9c6d-a0e8cc8e2a95",
+    "creation_time": 1538565527.0,
+    "name": "clear_samples_after_epoch: True - episodes: 1 - exploit_interval: 500 - mcts_sims: 100 - policy_momentum: 0.99 - step_exploration: 0.3"
+  },
+  {
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "config": {
+      "clear_samples_after_epoch": true,
+      "episodes": 10,
+      "exploit_interval": 500,
+      "mcts_sims": 100,
+      "policy_momentum": 0.99,
+      "step_exploration": 0.3
+    },
+    "uuid": "82c79d92-f319-4763-97e9-1f63f18dfb02",
+    "creation_time": 1538565554.0,
+    "name": "clear_samples_after_epoch: True - episodes: 10 - exploit_interval: 500 - mcts_sims: 100 - policy_momentum: 0.99 - step_exploration: 0.3"
+  },
+  {
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "config": {
+      "clear_samples_after_epoch": true,
+      "exploit_interval": 500,
+      "mcts_sims": 100,
+      "policy_lr": 0.2,
+      "policy_momentum": 0.99,
+      "step_exploration": 0.3
+    },
+    "uuid": "826f8f64-eaa0-45ca-a029-a7686e70b600",
+    "creation_time": 1538575371.0,
+    "name": "clear_samples_after_epoch: True - exploit_interval: 500 - mcts_sims: 100 - policy_lr: 0.2 - policy_momentum: 0.99 - step_exploration: 0.3"
+  },
+  {
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "config": {
+      "clear_samples_after_epoch": true,
+      "exploit_interval": 500,
+      "mcts_sims": 100,
+      "policy_lr": 0.3,
+      "policy_momentum": 0.99,
+      "step_exploration": 0.3
+    },
+    "uuid": "152deb62-175c-491b-bf0f-1b23b21bfa51",
+    "creation_time": 1538575401.0,
+    "name": "clear_samples_after_epoch: True - exploit_interval: 500 - mcts_sims: 100 - policy_lr: 0.3 - policy_momentum: 0.99 - step_exploration: 0.3"
+  },
+  {
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "config": {
+      "clear_samples_after_epoch": true,
+      "exploit_interval": 500,
+      "mcts_sims": 100,
+      "policy_lr": 0.5,
+      "policy_momentum": 0.99,
+      "step_exploration": 0.3
+    },
+    "uuid": "2f6216ef-43ba-4fc9-bdbe-d06e8973fa21",
+    "creation_time": 1538578596.0,
+    "name": "clear_samples_after_epoch: True - exploit_interval: 500 - mcts_sims: 100 - policy_lr: 0.5 - policy_momentum: 0.99 - step_exploration: 0.3"
+  },
+  {
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "config": {
+      "clear_samples_after_epoch": true,
+      "exploit_interval": 500,
+      "mcts_sims": 100,
+      "policy_lr": 0.7,
+      "policy_momentum": 0.99,
+      "step_exploration": 0.3
+    },
+    "uuid": "b6d595ae-3072-4742-8f37-074b0b28b2d8",
+    "creation_time": 1538578612.0,
+    "name": "clear_samples_after_epoch: True - exploit_interval: 500 - mcts_sims: 100 - policy_lr: 0.7 - policy_momentum: 0.99 - step_exploration: 0.3"
+  },
+  {
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "config": {
+      "batch_size": 256,
+      "clear_samples_after_epoch": true,
+      "exploit_interval": 500,
+      "mcts_sims": 100,
+      "policy_lr": 0.5,
+      "policy_momentum": 0.99,
+      "step_exploration": 0.3
+    },
+    "uuid": "2a84080f-2691-451b-89c3-2ed4afc47416",
+    "creation_time": 1538582764.0,
+    "name": "batch_size: 256 - clear_samples_after_epoch: True - exploit_interval: 500 - mcts_sims: 100 - policy_lr: 0.5 - policy_momentum: 0.99 - step_exploration: 0.3"
+  },
+  {
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "config": {
+      "batch_size": 64,
+      "clear_samples_after_epoch": true,
+      "exploit_interval": 500,
+      "mcts_sims": 100,
+      "policy_lr": 0.5,
+      "policy_momentum": 0.99,
+      "step_exploration": 0.3
+    },
+    "uuid": "e8739da1-b905-4824-8f5e-b227f2728903",
+    "creation_time": 1538582804.0,
+    "name": "batch_size: 64 - clear_samples_after_epoch: True - exploit_interval: 500 - mcts_sims: 100 - policy_lr: 0.5 - policy_momentum: 0.99 - step_exploration: 0.3"
+  },
+  {
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "config": {
+      "batch_size": 256,
+      "clear_samples_after_epoch": true,
+      "exploit_interval": 500,
+      "mcts_sims": 100,
+      "policy_lr": 2,
+      "policy_momentum": 0.99,
+      "step_exploration": 0.3
+    },
+    "uuid": "9e83ebc9-a3d6-43b0-a473-ca6397a2e12b",
+    "creation_time": 1538583699.0,
+    "name": "batch_size: 256 - clear_samples_after_epoch: True - exploit_interval: 500 - mcts_sims: 100 - policy_lr: 2 - policy_momentum: 0.99 - step_exploration: 0.3"
+  },
+  {
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "config": {
+      "batch_size": 256,
+      "clear_samples_after_epoch": true,
+      "exploit_interval": 500,
+      "mcts_sims": 100,
+      "policy_lr": 1,
+      "policy_momentum": 0.99,
+      "step_exploration": 0.3
+    },
+    "uuid": "f66d2ff8-7488-46f6-8e5e-14ad67b3599b",
+    "creation_time": 1538585668.0,
+    "name": "batch_size: 256 - clear_samples_after_epoch: True - exploit_interval: 500 - mcts_sims: 100 - policy_lr: 1 - policy_momentum: 0.99 - step_exploration: 0.3"
+  },
+  {
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "config": {
+      "batch_size": 256,
+      "clear_samples_after_epoch": true,
+      "exploit_interval": 500,
+      "hidden_neurons": 256,
+      "mcts_sims": 100,
+      "policy_lr": 0.5,
+      "policy_momentum": 0.99,
+      "step_exploration": 0.3
+    },
+    "uuid": "18ec32f8-180e-4fce-9352-68f0745fcb67",
+    "creation_time": 1538604573.0,
+    "name": "batch_size: 256 - clear_samples_after_epoch: True - exploit_interval: 500 - hidden_neurons: 256 - mcts_sims: 100 - policy_lr: 0.5 - policy_momentum: 0.99 - step_exploration: 0.3"
+  },
+  {
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "config": {
+      "batch_size": 256,
+      "clear_samples_after_epoch": true,
+      "exploit_interval": 500,
+      "mcts_sims": 100,
+      "policy_lr": 0.5,
+      "policy_momentum": 0.99,
+      "step_exploration": 0.3
+    },
+    "uuid": "ab552520-be36-4b67-8888-3c826c6679bf",
+    "creation_time": 1538604604.0,
+    "name": "batch_size: 256 - clear_samples_after_epoch: True - exploit_interval: 500 - mcts_sims: 100 - policy_lr: 0.5 - policy_momentum: 0.99 - step_exploration: 0.3"
   }
 ]
