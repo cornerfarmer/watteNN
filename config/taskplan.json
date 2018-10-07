@@ -2,261 +2,187 @@
   {
     "abstract": true,
     "name": "Default",
-    "config": {
-      "storage_size": 10000,
-      "batch_size": 128,
-      "hidden_neurons": 128,
-      "sample_size": 0,
-      "policy_lr": 0.1,
-      "minimal_env": true,
-      "value_lr": 0.01,
-      "clear_samples_after_epoch": false,
-      "exploration": 0.1,
-      "objective_opponent": false,
-      "mcts_sims": 40,
-      "value_momentum": 0.9,
-      "epochs": 1,
-      "save_interval": 0,
-      "episodes": 100,
-      "step_exploration": 0.1,
-      "exploit_interval": 100,
-      "clip": 0.15,
-      "equalizer": 0,
-      "policy_momentum": 0.9
-    },
     "creation_time": 1533646564.381098,
-    "uuid": "75c5f09b-cafd-43c7-be1d-53cae4879d55"
+    "uuid": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "config": {
+      "save_interval": 0,
+      "mcts_sims": 40,
+      "policy_lr": 0.1,
+      "policy_momentum": 0.9,
+      "minimal_env": true,
+      "objective_opponent": false,
+      "clear_samples_after_epoch": false,
+      "hidden_neurons": 128,
+      "batch_size": 128,
+      "episodes": 100,
+      "epochs": 1,
+      "value_momentum": 0.9,
+      "equalizer": 0,
+      "exploit_interval": 100,
+      "exploration": 0.1,
+      "step_exploration": 0.1,
+      "value_lr": 0.01,
+      "storage_size": 10000,
+      "clip": 0.15,
+      "sample_size": 0
+    }
   },
   {
     "name": "empty",
-    "config": {},
     "creation_time": 1537824892.0,
     "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "config": {},
     "uuid": "b960eb06-a46d-4a9e-93b2-252f73794eaf"
   },
   {
     "name": "hidden_neurons: 256",
+    "creation_time": 1537825039.0,
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
     "config": {
       "hidden_neurons": 256
     },
-    "creation_time": 1537825039.0,
-    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
     "uuid": "246ab00f-45c8-46c2-ae26-563331167f90"
   },
   {
     "name": "mcts_sims: 20",
+    "creation_time": 1537825075.0,
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
     "config": {
       "mcts_sims": 20
     },
-    "creation_time": 1537825075.0,
-    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
     "uuid": "62d82648-7f1e-4c8e-81a2-30c7ffbbf381"
   },
   {
     "name": "policy_momentum: 0.7",
+    "creation_time": 1537825089.0,
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
     "config": {
       "policy_momentum": 0.7
     },
-    "creation_time": 1537825089.0,
-    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
     "uuid": "067dc703-71d0-4820-a18e-3c1df75ec6da"
   },
   {
     "name": "policy_momentum: 0.5",
+    "creation_time": 1537825101.0,
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
     "config": {
       "policy_momentum": 0.5
     },
-    "creation_time": 1537825101.0,
-    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
     "uuid": "c04e5938-44e9-4b40-921d-a291f62f098f"
   },
   {
     "name": "policy_momentum: 0.3",
+    "creation_time": 1537825113.0,
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
     "config": {
       "policy_momentum": 0.3
     },
-    "creation_time": 1537825113.0,
-    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
     "uuid": "0dd71844-5e85-45cc-aa62-77b72ddc1820"
   },
   {
     "name": "episodes: 500 - storage_size: 50000",
-    "config": {
-      "storage_size": 50000,
-      "episodes": 500
-    },
     "creation_time": 1537825168.0,
     "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "config": {
+      "episodes": 500,
+      "storage_size": 50000
+    },
     "uuid": "8af19b7c-b7d6-4032-b8a8-cc192c8738ee"
   },
   {
     "name": "hidden_neurons: 512",
+    "creation_time": 1537908661.0,
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
     "config": {
       "hidden_neurons": 512
     },
-    "creation_time": 1537908661.0,
-    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
     "uuid": "b9b4028c-ab37-4756-a2f8-2580494864b1"
   },
   {
     "name": "hidden_neurons: 1024",
+    "creation_time": 1537908672.0,
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
     "config": {
       "hidden_neurons": 1024
     },
-    "creation_time": 1537908672.0,
-    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
     "uuid": "9221c88a-263c-4147-ac1e-91604e1fb22a"
   },
   {
     "name": "policy_lr: 0.2",
+    "creation_time": 1537908703.0,
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
     "config": {
       "policy_lr": 0.2
     },
-    "creation_time": 1537908703.0,
-    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
     "uuid": "a71bbe6a-ac2f-44df-a640-614c42e18e68"
   },
   {
     "name": "episodes: 200",
+    "creation_time": 1537985813.0,
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
     "config": {
       "episodes": 200
     },
-    "creation_time": 1537985813.0,
-    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
     "uuid": "8c46fc75-187f-4b2a-b676-0978e223eceb"
   },
   {
     "name": "policy_lr: 0.05",
+    "creation_time": 1537985991.0,
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
     "config": {
       "policy_lr": 0.05
     },
-    "creation_time": 1537985991.0,
-    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
     "uuid": "041465e8-4234-4e47-bab9-6f3a4b069c0d"
   },
   {
     "name": "mcts_sims: 80",
+    "creation_time": 1537986020.0,
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
     "config": {
       "mcts_sims": 80
     },
-    "creation_time": 1537986020.0,
-    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
     "uuid": "8d77c0a7-c8bb-4561-b449-a458a73d8dd8"
   },
   {
     "name": "mcts_sims: 150",
+    "creation_time": 1538126644.0,
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
     "config": {
       "mcts_sims": 150
     },
-    "creation_time": 1538126644.0,
-    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
     "uuid": "1cf98f8d-02f5-4c0c-8397-dc202a902264"
   },
   {
     "name": "storage_size: 100000",
+    "creation_time": 1538178341.0,
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
     "config": {
       "storage_size": 100000
     },
-    "creation_time": 1538178341.0,
-    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
     "uuid": "11bc3605-02e9-400b-8dad-650c12d70ddc"
   },
   {
     "name": "batch_size: 256 - episodes: 50 - mcts_sims: 100 - clear_samples_after_epoch: True",
-    "config": {
-      "batch_size": 256,
-      "clear_samples_after_epoch": true,
-      "episodes": 50,
-      "mcts_sims": 100
-    },
     "creation_time": 1538233155.0,
     "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "config": {
+      "mcts_sims": 100,
+      "clear_samples_after_epoch": true,
+      "batch_size": 256,
+      "episodes": 50
+    },
     "uuid": "e7d9727a-bb73-4e71-9c43-99d190c36135"
   },
   {
     "name": "hidden_neurons: 256 - episodes: 50 - mcts_sims: 100 - clear_samples_after_epoch: True",
-    "config": {
-      "clear_samples_after_epoch": true,
-      "hidden_neurons": 256,
-      "episodes": 50,
-      "mcts_sims": 100
-    },
     "creation_time": 1538236119.0,
     "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "config": {
+      "mcts_sims": 100,
+      "clear_samples_after_epoch": true,
+      "hidden_neurons": 256,
+      "episodes": 50
+    },
     "uuid": "631412f4-fe49-4aa0-ad86-61c33dd7cc9e"
-  },
-  {
-    "name": "mcts_sims: 100 - episodes: 50 - clear_samples_after_epoch: True",
-    "config": {
-      "clear_samples_after_epoch": true,
-      "episodes": 50,
-      "mcts_sims": 100
-    },
-    "creation_time": 1538398660.0,
-    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
-    "uuid": "5cd9e0e0-d719-49fa-8d87-885d7eee8e33"
-  },
-  {
-    "name": "clear_samples_after_epoch: True - policy_lr: 0.03 - episodes: 50 - mcts_sims: 100",
-    "config": {
-      "policy_lr": 0.03,
-      "episodes": 50,
-      "mcts_sims": 100,
-      "clear_samples_after_epoch": true
-    },
-    "creation_time": 1538417747.0,
-    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
-    "uuid": "7116d3d1-e410-4a37-ab3b-283a50fd4fea"
-  },
-  {
-    "name": "clear_samples_after_epoch: True - episodes: 50 - policy_momentum: 0 - mcts_sims: 100",
-    "config": {
-      "episodes": 50,
-      "mcts_sims": 100,
-      "clear_samples_after_epoch": true,
-      "policy_momentum": 0
-    },
-    "creation_time": 1538425179.0,
-    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
-    "uuid": "3769d5a0-44ab-4666-993f-d27e6d413bf9"
-  },
-  {
-    "name": "policy_lr: 0.3 - clear_samples_after_epoch: True - episodes: 50 - policy_momentum: 0 - mcts_sims: 100",
-    "config": {
-      "policy_lr": 0.3,
-      "episodes": 50,
-      "mcts_sims": 100,
-      "clear_samples_after_epoch": true,
-      "policy_momentum": 0
-    },
-    "creation_time": 1538425405.0,
-    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
-    "uuid": "41b84419-c325-46db-a581-b67ef154674a"
-  },
-  {
-    "name": "policy_lr: 0.5 - clear_samples_after_epoch: True - episodes: 50 - policy_momentum: 0 - mcts_sims: 100",
-    "config": {
-      "policy_lr": 0.5,
-      "episodes": 50,
-      "mcts_sims": 100,
-      "clear_samples_after_epoch": true,
-      "policy_momentum": 0
-    },
-    "creation_time": 1538425422.0,
-    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
-    "uuid": "83cafe78-d55f-4d3d-a9dc-9609e6c743b9"
-  },
-  {
-    "name": "policy_lr: 0.7 - clear_samples_after_epoch: True - episodes: 50 - policy_momentum: 0 - mcts_sims: 100",
-    "config": {
-      "policy_lr": 0.7,
-      "episodes": 50,
-      "mcts_sims": 100,
-      "clear_samples_after_epoch": true,
-      "policy_momentum": 0
-    },
-    "creation_time": 1538425559.0,
-    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
-    "uuid": "b21bf39c-edb0-44f8-a52f-3f40dfd6708d"
   }
 ]
