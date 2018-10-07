@@ -46,7 +46,7 @@ cdef class PredictionQueue:
 
 cdef class MCTSWorker:
 
-    def __cinit__(self, worker_id, rng, mcts_sims=20, exploration=0.1, only_one_step=False, step_exploration=0.1):
+    def __cinit__(self, worker_id, XorShfGenerator rng, MCTS mcts, mcts_sims=20, exploration=0.1, only_one_step=False, step_exploration=0.1):
         self.worker_id = worker_id
         self.mcts_sims = mcts_sims
         self.exploration = exploration
@@ -57,9 +57,12 @@ cdef class MCTSWorker:
         self.step_exploration = step_exploration
         self.exploration_mode.resize(2)
         self.rng = rng
+        self.mcts = mcts
 
     def __dealloc__(self):
         self._clear_nodes()
+
+
 
     cdef void _clear_nodes(self):
         for i in range(self.nodes.size()):
@@ -255,13 +258,8 @@ cdef class MCTSWorker:
             if p_step.back() == 0:
                 number_of_zero_p += 1
 
-        cdef int r
-        if self.rng.randFloat() < self.step_exploration:
-            action[0] = self.rng.rand() % p_step.size()
-            exploration_mode_activated[0] = p_step[action[0]] == 0
-        else:
-            action[0] = self.softmax_step(&p_step)
-            exploration_mode_activated[0] = False
+        action[0] = self.softmax_step(&p_step)
+        exploration_mode_activated[0] = self.rng.randFloat() < self.step_exploration
 
         return True
 
@@ -297,6 +295,21 @@ cdef class MCTSWorker:
             finished = self.mcts_game_step(env, queue, &p, &v, &a, &exploration_mode_activated)
             if not finished:
                 return False
+
+            if exploration_mode_activated:
+                env.set_state(&self.root.env_state)
+
+                rand_a = self.rng.rand() % env.players[env.current_player].hand_cards.size()
+                env.step(env.players[env.current_player].hand_cards[rand_a].id, &obs)
+
+                if not env.is_done():
+                    new_worker = self.mcts.duplicate_worker(self, env)
+
+                    if self.root.childs[rand_a].p == 0:
+                        new_worker.exploration_mode[self.root.current_player] = True
+                        new_worker.exploration_player = self.root.current_player
+
+
             env.set_state(&self.root.env_state)
 
             env.regenerate_obs(&obs)
@@ -357,7 +370,8 @@ cdef class MCTS:
         self.worker = []
         self.rng = rng
         for i in range(episodes):
-            self.worker.append(MCTSWorker(i, self.rng, mcts_sims, exploration, only_one_step, step_exploration))
+            self.worker.append(MCTSWorker(i, self.rng, self, mcts_sims, exploration, only_one_step, step_exploration))
+        self.unused_worker = []
 
     cpdef void mcts_generate(self, WattenEnv env, Model model, Storage storage, ModelRating rating, bool reset_env=True):
         cdef PredictionQueue queue = PredictionQueue()
@@ -373,16 +387,32 @@ cdef class MCTS:
         cdef bool finished = False
         while not finished:
             finished = True
-            for i in range(len(self.worker)):
+            i = 0
+            while i < len(self.worker):
                 current_worker = <MCTSWorker>(self.worker[i])
                 if not current_worker.finished:
                     current_worker.mcts_game(env, queue, storage)
                     if not current_worker.finished:
                         finished = False
 
+                i += 1
+
             if not finished:
                 queue.do_prediction(env, model, self.worker)
 
+        for i in range(self.episodes, len(self.worker)):
+            self.unused_worker.append(self.worker.pop())
+
+    cdef MCTSWorker duplicate_worker(self, MCTSWorker worker, WattenEnv env):
+        cdef MCTSWorker newWorker
+        if len(self.unused_worker) > 0:
+            newWorker = self.unused_worker.pop()
+        else:
+            newWorker = MCTSWorker(len(self.worker), self.rng, self, worker.mcts_sims, worker.exploration, worker.only_one_step, worker.step_exploration)
+        newWorker.reset(env)
+        newWorker.exploration_mode = worker.exploration_mode
+        self.worker.append(newWorker)
+        return newWorker
 
     cdef void draw_tree(self, MCTSState* root, int tree_depth=5, object tree_path=[]):
         dot = pydot.Dot()

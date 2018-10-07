@@ -33,6 +33,7 @@ cdef class MCTSWorker:
     cdef vector[bool] exploration_mode
     cdef float step_exploration
     cdef XorShfGenerator rng
+    cdef MCTS mcts
 
     cdef Observation _obs
     cdef Observation _full_obs
@@ -57,8 +58,10 @@ cdef class MCTS:
     cdef vector[Card*] _hand_cards
     cdef ModelOutput _prediction
     cdef object worker
+    cdef object unused_worker
     cdef XorShfGenerator rng
 
+    cdef MCTSWorker duplicate_worker(self, MCTSWorker worker, WattenEnv env)
     cpdef void mcts_generate(self, WattenEnv env, Model model, Storage storage, ModelRating rating, bool reset_env=?)
     cdef void draw_tree(self, MCTSState* root, int tree_depth=?, object tree_path=?)
     cdef object create_nodes(self, MCTSState* root, object dot, int tree_depth, object tree_path, int id=?)
