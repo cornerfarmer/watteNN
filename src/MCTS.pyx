@@ -284,7 +284,7 @@ cdef class MCTSWorker:
         cdef MCTSState tmp
 
         cdef vector[float] p
-        cdef int storage_index, a
+        cdef int storage_index, a, rand_a
         cdef float v
         cdef env_is_done = False
         cdef string key
@@ -299,15 +299,16 @@ cdef class MCTSWorker:
             if exploration_mode_activated:
                 env.set_state(&self.root.env_state)
 
-                rand_a = self.rng.rand() % env.players[env.current_player].hand_cards.size()
-                env.step(env.players[env.current_player].hand_cards[rand_a].id, &obs)
+                rand_a = self.rng.rand() % 3
+                if rand_a < env.players[env.current_player].hand_cards.size():
+                    env.step(env.players[env.current_player].hand_cards[rand_a].id, &obs)
 
-                if not env.is_done():
-                    new_worker = self.mcts.duplicate_worker(self, env)
+                    if not env.is_done():
+                        new_worker = self.mcts.duplicate_worker(self, env)
 
-                    if self.root.childs[rand_a].p == 0:
-                        new_worker.exploration_mode[self.root.current_player] = True
-                        new_worker.exploration_player = self.root.current_player
+                        if self.root.childs[rand_a].p == 0:
+                            new_worker.exploration_mode[self.root.current_player] = True
+                            new_worker.exploration_player = self.root.current_player
 
 
             env.set_state(&self.root.env_state)
