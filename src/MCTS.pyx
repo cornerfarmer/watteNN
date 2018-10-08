@@ -268,6 +268,7 @@ cdef class MCTSWorker:
         state.n = 0
         state.w = 0
         state.v = 0
+        state.parent = NULL
         state.p = 1
         state.env_state = env.get_state()
         state.current_player = env.current_player
@@ -300,7 +301,7 @@ cdef class MCTSWorker:
                 env.set_state(&self.root.env_state)
 
                 rand_a = self.rng.rand() % 3
-                if rand_a < env.players[env.current_player].hand_cards.size():
+                if rand_a < env.players[env.current_player].hand_cards.size() and self.root.childs[rand_a].p == 0:
                     env.step(env.players[env.current_player].hand_cards[rand_a].id, &obs)
 
                     if not env.is_done():
@@ -316,11 +317,12 @@ cdef class MCTSWorker:
             env.regenerate_obs(&obs)
             env.regenerate_full_obs(&full_obs)
 
-            storage_index = self.value_storage.add_item()
-            self.value_storage.data[storage_index].obs = full_obs
-            self.value_storage.data[storage_index].output.v = v
-            self.value_storage.data[storage_index].value_net = True
-
+            storage_index = storage.add_item()
+            storage.data[storage_index].obs = full_obs
+            storage.data[storage_index].output.v = v
+            storage.data[storage_index].value_net = True
+            if abs(v - self.root.v * (-1 if self.root.current_player == 1 else 1)) > 0.1:
+                print(v, self.root.v * (-1 if self.root.current_player == 1 else 1), self.exploration_mode)
             exploration_mode_active = self.exploration_mode[0] or self.exploration_mode[1]
 
             #
@@ -340,8 +342,8 @@ cdef class MCTSWorker:
                     #if obs.sets[0][5][0] == 1 and obs.sets[1][5][0] == 1 and obs.sets[1][6][2] == 1 and obs.sets[0][4][3] == 1:
                     #if obs.sets[0][4][0] == 1 and obs.sets[1][4][0] == 1 and obs.sets[0][7][2] == 1 and obs.sets[1][5][3] == 1:
                     #    print(storage.data[storage_index].weight, storage.data[storage_index].output.p, p)
-                    if obs.sets[0][6][0] == 1 and obs.sets[1][4][0] == 1 and obs.sets[0][5][2] == 1 and obs.sets[1][5][3] == 1:
-                        print(storage.data[storage_index].weight, p, self.exploration_mode, exploration_mode_active)
+                    if obs.sets[0][4][0] == 1 and obs.sets[1][5][0] == 1 and obs.sets[1][4][2] == 1 and obs.sets[0][7][3] == 1:
+                        print(storage.data[storage_index].weight, p, self.exploration_mode, exploration_mode_active, card.id, 0 if self.root.parent == NULL else (1 if self.root.parent.parent == NULL else 2))
                 j += 1
             if self.root.childs[a].p == 0:
                 self.exploration_mode[self.root.current_player] = True
@@ -359,7 +361,7 @@ cdef class MCTSWorker:
         #for i in range(self.value_storage.number_of_samples):
         #    self.value_storage.data[i].output.v *= (1 if env.last_winner is 0 else -1)
 
-        storage.copy_from(self.value_storage)
+        #storage.copy_from(self.value_storage)
 
         self.finished = True
         return True
@@ -401,13 +403,17 @@ cdef class MCTS:
             if not finished:
                 queue.do_prediction(env, model, self.worker)
 
+
         for i in range(self.episodes, len(self.worker)):
             self.unused_worker.append(self.worker.pop())
 
+
+
     cdef MCTSWorker duplicate_worker(self, MCTSWorker worker, WattenEnv env):
         cdef MCTSWorker newWorker
-        if len(self.unused_worker) > 0:
+        if False and len(self.unused_worker) > 0:
             newWorker = self.unused_worker.pop()
+            newWorker.worker_id = len(self.worker)
         else:
             newWorker = MCTSWorker(len(self.worker), self.rng, self, worker.mcts_sims, worker.exploration, worker.only_one_step, worker.step_exploration)
         newWorker.reset(env)

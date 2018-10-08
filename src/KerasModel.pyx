@@ -256,8 +256,8 @@ cdef class KerasModel(Model):
 
         #print("Loss ", self.model.test_on_batch([input1, input2], [output1, output2]))
         cdef vector[float] loss
-        loss.push_back(self.play_model.fit([play_input1, play_input2], [play_output1], epochs=epochs, batch_size=min(play_index, self.batch_size), sample_weight=[play_weights[0]], verbose=False, callbacks=[]).history['loss'][-1])
-        #loss.push_back(0)
+        #loss.push_back(self.play_model.fit([play_input1, play_input2], [play_output1], epochs=epochs, batch_size=min(play_index, self.batch_size), sample_weight=[play_weights[0]], verbose=False, callbacks=[]).history['loss'][-1])
+        loss.push_back(0)
         loss.push_back(self.value_model.fit([value_input1, value_input2], [value_output1], epochs=epochs, batch_size=min(value_index, self.batch_size), callbacks=[]).history['loss'][-1])
         if choose_index > 0:
             loss.push_back(self.choose_model.fit([choose_input1], [choose_output1, choose_output2], epochs=epochs, batch_size=min(choose_index, self.batch_size)).history['loss'][-1])
@@ -265,7 +265,7 @@ cdef class KerasModel(Model):
             loss.push_back(0)
         #print("Loss ", self.model.test_on_batch([input1, input2], [output1, output2]))
         #print(self.model.get_weights()[-4:-2])
-
+        print(loss)
         #if self.clean_opt_weights is None:
         #    self.clean_opt_weights = self.model.optimizer.get_weights()
         #    for weight in self.clean_opt_weights:
