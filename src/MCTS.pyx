@@ -321,11 +321,13 @@ cdef class MCTSWorker:
             storage.data[storage_index].obs = full_obs
             storage.data[storage_index].output.v = v
             storage.data[storage_index].value_net = True
-            if abs(v - self.root.v * (-1 if self.root.current_player == 1 else 1)) > 0.1:
-                print(v, self.root.v * (-1 if self.root.current_player == 1 else 1), self.exploration_mode)
-            exploration_mode_active = self.exploration_mode[0] or self.exploration_mode[1]
 
+            exploration_mode_active = self.exploration_mode[0] or self.exploration_mode[1]
             #
+            #other = ""
+            #for card in env.players[1 - env.current_player].hand_cards:
+            #    other += str(card.id) + ", "
+
             j = 0
             for card in env.players[env.current_player].hand_cards:
                 if p[j] > -1:
@@ -335,15 +337,17 @@ cdef class MCTSWorker:
                         storage.data[storage_index].output.p[i] = (i == card.id)
                     storage.data[storage_index].weight = (p[j] + 1) / 2
                     if exploration_mode_active and self.exploration_mode[1 - env.current_player]:
-                        storage.data[storage_index].weight *= 0.01
+                        storage.data[storage_index].weight *= 0.1
 
                     storage.data[storage_index].value_net = False
                     #if obs.sets[0][4][0] == 1 and obs.sets[1][4][0] == 1 and obs.sets[1][7][0] == 1 and obs.sets[1][5][1] == 1:
                     #if obs.sets[0][5][0] == 1 and obs.sets[1][5][0] == 1 and obs.sets[1][6][2] == 1 and obs.sets[0][4][3] == 1:
                     #if obs.sets[0][4][0] == 1 and obs.sets[1][4][0] == 1 and obs.sets[0][7][2] == 1 and obs.sets[1][5][3] == 1:
                     #    print(storage.data[storage_index].weight, storage.data[storage_index].output.p, p)
-                    if obs.sets[0][4][0] == 1 and obs.sets[1][5][0] == 1 and obs.sets[1][4][2] == 1 and obs.sets[0][7][3] == 1:
-                        print(storage.data[storage_index].weight, p, self.exploration_mode, exploration_mode_active, card.id, 0 if self.root.parent == NULL else (1 if self.root.parent.parent == NULL else 2))
+                    #if obs.sets[0][5][0] == 1 and obs.sets[1][6][0] == 1 and obs.sets[1][5][2] == 1 and obs.sets[0][6][3] == 1:
+                    #    if other == '12, 15, ' or other == '15, 12, ':
+                    #        print(self.root.p)
+                    #    print(storage.data[storage_index].weight, p, self.exploration_mode, exploration_mode_active, card.id, 0 if self.root.parent == NULL else (1 if self.root.parent.parent == NULL else 2), other)
                 j += 1
             if self.root.childs[a].p == 0:
                 self.exploration_mode[self.root.current_player] = True
@@ -411,7 +415,7 @@ cdef class MCTS:
 
     cdef MCTSWorker duplicate_worker(self, MCTSWorker worker, WattenEnv env):
         cdef MCTSWorker newWorker
-        if False and len(self.unused_worker) > 0:
+        if len(self.unused_worker) > 0:
             newWorker = self.unused_worker.pop()
             newWorker.worker_id = len(self.worker)
         else:

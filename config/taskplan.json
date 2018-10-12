@@ -386,5 +386,63 @@
     "uuid": "ab552520-be36-4b67-8888-3c826c6679bf",
     "creation_time": 1538604604.0,
     "name": "batch_size: 256 - clear_samples_after_epoch: True - exploit_interval: 500 - mcts_sims: 100 - policy_lr: 0.5 - policy_momentum: 0.99 - step_exploration: 0.3"
+  },
+  {
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "config": {
+      "clear_samples_after_epoch": true,
+      "episodes": 50,
+      "mcts_sims": 100,
+      "policy_momentum": 0.99,
+      "step_exploration": 0.9,
+      "value_lr": 0.005
+    },
+    "uuid": "8e079086-bae3-4896-8412-2b335febab14",
+    "creation_time": 1539201304.0,
+    "name": "clear_samples_after_epoch: True - episodes: 50 - mcts_sims: 100 - policy_momentum: 0.99 - step_exploration: 0.9 - value_lr: 0.005"
+  },
+  {
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "config": {
+      "clear_samples_after_epoch": true,
+      "episodes": 50,
+      "mcts_sims": 100,
+      "policy_lr": 0.5,
+      "policy_momentum": 0.99,
+      "step_exploration": 0.9,
+      "value_lr": 0.005
+    },
+    "uuid": "91147ec6-ee41-42c7-9320-8186c87a9daf",
+    "creation_time": 1539201347.0,
+    "name": "clear_samples_after_epoch: True - episodes: 50 - mcts_sims: 100 - policy_lr: 0.5 - policy_momentum: 0.99 - step_exploration: 0.9 - value_lr: 0.005"
+  },
+  {
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "config": {
+      "clear_samples_after_epoch": true,
+      "episodes": 50,
+      "mcts_sims": 100,
+      "policy_lr": 0.25,
+      "policy_momentum": 0.99,
+      "step_exploration": 0.9,
+      "value_lr": 0.005
+    },
+    "uuid": "c7954c53-760d-4318-8969-dba1c07799c0",
+    "creation_time": 1539201600.0,
+    "name": "clear_samples_after_epoch: True - episodes: 50 - mcts_sims: 100 - policy_lr: 0.25 - policy_momentum: 0.99 - step_exploration: 0.9 - value_lr: 0.005"
+  },
+  {
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "config": {
+      "clear_samples_after_epoch": true,
+      "episodes": 50,
+      "mcts_sims": 100,
+      "policy_momentum": 0.99,
+      "step_exploration": 0.9,
+      "value_lr": 0.005
+    },
+    "uuid": "7e9db469-0d41-4f76-b89c-60ebd6d99797",
+    "creation_time": 1539208878.0,
+    "name": "clear_samples_after_epoch: True - episodes: 50 - mcts_sims: 100 - policy_momentum: 0.99 - step_exploration: 0.9 - value_lr: 0.005"
   }
 ]

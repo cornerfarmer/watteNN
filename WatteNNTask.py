@@ -73,7 +73,7 @@ class WatteNNTask(taskplan.Task):
 
         if self.preset.get_bool("minimal_env") and current_iteration % self.preset.get_int("exploit_interval") == 0:
             self.best_model.copy_weights_from(self.model)
-            table, avg_diff_on, avg_diff_off, max_diff, v_loss_on, v_loss_off, v_based_avg_diff_on, v_based_avg_diff_off = self.game.draw_game_tree(self.best_model, self.rating, False, None, None)
+            table, avg_diff_on, avg_diff_off, max_diff, v_loss_on, v_loss_off, v_based_avg_diff_on, v_based_avg_diff_off = self.game.draw_game_tree(self.best_model, self.rating, False, 241, None, "trees/" + str(current_iteration) + ".svg")
 
             tensorboard_writer.add_summary(tf.Summary(value=[
                 tf.Summary.Value(tag="pbe/on", simple_value=avg_diff_on),

@@ -197,6 +197,7 @@ cdef class Game:
                 node.set("label", node.get("label").replace("$TRUE_V$", '%.2f' % ((total_win_prob * 2 - 1) * (1 if current_player is 0 else -1))))
 
             v_error = abs(output.v - (total_win_prob * 2 - 1) * (1 if current_player is 0 else -1))
+
             if exploration_mode_enabled and exploration_mode[current_player]:
                 self.v_loss_off_sum += v_error
                 self.v_loss_off_n += 1
@@ -217,7 +218,7 @@ cdef class Game:
 
         return next_id, total_win_prob, v_based_total_win_prob
 
-    cpdef draw_game_tree(self, Model model, ModelRating modelRating, use_cache, tree_ind, debug_tree_key):
+    cpdef draw_game_tree(self, Model model, ModelRating modelRating, use_cache, tree_ind, debug_tree_key, tree_path='tree.svg'):
 
         dot = pydot.Dot()
         dot.set('rankdir', 'TB')
@@ -324,7 +325,7 @@ cdef class Game:
             self.env.regenerate_obs(&obs)
             self.game_tree_step(model, obs, dot, None, 0, 1, 0, "", table, True, 0, [False, False])
             png_str = dot.create_png(prog='dot')
-            dot.write_svg('tree.svg')
+            dot.write_svg(tree_path)
 
             sio = BytesIO()
             sio.write(png_str)
