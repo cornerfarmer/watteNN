@@ -324,9 +324,9 @@ cdef class MCTSWorker:
 
             exploration_mode_active = self.exploration_mode[0] or self.exploration_mode[1]
             #
-            #other = ""
-            #for card in env.players[1 - env.current_player].hand_cards:
-            #    other += str(card.id) + ", "
+            other = ""
+            for card in env.players[1 - env.current_player].hand_cards:
+                other += str(card.id) + ", "
 
             j = 0
             for card in env.players[env.current_player].hand_cards:
@@ -344,10 +344,10 @@ cdef class MCTSWorker:
                     #if obs.sets[0][5][0] == 1 and obs.sets[1][5][0] == 1 and obs.sets[1][6][2] == 1 and obs.sets[0][4][3] == 1:
                     #if obs.sets[0][4][0] == 1 and obs.sets[1][4][0] == 1 and obs.sets[0][7][2] == 1 and obs.sets[1][5][3] == 1:
                     #    print(storage.data[storage_index].weight, storage.data[storage_index].output.p, p)
-                    #if obs.sets[0][5][0] == 1 and obs.sets[1][6][0] == 1 and obs.sets[1][5][2] == 1 and obs.sets[0][6][3] == 1:
+                    if obs.sets[0][4][0] == 1 and obs.sets[1][6][0] == 1 and obs.sets[1][5][2] == 1 and obs.sets[0][5][3] == 1:
                     #    if other == '12, 15, ' or other == '15, 12, ':
                     #        print(self.root.p)
-                    #    print(storage.data[storage_index].weight, p, self.exploration_mode, exploration_mode_active, card.id, 0 if self.root.parent == NULL else (1 if self.root.parent.parent == NULL else 2), other)
+                        print(storage.data[storage_index].weight, p, self.exploration_mode, exploration_mode_active, card.id, 0 if self.root.parent == NULL else (1 if self.root.parent.parent == NULL else 2), other)
                 j += 1
             if self.root.childs[a].p == 0:
                 self.exploration_mode[self.root.current_player] = True

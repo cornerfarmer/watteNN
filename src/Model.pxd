@@ -4,7 +4,7 @@ from libcpp.vector cimport vector
 from libcpp cimport bool
 from gym_watten.envs.watten_env cimport Observation, Card
 from src.Storage cimport Storage
-from src cimport ModelOutput, Experience
+from src cimport ModelOutput
 
 cdef class Model:
     cpdef vector[float] memorize_storage(self, Storage storage, bool clear_afterwards=?, int epochs=?, int number_of_samples=?)

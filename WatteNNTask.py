@@ -24,9 +24,9 @@ class WatteNNTask(taskplan.Task):
         super().__init__(preset, preset_pipe, logger)
         self.sum = 0
         self.env = WattenEnv(self.preset.get_bool("minimal_env"))
-        self.model = KerasModel(self.env, self.preset.get_int("hidden_neurons"), self.preset.get_int("batch_size"), self.preset.get_float("policy_lr"), self.preset.get_float("policy_momentum"), self.preset.get_float("value_lr"), self.preset.get_float("value_momentum"), 0.15, self.preset.get_float("equalizer"))
-        self.best_model = KerasModel(self.env, self.preset.get_int("hidden_neurons"), self.preset.get_int("batch_size"), self.preset.get_float("policy_lr"), self.preset.get_float("policy_momentum"), self.preset.get_float("value_lr"), self.preset.get_float("value_momentum"), 0.15, self.preset.get_float("equalizer"))
-        self.train_model = KerasModel(self.env, self.preset.get_int("hidden_neurons"), self.preset.get_int("batch_size"), self.preset.get_float("policy_lr"), self.preset.get_float("policy_momentum"), self.preset.get_float("value_lr"), self.preset.get_float("value_momentum"), 0.15, self.preset.get_float("equalizer"))
+        self.model = LookUp()#KerasModel(self.env, self.preset.get_int("hidden_neurons"), self.preset.get_int("batch_size"), self.preset.get_float("policy_lr"), self.preset.get_float("policy_momentum"), self.preset.get_float("value_lr"), self.preset.get_float("value_momentum"), 0.15, self.preset.get_float("equalizer"))
+        self.best_model = LookUp()#KerasModel(self.env, self.preset.get_int("hidden_neurons"), self.preset.get_int("batch_size"), self.preset.get_float("policy_lr"), self.preset.get_float("policy_momentum"), self.preset.get_float("value_lr"), self.preset.get_float("value_momentum"), 0.15, self.preset.get_float("equalizer"))
+        self.train_model = LookUp()#KerasModel(self.env, self.preset.get_int("hidden_neurons"), self.preset.get_int("batch_size"), self.preset.get_float("policy_lr"), self.preset.get_float("policy_momentum"), self.preset.get_float("value_lr"), self.preset.get_float("value_momentum"), 0.15, self.preset.get_float("equalizer"))
         self.storage = Storage(self.preset.get_int("storage_size"))
         self.rng = XorShfGenerator()
         self.mcts = MCTS(self.rng, self.preset.get_int("episodes"), self.preset.get_int("mcts_sims"), exploration=self.preset.get_float("exploration"), step_exploration=self.preset.get_float("step_exploration"))
@@ -73,7 +73,7 @@ class WatteNNTask(taskplan.Task):
 
         if self.preset.get_bool("minimal_env") and current_iteration % self.preset.get_int("exploit_interval") == 0:
             self.best_model.copy_weights_from(self.model)
-            table, avg_diff_on, avg_diff_off, max_diff, v_loss_on, v_loss_off, v_based_avg_diff_on, v_based_avg_diff_off = self.game.draw_game_tree(self.best_model, self.rating, False, 241, None, "trees/" + str(current_iteration) + ".svg")
+            table, avg_diff_on, avg_diff_off, max_diff, v_loss_on, v_loss_off, v_based_avg_diff_on, v_based_avg_diff_off = self.game.draw_game_tree(self.best_model, self.rating, False, None, None, "trees/" + str(current_iteration) + ".svg")
 
             tensorboard_writer.add_summary(tf.Summary(value=[
                 tf.Summary.Value(tag="pbe/on", simple_value=avg_diff_on),

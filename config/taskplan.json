@@ -3,446 +3,479 @@
     "abstract": true,
     "name": "Default",
     "creation_time": 1533646564.381098,
-    "uuid": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
     "config": {
+      "checkpoint_interval": 0,
       "save_interval": 0,
-      "mcts_sims": 40,
-      "policy_lr": 0.1,
-      "policy_momentum": 0.9,
-      "minimal_env": true,
-      "objective_opponent": false,
-      "clear_samples_after_epoch": false,
-      "hidden_neurons": 128,
       "batch_size": 128,
-      "episodes": 100,
-      "epochs": 1,
-      "value_momentum": 0.9,
-      "equalizer": 0,
-      "exploit_interval": 100,
-      "exploration": 0.1,
+      "hidden_neurons": 128,
       "step_exploration": 0.1,
-      "value_lr": 0.01,
-      "storage_size": 10000,
+      "equalizer": 0,
+      "value_momentum": 0.9,
+      "episodes": 100,
+      "objective_opponent": false,
       "clip": 0.15,
-      "sample_size": 0
-    }
+      "epochs": 1,
+      "value_lr": 0.01,
+      "policy_lr": 0.1,
+      "exploit_interval": 100,
+      "policy_momentum": 0.9,
+      "sample_size": 0,
+      "clear_samples_after_epoch": false,
+      "storage_size": 10000,
+      "mcts_sims": 40,
+      "minimal_env": true,
+      "exploration": 0.1
+    },
+    "uuid": "75c5f09b-cafd-43c7-be1d-53cae4879d55"
   },
   {
     "name": "empty",
     "creation_time": 1537824892.0,
-    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
     "config": {},
-    "uuid": "b960eb06-a46d-4a9e-93b2-252f73794eaf"
+    "uuid": "b960eb06-a46d-4a9e-93b2-252f73794eaf",
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55"
   },
   {
     "name": "hidden_neurons: 256",
     "creation_time": 1537825039.0,
-    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
     "config": {
       "hidden_neurons": 256
     },
-    "uuid": "246ab00f-45c8-46c2-ae26-563331167f90"
+    "uuid": "246ab00f-45c8-46c2-ae26-563331167f90",
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55"
   },
   {
     "name": "mcts_sims: 20",
     "creation_time": 1537825075.0,
-    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
     "config": {
       "mcts_sims": 20
     },
-    "uuid": "62d82648-7f1e-4c8e-81a2-30c7ffbbf381"
+    "uuid": "62d82648-7f1e-4c8e-81a2-30c7ffbbf381",
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55"
   },
   {
     "name": "policy_momentum: 0.7",
     "creation_time": 1537825089.0,
-    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
     "config": {
       "policy_momentum": 0.7
     },
-    "uuid": "067dc703-71d0-4820-a18e-3c1df75ec6da"
+    "uuid": "067dc703-71d0-4820-a18e-3c1df75ec6da",
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55"
   },
   {
     "name": "policy_momentum: 0.5",
     "creation_time": 1537825101.0,
-    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
     "config": {
       "policy_momentum": 0.5
     },
-    "uuid": "c04e5938-44e9-4b40-921d-a291f62f098f"
+    "uuid": "c04e5938-44e9-4b40-921d-a291f62f098f",
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55"
   },
   {
     "name": "policy_momentum: 0.3",
     "creation_time": 1537825113.0,
-    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
     "config": {
       "policy_momentum": 0.3
     },
-    "uuid": "0dd71844-5e85-45cc-aa62-77b72ddc1820"
+    "uuid": "0dd71844-5e85-45cc-aa62-77b72ddc1820",
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55"
   },
   {
     "name": "episodes: 500 - storage_size: 50000",
     "creation_time": 1537825168.0,
-    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
     "config": {
       "episodes": 500,
       "storage_size": 50000
     },
-    "uuid": "8af19b7c-b7d6-4032-b8a8-cc192c8738ee"
+    "uuid": "8af19b7c-b7d6-4032-b8a8-cc192c8738ee",
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55"
   },
   {
     "name": "hidden_neurons: 512",
     "creation_time": 1537908661.0,
-    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
     "config": {
       "hidden_neurons": 512
     },
-    "uuid": "b9b4028c-ab37-4756-a2f8-2580494864b1"
+    "uuid": "b9b4028c-ab37-4756-a2f8-2580494864b1",
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55"
   },
   {
     "name": "hidden_neurons: 1024",
     "creation_time": 1537908672.0,
-    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
     "config": {
       "hidden_neurons": 1024
     },
-    "uuid": "9221c88a-263c-4147-ac1e-91604e1fb22a"
+    "uuid": "9221c88a-263c-4147-ac1e-91604e1fb22a",
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55"
   },
   {
     "name": "policy_lr: 0.2",
     "creation_time": 1537908703.0,
-    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
     "config": {
       "policy_lr": 0.2
     },
-    "uuid": "a71bbe6a-ac2f-44df-a640-614c42e18e68"
+    "uuid": "a71bbe6a-ac2f-44df-a640-614c42e18e68",
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55"
   },
   {
     "name": "episodes: 200",
     "creation_time": 1537985813.0,
-    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
     "config": {
       "episodes": 200
     },
-    "uuid": "8c46fc75-187f-4b2a-b676-0978e223eceb"
+    "uuid": "8c46fc75-187f-4b2a-b676-0978e223eceb",
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55"
   },
   {
     "name": "policy_lr: 0.05",
     "creation_time": 1537985991.0,
-    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
     "config": {
       "policy_lr": 0.05
     },
-    "uuid": "041465e8-4234-4e47-bab9-6f3a4b069c0d"
+    "uuid": "041465e8-4234-4e47-bab9-6f3a4b069c0d",
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55"
   },
   {
     "name": "mcts_sims: 80",
     "creation_time": 1537986020.0,
-    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
     "config": {
       "mcts_sims": 80
     },
-    "uuid": "8d77c0a7-c8bb-4561-b449-a458a73d8dd8"
+    "uuid": "8d77c0a7-c8bb-4561-b449-a458a73d8dd8",
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55"
   },
   {
     "name": "mcts_sims: 150",
     "creation_time": 1538126644.0,
-    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
     "config": {
       "mcts_sims": 150
     },
-    "uuid": "1cf98f8d-02f5-4c0c-8397-dc202a902264"
+    "uuid": "1cf98f8d-02f5-4c0c-8397-dc202a902264",
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55"
   },
   {
     "name": "storage_size: 100000",
     "creation_time": 1538178341.0,
-    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
     "config": {
       "storage_size": 100000
     },
-    "uuid": "11bc3605-02e9-400b-8dad-650c12d70ddc"
+    "uuid": "11bc3605-02e9-400b-8dad-650c12d70ddc",
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55"
   },
   {
     "name": "batch_size: 256 - episodes: 50 - mcts_sims: 100 - clear_samples_after_epoch: True",
     "creation_time": 1538233155.0,
-    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
     "config": {
-      "mcts_sims": 100,
       "clear_samples_after_epoch": true,
+      "episodes": 50,
       "batch_size": 256,
-      "episodes": 50
+      "mcts_sims": 100
     },
-    "uuid": "e7d9727a-bb73-4e71-9c43-99d190c36135"
+    "uuid": "e7d9727a-bb73-4e71-9c43-99d190c36135",
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55"
   },
   {
     "name": "hidden_neurons: 256 - episodes: 50 - mcts_sims: 100 - clear_samples_after_epoch: True",
-    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "creation_time": 1538236119.0,
     "config": {
       "clear_samples_after_epoch": true,
       "episodes": 50,
-      "exploit_interval": 500,
       "hidden_neurons": 256,
-      "mcts_sims": 100
+      "mcts_sims": 100,
+      "exploit_interval": 500
     },
     "uuid": "631412f4-fe49-4aa0-ad86-61c33dd7cc9e",
-    "creation_time": 1538236119.0
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55"
   },
   {
-    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "name": "clear_samples_after_epoch: True - episodes: 50 - exploit_interval: 500 - mcts_sims: 100",
+    "creation_time": 1538407561.0,
     "config": {
       "clear_samples_after_epoch": true,
       "episodes": 50,
-      "exploit_interval": 500,
-      "mcts_sims": 100
+      "mcts_sims": 100,
+      "exploit_interval": 500
     },
     "uuid": "99d4ed70-5ac6-4989-849a-95a868748357",
-    "creation_time": 1538407561.0,
-    "name": "clear_samples_after_epoch: True - episodes: 50 - exploit_interval: 500 - mcts_sims: 100"
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55"
   },
   {
-    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "name": "clear_samples_after_epoch: True - episodes: 50 - exploit_interval: 500 - mcts_sims: 100 - policy_momentum: 0.99 - step_exploration: 0.3",
+    "creation_time": 1538558675.0,
     "config": {
-      "clear_samples_after_epoch": true,
       "episodes": 50,
-      "exploit_interval": 500,
-      "mcts_sims": 100,
+      "step_exploration": 0.3,
       "policy_momentum": 0.99,
-      "step_exploration": 0.3
+      "clear_samples_after_epoch": true,
+      "mcts_sims": 100,
+      "exploit_interval": 500
     },
     "uuid": "0e9378b5-0c59-431c-9b64-3c888fe43ec3",
-    "creation_time": 1538558675.0,
-    "name": "clear_samples_after_epoch: True - episodes: 50 - exploit_interval: 500 - mcts_sims: 100 - policy_momentum: 0.99 - step_exploration: 0.3"
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55"
   },
   {
-    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "name": "clear_samples_after_epoch: True - episodes: 1 - exploit_interval: 500 - mcts_sims: 100 - policy_momentum: 0.99 - step_exploration: 0.3",
+    "creation_time": 1538565527.0,
     "config": {
-      "clear_samples_after_epoch": true,
       "episodes": 1,
-      "exploit_interval": 500,
-      "mcts_sims": 100,
+      "step_exploration": 0.3,
       "policy_momentum": 0.99,
-      "step_exploration": 0.3
+      "clear_samples_after_epoch": true,
+      "mcts_sims": 100,
+      "exploit_interval": 500
     },
     "uuid": "fdc66e97-18e0-4f64-9c6d-a0e8cc8e2a95",
-    "creation_time": 1538565527.0,
-    "name": "clear_samples_after_epoch: True - episodes: 1 - exploit_interval: 500 - mcts_sims: 100 - policy_momentum: 0.99 - step_exploration: 0.3"
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55"
   },
   {
-    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "name": "clear_samples_after_epoch: True - episodes: 10 - exploit_interval: 500 - mcts_sims: 100 - policy_momentum: 0.99 - step_exploration: 0.3",
+    "creation_time": 1538565554.0,
     "config": {
-      "clear_samples_after_epoch": true,
       "episodes": 10,
-      "exploit_interval": 500,
-      "mcts_sims": 100,
+      "step_exploration": 0.3,
       "policy_momentum": 0.99,
-      "step_exploration": 0.3
+      "clear_samples_after_epoch": true,
+      "mcts_sims": 100,
+      "exploit_interval": 500
     },
     "uuid": "82c79d92-f319-4763-97e9-1f63f18dfb02",
-    "creation_time": 1538565554.0,
-    "name": "clear_samples_after_epoch: True - episodes: 10 - exploit_interval: 500 - mcts_sims: 100 - policy_momentum: 0.99 - step_exploration: 0.3"
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55"
   },
   {
-    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "name": "clear_samples_after_epoch: True - exploit_interval: 500 - mcts_sims: 100 - policy_lr: 0.2 - policy_momentum: 0.99 - step_exploration: 0.3",
+    "creation_time": 1538575371.0,
     "config": {
       "clear_samples_after_epoch": true,
-      "exploit_interval": 500,
-      "mcts_sims": 100,
+      "step_exploration": 0.3,
       "policy_lr": 0.2,
       "policy_momentum": 0.99,
-      "step_exploration": 0.3
+      "mcts_sims": 100,
+      "exploit_interval": 500
     },
     "uuid": "826f8f64-eaa0-45ca-a029-a7686e70b600",
-    "creation_time": 1538575371.0,
-    "name": "clear_samples_after_epoch: True - exploit_interval: 500 - mcts_sims: 100 - policy_lr: 0.2 - policy_momentum: 0.99 - step_exploration: 0.3"
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55"
   },
   {
-    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "name": "clear_samples_after_epoch: True - exploit_interval: 500 - mcts_sims: 100 - policy_lr: 0.3 - policy_momentum: 0.99 - step_exploration: 0.3",
+    "creation_time": 1538575401.0,
     "config": {
       "clear_samples_after_epoch": true,
-      "exploit_interval": 500,
-      "mcts_sims": 100,
+      "step_exploration": 0.3,
       "policy_lr": 0.3,
       "policy_momentum": 0.99,
-      "step_exploration": 0.3
+      "mcts_sims": 100,
+      "exploit_interval": 500
     },
     "uuid": "152deb62-175c-491b-bf0f-1b23b21bfa51",
-    "creation_time": 1538575401.0,
-    "name": "clear_samples_after_epoch: True - exploit_interval: 500 - mcts_sims: 100 - policy_lr: 0.3 - policy_momentum: 0.99 - step_exploration: 0.3"
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55"
   },
   {
-    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "name": "clear_samples_after_epoch: True - exploit_interval: 500 - mcts_sims: 100 - policy_lr: 0.5 - policy_momentum: 0.99 - step_exploration: 0.3",
+    "creation_time": 1538578596.0,
     "config": {
       "clear_samples_after_epoch": true,
-      "exploit_interval": 500,
-      "mcts_sims": 100,
+      "step_exploration": 0.3,
       "policy_lr": 0.5,
       "policy_momentum": 0.99,
-      "step_exploration": 0.3
+      "mcts_sims": 100,
+      "exploit_interval": 500
     },
     "uuid": "2f6216ef-43ba-4fc9-bdbe-d06e8973fa21",
-    "creation_time": 1538578596.0,
-    "name": "clear_samples_after_epoch: True - exploit_interval: 500 - mcts_sims: 100 - policy_lr: 0.5 - policy_momentum: 0.99 - step_exploration: 0.3"
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55"
   },
   {
-    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "name": "clear_samples_after_epoch: True - exploit_interval: 500 - mcts_sims: 100 - policy_lr: 0.7 - policy_momentum: 0.99 - step_exploration: 0.3",
+    "creation_time": 1538578612.0,
     "config": {
       "clear_samples_after_epoch": true,
-      "exploit_interval": 500,
-      "mcts_sims": 100,
+      "step_exploration": 0.3,
       "policy_lr": 0.7,
       "policy_momentum": 0.99,
-      "step_exploration": 0.3
+      "mcts_sims": 100,
+      "exploit_interval": 500
     },
     "uuid": "b6d595ae-3072-4742-8f37-074b0b28b2d8",
-    "creation_time": 1538578612.0,
-    "name": "clear_samples_after_epoch: True - exploit_interval: 500 - mcts_sims: 100 - policy_lr: 0.7 - policy_momentum: 0.99 - step_exploration: 0.3"
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55"
   },
   {
-    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "name": "batch_size: 256 - clear_samples_after_epoch: True - exploit_interval: 500 - mcts_sims: 100 - policy_lr: 0.5 - policy_momentum: 0.99 - step_exploration: 0.3",
+    "creation_time": 1538582764.0,
     "config": {
-      "batch_size": 256,
       "clear_samples_after_epoch": true,
-      "exploit_interval": 500,
-      "mcts_sims": 100,
+      "batch_size": 256,
+      "step_exploration": 0.3,
       "policy_lr": 0.5,
       "policy_momentum": 0.99,
-      "step_exploration": 0.3
+      "mcts_sims": 100,
+      "exploit_interval": 500
     },
     "uuid": "2a84080f-2691-451b-89c3-2ed4afc47416",
-    "creation_time": 1538582764.0,
-    "name": "batch_size: 256 - clear_samples_after_epoch: True - exploit_interval: 500 - mcts_sims: 100 - policy_lr: 0.5 - policy_momentum: 0.99 - step_exploration: 0.3"
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55"
   },
   {
-    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "name": "batch_size: 64 - clear_samples_after_epoch: True - exploit_interval: 500 - mcts_sims: 100 - policy_lr: 0.5 - policy_momentum: 0.99 - step_exploration: 0.3",
+    "creation_time": 1538582804.0,
     "config": {
-      "batch_size": 64,
       "clear_samples_after_epoch": true,
-      "exploit_interval": 500,
-      "mcts_sims": 100,
+      "batch_size": 64,
+      "step_exploration": 0.3,
       "policy_lr": 0.5,
       "policy_momentum": 0.99,
-      "step_exploration": 0.3
+      "mcts_sims": 100,
+      "exploit_interval": 500
     },
     "uuid": "e8739da1-b905-4824-8f5e-b227f2728903",
-    "creation_time": 1538582804.0,
-    "name": "batch_size: 64 - clear_samples_after_epoch: True - exploit_interval: 500 - mcts_sims: 100 - policy_lr: 0.5 - policy_momentum: 0.99 - step_exploration: 0.3"
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55"
   },
   {
-    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "name": "batch_size: 256 - clear_samples_after_epoch: True - exploit_interval: 500 - mcts_sims: 100 - policy_lr: 2 - policy_momentum: 0.99 - step_exploration: 0.3",
+    "creation_time": 1538583699.0,
     "config": {
-      "batch_size": 256,
       "clear_samples_after_epoch": true,
-      "exploit_interval": 500,
-      "mcts_sims": 100,
+      "batch_size": 256,
+      "step_exploration": 0.3,
       "policy_lr": 2,
       "policy_momentum": 0.99,
-      "step_exploration": 0.3
+      "mcts_sims": 100,
+      "exploit_interval": 500
     },
     "uuid": "9e83ebc9-a3d6-43b0-a473-ca6397a2e12b",
-    "creation_time": 1538583699.0,
-    "name": "batch_size: 256 - clear_samples_after_epoch: True - exploit_interval: 500 - mcts_sims: 100 - policy_lr: 2 - policy_momentum: 0.99 - step_exploration: 0.3"
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55"
   },
   {
-    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "name": "batch_size: 256 - clear_samples_after_epoch: True - exploit_interval: 500 - mcts_sims: 100 - policy_lr: 1 - policy_momentum: 0.99 - step_exploration: 0.3",
+    "creation_time": 1538585668.0,
     "config": {
-      "batch_size": 256,
       "clear_samples_after_epoch": true,
-      "exploit_interval": 500,
-      "mcts_sims": 100,
+      "batch_size": 256,
+      "step_exploration": 0.3,
       "policy_lr": 1,
       "policy_momentum": 0.99,
-      "step_exploration": 0.3
+      "mcts_sims": 100,
+      "exploit_interval": 500
     },
     "uuid": "f66d2ff8-7488-46f6-8e5e-14ad67b3599b",
-    "creation_time": 1538585668.0,
-    "name": "batch_size: 256 - clear_samples_after_epoch: True - exploit_interval: 500 - mcts_sims: 100 - policy_lr: 1 - policy_momentum: 0.99 - step_exploration: 0.3"
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55"
   },
   {
-    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "name": "batch_size: 256 - clear_samples_after_epoch: True - exploit_interval: 500 - hidden_neurons: 256 - mcts_sims: 100 - policy_lr: 0.5 - policy_momentum: 0.99 - step_exploration: 0.3",
+    "creation_time": 1538604573.0,
     "config": {
-      "batch_size": 256,
       "clear_samples_after_epoch": true,
-      "exploit_interval": 500,
+      "batch_size": 256,
       "hidden_neurons": 256,
-      "mcts_sims": 100,
+      "step_exploration": 0.3,
       "policy_lr": 0.5,
       "policy_momentum": 0.99,
-      "step_exploration": 0.3
+      "mcts_sims": 100,
+      "exploit_interval": 500
     },
     "uuid": "18ec32f8-180e-4fce-9352-68f0745fcb67",
-    "creation_time": 1538604573.0,
-    "name": "batch_size: 256 - clear_samples_after_epoch: True - exploit_interval: 500 - hidden_neurons: 256 - mcts_sims: 100 - policy_lr: 0.5 - policy_momentum: 0.99 - step_exploration: 0.3"
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55"
   },
   {
-    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "name": "batch_size: 256 - clear_samples_after_epoch: True - exploit_interval: 500 - mcts_sims: 100 - policy_lr: 0.5 - policy_momentum: 0.99 - step_exploration: 0.3",
+    "creation_time": 1538604604.0,
     "config": {
-      "batch_size": 256,
       "clear_samples_after_epoch": true,
-      "exploit_interval": 500,
-      "mcts_sims": 100,
+      "batch_size": 256,
+      "step_exploration": 0.3,
       "policy_lr": 0.5,
       "policy_momentum": 0.99,
-      "step_exploration": 0.3
+      "mcts_sims": 100,
+      "exploit_interval": 500
     },
     "uuid": "ab552520-be36-4b67-8888-3c826c6679bf",
-    "creation_time": 1538604604.0,
-    "name": "batch_size: 256 - clear_samples_after_epoch: True - exploit_interval: 500 - mcts_sims: 100 - policy_lr: 0.5 - policy_momentum: 0.99 - step_exploration: 0.3"
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55"
   },
   {
-    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "name": "clear_samples_after_epoch: True - episodes: 50 - mcts_sims: 100 - policy_momentum: 0.99 - step_exploration: 0.9 - value_lr: 0.005",
+    "creation_time": 1539201304.0,
     "config": {
       "clear_samples_after_epoch": true,
-      "episodes": 50,
       "mcts_sims": 100,
+      "value_lr": 0.005,
       "policy_momentum": 0.99,
-      "step_exploration": 0.9,
-      "value_lr": 0.005
+      "episodes": 50,
+      "step_exploration": 0.9
     },
     "uuid": "8e079086-bae3-4896-8412-2b335febab14",
-    "creation_time": 1539201304.0,
-    "name": "clear_samples_after_epoch: True - episodes: 50 - mcts_sims: 100 - policy_momentum: 0.99 - step_exploration: 0.9 - value_lr: 0.005"
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55"
   },
   {
-    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "name": "clear_samples_after_epoch: True - episodes: 50 - mcts_sims: 100 - policy_lr: 0.5 - policy_momentum: 0.99 - step_exploration: 0.9 - value_lr: 0.005",
+    "creation_time": 1539201347.0,
     "config": {
       "clear_samples_after_epoch": true,
-      "episodes": 50,
       "mcts_sims": 100,
+      "value_lr": 0.005,
       "policy_lr": 0.5,
       "policy_momentum": 0.99,
-      "step_exploration": 0.9,
-      "value_lr": 0.005
+      "episodes": 50,
+      "step_exploration": 0.9
     },
     "uuid": "91147ec6-ee41-42c7-9320-8186c87a9daf",
-    "creation_time": 1539201347.0,
-    "name": "clear_samples_after_epoch: True - episodes: 50 - mcts_sims: 100 - policy_lr: 0.5 - policy_momentum: 0.99 - step_exploration: 0.9 - value_lr: 0.005"
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55"
   },
   {
-    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "name": "clear_samples_after_epoch: True - episodes: 50 - mcts_sims: 100 - policy_lr: 0.25 - policy_momentum: 0.99 - step_exploration: 0.9 - value_lr: 0.005",
+    "creation_time": 1539201600.0,
     "config": {
       "clear_samples_after_epoch": true,
-      "episodes": 50,
       "mcts_sims": 100,
+      "value_lr": 0.005,
       "policy_lr": 0.25,
       "policy_momentum": 0.99,
-      "step_exploration": 0.9,
-      "value_lr": 0.005
+      "episodes": 50,
+      "step_exploration": 0.9
     },
     "uuid": "c7954c53-760d-4318-8969-dba1c07799c0",
-    "creation_time": 1539201600.0,
-    "name": "clear_samples_after_epoch: True - episodes: 50 - mcts_sims: 100 - policy_lr: 0.25 - policy_momentum: 0.99 - step_exploration: 0.9 - value_lr: 0.005"
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55"
   },
   {
-    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "name": "clear_samples_after_epoch: True - episodes: 50 - mcts_sims: 100 - policy_momentum: 0.99 - step_exploration: 0.9 - value_lr: 0.005",
+    "creation_time": 1539208878.0,
     "config": {
       "clear_samples_after_epoch": true,
-      "episodes": 50,
       "mcts_sims": 100,
+      "value_lr": 0.005,
       "policy_momentum": 0.99,
-      "step_exploration": 0.9,
-      "value_lr": 0.005
+      "episodes": 50,
+      "step_exploration": 0.9
     },
     "uuid": "7e9db469-0d41-4f76-b89c-60ebd6d99797",
-    "creation_time": 1539208878.0,
-    "name": "clear_samples_after_epoch: True - episodes: 50 - mcts_sims: 100 - policy_momentum: 0.99 - step_exploration: 0.9 - value_lr: 0.005"
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55"
+  },
+  {
+    "name": "policy_lr: 0.5 - step_exploration: 0.9 - hidden_neurons: 256 - policy_momentum: 0.99 - episodes: 50 - mcts_sims: 100 - clear_samples_after_epoch: True - value_lr: 0.005",
+    "creation_time": 1539451910.0,
+    "config": {
+      "episodes": 50,
+      "hidden_neurons": 256,
+      "step_exploration": 0.9,
+      "policy_lr": 0.5,
+      "policy_momentum": 0.99,
+      "clear_samples_after_epoch": true,
+      "mcts_sims": 100,
+      "value_lr": 0.005
+    },
+    "uuid": "0a8b57dd-f2fd-4c6e-97d5-df7ca7f88044",
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55"
+  },
+  {
+    "name": "policy_lr: 0.5 - step_exploration: 0.9 - hidden_neurons: 512 - policy_momentum: 0.99 - episodes: 50 - mcts_sims: 100 - clear_samples_after_epoch: True - value_lr: 0.005",
+    "creation_time": 1539451938.0,
+    "config": {
+      "episodes": 50,
+      "hidden_neurons": 512,
+      "step_exploration": 0.9,
+      "policy_lr": 0.5,
+      "policy_momentum": 0.99,
+      "clear_samples_after_epoch": true,
+      "mcts_sims": 100,
+      "value_lr": 0.005
+    },
+    "uuid": "4b4902da-9895-4f0a-b7db-4c898a99be08",
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55"
   }
 ]

@@ -4,7 +4,7 @@ from libcpp.vector cimport vector
 from libcpp cimport bool
 from gym_watten.envs.watten_env cimport Observation, Card, WattenEnv
 from src.Storage cimport Storage
-from src cimport ModelOutput, Experience
+from src cimport ModelOutput
 from src.Model cimport Model
 
 cdef class KerasModel(Model):

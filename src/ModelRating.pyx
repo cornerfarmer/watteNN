@@ -108,7 +108,7 @@ cdef class ModelRating:
                 model_output.p[self.env.players[self.env.current_player].hand_cards[i].id] = correct_output[i] / n
 
             #print([card.id for card in self.env.players[self.env.current_player].hand_cards], obs.hand_cards)
-            self.memory.memorize(&obs, &model_output)
+            #self.memory.memorize(&obs, &model_output)
         else:
             self.memory.predict_single_p(&obs, &model_output)
 

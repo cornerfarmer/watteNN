@@ -7,9 +7,13 @@ cdef struct ModelOutput:
     float p[32]
     float v
 
-cdef struct Experience:
-    ModelOutput output
-    int n
+cdef struct ExperienceP:
+    float p[32]
+
+cdef struct ExperienceV:
+    vector[float] store
+    int next_id
+
 
 cdef cppclass MCTSState:
     vector[MCTSState*] childs
