@@ -337,7 +337,7 @@ cdef class MCTSWorker:
                         storage.data[storage_index].output.p[i] = (i == card.id)
                     storage.data[storage_index].weight = (p[j] + 1) / 2
                     if exploration_mode_active and self.exploration_mode[1 - env.current_player]:
-                        storage.data[storage_index].weight *= 0.1
+                        storage.data[storage_index].weight *= 0.01
 
                     storage.data[storage_index].value_net = False
                     #if obs.sets[0][4][0] == 1 and obs.sets[1][4][0] == 1 and obs.sets[1][7][0] == 1 and obs.sets[1][5][1] == 1:

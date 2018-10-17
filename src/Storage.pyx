@@ -26,6 +26,41 @@ cdef class Storage:
             self.next_index %= self.max_samples
             return new_index
 
+
+    cpdef void count_per_key(self, target_key):
+        cdef float sum[32]
+        for i in range(32):
+            sum[i] = 0
+
+        for i in range(self.number_of_samples):
+            if not self.data[i].value_net:
+                key = ""
+                hand_cards_key = ""
+                opponent_hand_cards_key = ""
+
+                for k in range(self.data[i].obs.sets[0][0].size()):
+                    for c in range(4):
+                        for v in range(8):
+                            if self.data[i].obs.sets[c][v][k] == 1:
+                                if k == 0:
+                                    hand_cards_key += str(c * 8 + v) + ","
+                                elif k == 1 and self.data[i].value_net:
+                                    opponent_hand_cards_key += str(c * 8 + v) + ","
+                                elif k == 1 or (k == 2 and self.data[i].value_net):
+                                    key = str(c * 8 + v) + ".1," + key
+                                elif k >= 2:
+                                    key = str(c * 8 + v) + "." + str(1 - self.data[i].obs.scalars[4 + k - (3 if self.data[i].value_net else 2)]) + "," + key
+                key += "-" + hand_cards_key
+
+                if target_key == key:
+                    for j in range(32):
+                        if self.data[i].output.p[j] == 1:
+                            sum[j] += self.data[i].weight
+
+
+        print(sum)
+
+
     cpdef void export_csv(self, file_name, WattenEnv env):
         with open(file_name, "w") as output:
             writer = csv.writer(output, lineterminator='\n')
