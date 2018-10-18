@@ -212,7 +212,7 @@ cdef class Game:
                     print(joint_prob)
 
                 if node_key not in table:
-                    table[node_key] = [model_probs, [], exploration_mode_enabled and not exploration_mode[1 - current_player]]
+                    table[node_key] = [model_probs, [], exploration_mode_enabled and exploration_mode[current_player]]
 
                 table[node_key][1].append([joint_prob if not exploration_mode_enabled or not exploration_mode[1 - current_player] else 0, win_prob_per_action, opponent_key, v_based_win_prob_per_action])
 

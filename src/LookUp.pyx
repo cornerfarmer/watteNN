@@ -49,7 +49,7 @@ cdef class LookUp(Model):
         for i in range(32):
             if storage.obs.sets[i / 8][i % 8][0] == 1 and storage.output.p[i] == 1:
                 prev = self.table_p[key].p[i]
-                self.table_p[key].p[i] += storage.weight * 0.001
+                self.table_p[key].p[i] += storage.weight * 0.005
                 self.table_p[key].p[i] = min(self.table_p[key].p[i], 1)
                 added = self.table_p[key].p[i] - prev
 

@@ -301,15 +301,15 @@ cdef class MCTSWorker:
                 env.set_state(&self.root.env_state)
 
                 rand_a = self.rng.rand() % 3
-                if rand_a < env.players[env.current_player].hand_cards.size() and self.root.childs[rand_a].p == 0:
+                if rand_a < env.players[env.current_player].hand_cards.size():
                     env.step(env.players[env.current_player].hand_cards[rand_a].id, &obs)
 
                     if not env.is_done():
                         new_worker = self.mcts.duplicate_worker(self, env)
 
-                        if self.root.childs[rand_a].p == 0:
-                            new_worker.exploration_mode[self.root.current_player] = True
-                            new_worker.exploration_player = self.root.current_player
+                        #if self.root.childs[rand_a].p == 0:
+                        new_worker.exploration_mode[self.root.current_player] = True
+                        new_worker.exploration_player = self.root.current_player
 
 
             env.set_state(&self.root.env_state)
@@ -337,7 +337,7 @@ cdef class MCTSWorker:
                         storage.data[storage_index].output.p[i] = (i == card.id)
                     storage.data[storage_index].weight = (p[j] + 1) / 2
                     if exploration_mode_active and self.exploration_mode[1 - env.current_player]:
-                        storage.data[storage_index].weight *= 0.01
+                        storage.data[storage_index].weight *= 0.001
 
                     storage.data[storage_index].value_net = False
                     #if obs.sets[0][4][0] == 1 and obs.sets[1][4][0] == 1 and obs.sets[1][7][0] == 1 and obs.sets[1][5][1] == 1:

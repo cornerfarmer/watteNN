@@ -3,4 +3,4 @@ from gym_watten.envs.watten_env import WattenEnv
 
 env = WattenEnv(True)
 rating = ModelRating(env)
-rating.find(",5.1-12,13,15,")
+rating.find(",15.1-5,6,7,")
