@@ -10,7 +10,7 @@ from src.XorShfGenerator import XorShfGenerator
 env = WattenEnv(True)
 rating = ModelRating(env)
 rng = XorShfGenerator()
-mcts = MCTS(rng, episodes=10000, mcts_sims=10000, exploration=0.1, step_exploration=0.9)
+mcts = MCTS(rng, episodes=1, mcts_sims=10000, exploration=0.1, step_exploration=0.9)
 #model = KerasModel(env, 128, equalizer=0, clip=0.15, batch_size=70214, policy_lr=100, policy_momentum=0.9, value_lr=0.005, value_momentum=0.9)
 model = LookUp()
 storage = Storage()

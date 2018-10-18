@@ -121,6 +121,7 @@ cdef class KerasModel(Model):
         policy_out = concatenate([convnet, input_2])
         #policy_out = Dense(64, activation='relu')(policy_out)
         #policy_out = Dense(128, activation='relu')(policy_out)
+        policy_out = Dense(hidden_neurons*2, activation='relu')(policy_out)
         policy_out = Dense(hidden_neurons, activation='relu')(policy_out)
         policy_out = Dense(32, activation='linear')(policy_out)
         def slice(x):
@@ -141,8 +142,9 @@ cdef class KerasModel(Model):
             return loss
 
         opt = optimizers.SGD(lr=self.policy_lr, momentum=self.policy_momentum)
+        opt = optimizers.Adam(lr=0.0001)
         self.play_model.compile(optimizer=opt,
-                      loss=[customLoss],
+                      loss=['mean_squared_error'],
                       metrics=['accuracy'])
 
     cdef void _build_value_model(self, WattenEnv env, int hidden_neurons):
@@ -259,9 +261,11 @@ cdef class KerasModel(Model):
 
         #print("Loss ", self.model.test_on_batch([input1, input2], [output1, output2]))
         cdef vector[float] loss
-        loss.push_back(self.play_model.fit([play_input1, play_input2], [play_output1], epochs=epochs, batch_size=min(play_index, self.batch_size), sample_weight=[play_weights[0]], verbose=False, callbacks=[callback_p]).history['loss'][-1])
-        #loss.push_back(0)
-        loss.push_back(self.value_model.fit([value_input1, value_input2], [value_output1], epochs=epochs, batch_size=min(value_index, self.batch_size), callbacks=[]).history['loss'][-1])
+        loss.push_back(self.play_model.fit([play_input1, play_input2], [play_output1], epochs=epochs, batch_size=min(play_index, self.batch_size), sample_weight=[play_weights[0]], verbose=True, callbacks=[]).history['loss'][-1])
+        if value_index > 0:
+            loss.push_back(self.value_model.fit([value_input1, value_input2], [value_output1], epochs=epochs, batch_size=min(value_index, self.batch_size), callbacks=[]).history['loss'][-1])
+        else:
+            loss.push_back(0)
         if choose_index > 0:
             loss.push_back(self.choose_model.fit([choose_input1], [choose_output1, choose_output2], epochs=epochs, batch_size=min(choose_index, self.batch_size)).history['loss'][-1])
         else:

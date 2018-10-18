@@ -477,5 +477,36 @@
     },
     "uuid": "4b4902da-9895-4f0a-b7db-4c898a99be08",
     "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55"
+  },
+  {
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "config": {
+      "clear_samples_after_epoch": true,
+      "episodes": 50,
+      "mcts_sims": 100,
+      "policy_lr": 0.01,
+      "policy_momentum": 0.99,
+      "step_exploration": 0.9,
+      "value_lr": 0.005
+    },
+    "uuid": "173a5ec9-26bf-4bd6-8302-102b6505b8eb",
+    "creation_time": 1539875170.0,
+    "name": "clear_samples_after_epoch: True - episodes: 50 - mcts_sims: 100 - policy_lr: 0.01 - policy_momentum: 0.99 - step_exploration: 0.9 - value_lr: 0.005"
+  },
+  {
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "config": {
+      "clear_samples_after_epoch": true,
+      "clip": 0.02,
+      "episodes": 50,
+      "mcts_sims": 100,
+      "policy_lr": 0.01,
+      "policy_momentum": 0.99,
+      "step_exploration": 0.9,
+      "value_lr": 0.005
+    },
+    "uuid": "8853bd3d-1911-4db1-9c19-8bf68cc1fc8e",
+    "creation_time": 1539875209.0,
+    "name": "clear_samples_after_epoch: True - clip: 0.02 - episodes: 50 - mcts_sims: 100 - policy_lr: 0.01 - policy_momentum: 0.99 - step_exploration: 0.9 - value_lr: 0.005"
   }
 ]

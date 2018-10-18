@@ -2,7 +2,7 @@ from libcpp.string cimport string
 from libcpp.map cimport map
 from libcpp.vector cimport vector
 from libcpp cimport bool
-from gym_watten.envs.watten_env cimport Observation, Card
+from gym_watten.envs.watten_env cimport Observation, Card, WattenEnv
 from src.Storage cimport Storage
 from src.Model cimport Model
 from src cimport ModelOutput, ExperienceP, ExperienceV, StorageItem
@@ -11,6 +11,7 @@ cdef class LookUp(Model):
     cdef map[string, ExperienceP] table_p
     cdef map[string, ExperienceV] table_v
     cdef bool watch
+    cdef float clip, learning_rate
 
     cdef string generate_key(self, Observation* obs)
     cdef void memorize(self, StorageItem* storage)
@@ -23,3 +24,4 @@ cdef class LookUp(Model):
     cdef float predict_single_v(self, Observation* full_obs)
 
     cpdef void copy_weights_from(self, Model other_model)
+    cpdef void generate_storage(self, Storage storage, WattenEnv env)

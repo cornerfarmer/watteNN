@@ -6,13 +6,16 @@ from src.MCTS cimport Storage
 from src.Model cimport Model
 from src cimport ModelOutput, ExperienceP, ExperienceV, StorageItem
 import pickle
+from cython.operator cimport dereference, preincrement
 
 cdef extern from "<string>" namespace "std":
     string to_string(int val)
 
 cdef class LookUp(Model):
-    def __cinit__(self):
+    def __cinit__(self, float clip=0.15, float learning_rate=0.01):
         self.watch = False
+        self.learning_rate = learning_rate
+        self.clip = clip
 
     cdef string generate_key(self, Observation* obs):
         cdef int i, j
@@ -49,7 +52,7 @@ cdef class LookUp(Model):
         for i in range(32):
             if storage.obs.sets[i / 8][i % 8][0] == 1 and storage.output.p[i] == 1:
                 prev = self.table_p[key].p[i]
-                self.table_p[key].p[i] += storage.weight * 0.005
+                self.table_p[key].p[i] += storage.weight * self.learning_rate
                 self.table_p[key].p[i] = min(self.table_p[key].p[i], 1)
                 added = self.table_p[key].p[i] - prev
 
@@ -98,15 +101,24 @@ cdef class LookUp(Model):
     cdef void predict_single_p(self, Observation* obs, ModelOutput* output):
         key = self.generate_key(obs)
 
-        cdef int i, number_of_cards = 0
+        cdef int i, n, number_of_cards = 0
+        cdef float removed
         if self.table_p.count(key) > 0:
+
+            removed = 0
+            n = 0
             for i in range(32):
-                if self.table_p[key].p[i] < 0.02:
+                if self.table_p[key].p[i] < self.clip:
                     output.p[i] = 0
-                elif self.table_p[key].p[i] > 0.98:
-                    output.p[i] = 1
+                    removed +=self.table_p[key].p[i]
                 else:
                     output.p[i] = self.table_p[key].p[i]
+                    n += 1
+
+            for i in range(32):
+                 if self.table_p[key].p[i] >= self.clip:
+                     output.p[i] += removed / n
+
 
             output.v = 0
         else:
@@ -149,3 +161,75 @@ cdef class LookUp(Model):
 
         with open(str(filename + "model.pk"), 'wb') as handle:
             pickle.dump(pydict, handle)
+
+
+    cpdef void generate_storage(self, Storage storage, WattenEnv env):
+        cdef map[string, ExperienceP].iterator it = self.table_p.begin()
+        cdef int storage_index
+        cdef Observation obs
+        cdef Card* card
+
+        while it != self.table_p.end():
+            key = str(dereference(it).first.decode("utf-8"))
+            m = [listing.strip(',') for listing in key.split('-')]
+
+            own_cards = m[1].split(',')
+            if len(own_cards) == 1 and own_cards[0] == '':
+                own_cards = []
+            opponent_cards = []
+
+            last_tricks = m[0].split(',')
+            if len(last_tricks) == 1 and last_tricks[0] == '':
+                last_tricks = []
+
+            for i in range(len(last_tricks)):
+                last_tricks[i] = last_tricks[i].split('.')
+
+            if len(last_tricks) > 0:
+                start_player = 1 - int(last_tricks[0][1])
+            else:
+                start_player = 0
+
+            for i in range(len(last_tricks)):
+                if int(last_tricks[i][1]) == 1:
+                    own_cards.append(last_tricks[i][0])
+                else:
+                    opponent_cards.append(last_tricks[i][0])
+
+
+            for card in env.cards:
+                if len(opponent_cards) == 3:
+                    break
+
+                if not card.id in own_cards and not card.id in opponent_cards:
+                    opponent_cards.append(card.id)
+
+            own_cards = [int(card_id) for card_id in own_cards]
+            opponent_cards = [int(card_id) for card_id in opponent_cards]
+
+
+            env.reset()
+            env.current_player = start_player
+            env.players[0].hand_cards.clear()
+
+            for card_id in own_cards:
+                env.players[0].hand_cards.push_back(env.all_cards[card_id])
+
+            env.players[1].hand_cards.clear()
+            for card_id in opponent_cards:
+                env.players[1].hand_cards.push_back(env.all_cards[card_id])
+
+            for i in range(len(last_tricks)):
+                env.step(int(last_tricks[i][0]))
+
+            env.regenerate_obs(&obs)
+
+            storage_index = storage.add_item()
+            storage.data[storage_index].obs = obs
+
+            for i in range(32):
+                storage.data[storage_index].output.p[i] = dereference(it).second.p[i]
+            storage.data[storage_index].weight = 1
+            storage.data[storage_index].value_net = False
+
+            preincrement(it)
