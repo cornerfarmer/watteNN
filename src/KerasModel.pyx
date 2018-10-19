@@ -144,7 +144,7 @@ cdef class KerasModel(Model):
         opt = optimizers.SGD(lr=self.policy_lr, momentum=self.policy_momentum)
         #opt = optimizers.Adam(lr=0.0001)
         self.play_model.compile(optimizer=opt,
-                      loss=[customLoss()],
+                      loss=[customLoss],
                       metrics=['accuracy'])
 
     cdef void _build_value_model(self, WattenEnv env, int hidden_neurons):
