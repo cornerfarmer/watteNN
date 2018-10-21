@@ -128,7 +128,11 @@ cdef class KerasModel(Model):
             return x[:, :, :, 0]
         input_slice = Lambda(slice)(input_1)
         input_slice = Flatten()(input_slice)
-        policy_out = SelectiveSoftmax()([policy_out, input_slice])
+
+        def add(x):
+            return x + 0.5
+        policy_out = Lambda(add)(policy_out)
+        policy_out = Multiply()([policy_out, input_slice])
 
 
         self.play_model = RealKerasModel(inputs=[input_1, input_2], outputs=[policy_out])
@@ -141,10 +145,27 @@ cdef class KerasModel(Model):
             loss = K.mean(K.cast(use_abs, 'float32') * loss_abs + (1 - K.cast(use_abs, 'float32')) * loss_sq, axis=-1)
             return loss
 
+        def loss_factor(yTrue, yPred):
+            zero_true = K.cast(K.equal(yTrue, 0), 'float32')
+            valid_zeros = zero_true * K.cast(K.greater(yPred, 0.08), 'float32')
+            invalid_ones = K.repeat_elements(K.sum((1 - zero_true) * K.cast(K.less(yPred, 0.08), 'float32'), axis=-1, keepdims=True), 32, axis=-1)
+
+            return zero_true * ((1 - invalid_ones) * (valid_zeros * (1 / K.maximum(1.0, K.sum(valid_zeros, axis=-1, keepdims=True))) + (1 - valid_zeros) * 0.5) + invalid_ones * 0) + (1 - zero_true) * 1
+
+        def customLinearLoss(yTrue, yPred):
+            a = 0.05
+            loss_sq = 0.5 * 1 / a * K.pow(yPred - yTrue, 2)
+            loss_abs = K.abs(yPred - yTrue) - 0.5 * 1 / a * a ** 2
+            use_abs = K.abs(yPred - yTrue) > a
+            loss = K.cast(use_abs, 'float32') * loss_abs + (1 - K.cast(use_abs, 'float32')) * loss_sq
+            factor = loss_factor(yTrue, yPred)
+
+            return K.mean(factor * loss, axis=-1)
+
         opt = optimizers.SGD(lr=self.policy_lr, momentum=self.policy_momentum)
         #opt = optimizers.Adam(lr=0.0001)
         self.play_model.compile(optimizer=opt,
-                      loss=[customLoss],
+                      loss=[customLinearLoss],
                       metrics=['accuracy'])
 
     cdef void _build_value_model(self, WattenEnv env, int hidden_neurons):
@@ -319,6 +340,19 @@ cdef class KerasModel(Model):
             output[0][i].p = outputs[i]
 
     cdef object _clip_output(self, output):
+        equal_output = output[0].copy()
+        equal_output[equal_output != 0] = 1
+        equal_output /= equal_output.sum(axis=-1, keepdims=True)
+
+        output_p = output[0]
+        output_p -= 0.1
+        output_p /= 0.8
+        output_p[output_p < 0] = 0
+        output_p[output_p > 1] = 1
+        output_p /= output_p.sum(axis=-1, keepdims=True)
+
+        output_p[np.isnan(output_p)] = equal_output[np.isnan(output_p)]
+        return output
         col_sum = output.copy()
         n = np.sum(col_sum >= self.clip, axis=-1)
         col_sum[col_sum >= self.clip] = 0

@@ -11,12 +11,12 @@ env = WattenEnv(True)
 rating = ModelRating(env)
 rng = XorShfGenerator()
 mcts = MCTS(rng, episodes=1, mcts_sims=10000, exploration=0.1, step_exploration=0.9)
-#model = KerasModel(env, 128, equalizer=0, clip=0.15, batch_size=70214, policy_lr=100, policy_momentum=0.9, value_lr=0.005, value_momentum=0.9)
-model = LookUp()
+model = KerasModel(env, 128, equalizer=0, clip=0.15, batch_size=32, policy_lr=100, policy_momentum=0.9, value_lr=0.005, value_momentum=0.9)
+#model = LookUp()
 storage = Storage()
 path = 'results/lookup/clear_samples_after_epoch: True - episodes: 50 - mcts_sims: 100 - policy_lr: 0.5 - policy_momentum: 0.99 - step_exploration: 0.9 - value_lr: 0.005/12'
 #path += '/checkpoints/2800'
-model.load(path + '/best-model')
+#model.load(path + '/best-model')
 
 mcts.mcts_generate(env, model, storage, rating)
 #with open("storage.pk", 'wb') as handle:
