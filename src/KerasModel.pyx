@@ -43,7 +43,7 @@ class SelectiveSoftmax(Layer):
         return input_shape[0]
 
 cdef class KerasModel(Model):
-    def __init__(self, env, hidden_neurons=128, batch_size=30, policy_lr=0.04, policy_momentum=0.9, value_lr=0.04, value_momentum=0.9, clip=0, equalizer=0.01):
+    def __init__(self, env, hidden_neurons=128, batch_size=30, policy_lr=0.04, policy_momentum=0.9, value_lr=0.04, value_momentum=0.9, clip=0, equalizer=0.01, linear_output=False):
         self.policy_lr = policy_lr
         self.policy_momentum = policy_momentum
         self.value_lr = value_lr
@@ -52,13 +52,14 @@ cdef class KerasModel(Model):
         self.batch_size = batch_size
         self.clip = clip
         self.equalizer = equalizer
+        self.linear_output = linear_output
 
         self._build_choose_model(env, hidden_neurons)
         self._build_play_model(env, hidden_neurons)
         self._build_value_model(env, hidden_neurons)
 
         self.test_obs = {'sets': [[[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [1, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 1, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 1, 0, 0, 0, 0, 0], [1, 0, 0, 0, 0, 0, 0], [0, 1, 0, 0, 0, 0, 0], [0, 0, 0, 0, 1, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0]]], 'scalars': [1, 0, 0, 0, 0, 1, 0, 0], 'type': ActionType.DRAW_CARD}
-        self.test_obs_p = {'sets': [[[0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [1, 0, 0, 0, 0, 0], [0, 0, 0, 1, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 1, 0, 0, 0], [1, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0]]], 'scalars': [1, 0, 0, 0, 0, 1, 0, 0], 'type': ActionType.DRAW_CARD}
+        self.test_obs_p = {'sets': [[[0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [1, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [1, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [1, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0]], [[0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0]]], 'scalars': [0, 0, 0, 0, 0, 0, 0, 0], 'type': ActionType.DRAW_CARD}
 
 
     cdef void _build_choose_model(self, WattenEnv env, int hidden_neurons):
@@ -131,16 +132,20 @@ cdef class KerasModel(Model):
 
         def add(x):
             return x + 0.5
-        policy_out = Lambda(add)(policy_out)
-        policy_out = Multiply()([policy_out, input_slice])
+
+        if self.linear_output:
+            policy_out = Lambda(add)(policy_out)
+            policy_out = Multiply()([policy_out, input_slice])
+        else:
+             policy_out = SelectiveSoftmax()([policy_out, input_slice])
 
 
         self.play_model = RealKerasModel(inputs=[input_1, input_2], outputs=[policy_out])
 
         def customLoss(yTrue, yPred):
             a = 0.1
-            loss_sq = 0.5 * 1 / a * K.pow(yPred - yTrue, 10)
-            loss_abs = K.abs(yPred - yTrue) - 0.5 * 1 / a * a ** 10
+            loss_sq = 0.5 * 1 / a * K.pow(yPred - yTrue, 2)
+            loss_abs = K.abs(yPred - yTrue) - 0.5 * 1 / a * a ** 2
             use_abs = K.abs(yPred - yTrue) > a
             loss = K.mean(K.cast(use_abs, 'float32') * loss_abs + (1 - K.cast(use_abs, 'float32')) * loss_sq, axis=-1)
             return loss
@@ -165,7 +170,7 @@ cdef class KerasModel(Model):
         opt = optimizers.SGD(lr=self.policy_lr, momentum=self.policy_momentum)
         #opt = optimizers.Adam(lr=0.0001)
         self.play_model.compile(optimizer=opt,
-                      loss=[customLinearLoss],
+                      loss=[customLinearLoss if self.linear_output else customLoss],
                       metrics=['accuracy'])
 
     cdef void _build_value_model(self, WattenEnv env, int hidden_neurons):
@@ -227,7 +232,8 @@ cdef class KerasModel(Model):
         #if self.clean_opt_weights is not None:
         #    self.model.optimizer.set_weights(self.clean_opt_weights)
 
-        cdef int play_index = 0, choose_index = 0, sample_index = 0, value_index = 0
+        cdef int play_index = 0, choose_index = 0, sample_index = 0, value_index = 0, cards
+        cdef int valid
         for i in range(s):
             if number_of_samples < storage.number_of_samples:
                 sample_index = rand() % storage.number_of_samples
@@ -245,6 +251,16 @@ cdef class KerasModel(Model):
 
                 value_index += 1
             else:
+                #cards = 0
+                #valid = 0
+                #for i in range(storage.data[sample_index].obs.sets.size()):
+                #    for j in range(storage.data[sample_index].obs.sets[i].size()):
+                #        #for k in range(storage.data[sample_index].obs.sets[i][j].size()):
+                #        if storage.data[sample_index].obs.sets[i][j][0] == self.test_obs_p.sets[i][j][0]:
+                #            valid += storage.data[sample_index].obs.sets[i][j][0]
+                #        cards += storage.data[sample_index].obs.sets[i][j][0]
+
+                #if cards == 3:
                 if storage.data[sample_index].obs.type is ActionType.DRAW_CARD:
                     play_input1[play_index] = storage.data[sample_index].obs.sets
                     play_input2[play_index] = storage.data[sample_index].obs.scalars
@@ -282,7 +298,7 @@ cdef class KerasModel(Model):
 
         #print("Loss ", self.model.test_on_batch([input1, input2], [output1, output2]))
         cdef vector[float] loss
-        loss.push_back(self.play_model.fit([play_input1, play_input2], [play_output1], epochs=epochs, batch_size=min(play_index, self.batch_size), sample_weight=[play_weights[0]], verbose=True, callbacks=[]).history['loss'][-1])
+        loss.push_back(self.play_model.fit([play_input1, play_input2], [play_output1], epochs=epochs, batch_size=min(play_index, self.batch_size), sample_weight=[play_weights[0]], verbose=True, callbacks=[callback_p]).history['loss'][-1])
         if value_index > 0:
             loss.push_back(self.value_model.fit([value_input1, value_input2], [value_output1], epochs=epochs, batch_size=min(value_index, self.batch_size), callbacks=[]).history['loss'][-1])
         else:
@@ -340,27 +356,29 @@ cdef class KerasModel(Model):
             output[0][i].p = outputs[i]
 
     cdef object _clip_output(self, output):
-        equal_output = output[0].copy()
-        equal_output[equal_output != 0] = 1
-        equal_output /= equal_output.sum(axis=-1, keepdims=True)
+        if self.linear_output:
+            equal_output = output[0].copy()
+            equal_output[equal_output != 0] = 1
+            equal_output /= equal_output.sum(axis=-1, keepdims=True)
 
-        output_p = output[0]
-        output_p -= 0.1
-        output_p /= 0.8
-        output_p[output_p < 0] = 0
-        output_p[output_p > 1] = 1
-        output_p /= output_p.sum(axis=-1, keepdims=True)
+            output_p = output[0]
+            output_p -= 0.1
+            output_p /= 0.8
+            output_p[output_p < 0] = 0
+            output_p[output_p > 1] = 1
+            output_p /= output_p.sum(axis=-1, keepdims=True)
 
-        output_p[np.isnan(output_p)] = equal_output[np.isnan(output_p)]
-        return output
-        col_sum = output.copy()
-        n = np.sum(col_sum >= self.clip, axis=-1)
-        col_sum[col_sum >= self.clip] = 0
-        col_sum = np.sum(col_sum, axis=-1)
+            output_p[np.isnan(output_p)] = equal_output[np.isnan(output_p)]
+            return output
+        else:
+            col_sum = output.copy()
+            n = np.sum(col_sum >= self.clip, axis=-1)
+            col_sum[col_sum >= self.clip] = 0
+            col_sum = np.sum(col_sum, axis=-1)
 
-        output[output < self.clip] = 0
-        output[output >= self.clip] += np.repeat(np.expand_dims(1 / n * col_sum, axis=-1), output.shape[1], axis=1)[output >= self.clip]
-        return output
+            output[output < self.clip] = 0
+            output[output >= self.clip] += np.repeat(np.expand_dims(1 / n * col_sum, axis=-1), output.shape[1], axis=1)[output >= self.clip]
+            return output
 
     cdef void predict_v(self, vector[Observation]* full_obs, vector[ModelOutput]* output):
         inputs = [np.zeros([full_obs.size(), 4, 8, self.play_input_sets_size + 1]), np.zeros([full_obs.size(), self.play_input_scalars_size])]

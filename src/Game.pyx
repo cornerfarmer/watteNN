@@ -171,7 +171,7 @@ cdef class Game:
                 if output.p[card.id] == 0:
                     next_exploration_mode = exploration_mode[:]
                     next_exploration_mode[current_player] = True
-                    next_joint_prob = 1
+                    next_joint_prob = joint_prob
                 else:
                     next_exploration_mode = exploration_mode
                     next_joint_prob = joint_prob * output.p[card.id]

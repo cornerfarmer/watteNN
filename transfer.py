@@ -21,8 +21,8 @@ model.load(path + '/best-model')
 
 model.generate_storage(storage, env)
 
-network = KerasModel(env, 128, equalizer=0, clip=0.15, batch_size=128, policy_lr=0.1, policy_momentum=0.8, value_lr=0.005, value_momentum=0.9)
-network.memorize_storage(storage, False, 2000, 0)
+network = KerasModel(env, 128, equalizer=0, clip=0.15, batch_size=128, policy_lr=0.01, policy_momentum=0.8, value_lr=0.005, value_momentum=0.9)
+network.memorize_storage(storage, False, 3000, 0)
 
 
 

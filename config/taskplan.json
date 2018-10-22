@@ -37,6 +37,22 @@
     "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55"
   },
   {
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "config": {
+      "clear_samples_after_epoch": true,
+      "episodes": 50,
+      "exploit_interval": 500,
+      "mcts_sims": 100,
+      "policy_lr": 1,
+      "policy_momentum": 0,
+      "step_exploration": 0.9,
+      "value_lr": 0.005
+    },
+    "uuid": "b9d7244f-7f51-491d-839b-c58ba7fa2d63",
+    "creation_time": 1539943054.0,
+    "name": "clear_samples_after_epoch: True - episodes: 50 - exploit_interval: 500 - mcts_sims: 100 - policy_lr: 1 - policy_momentum: 0 - step_exploration: 0.9 - value_lr: 0.005"
+  },
+  {
     "name": "hidden_neurons: 256",
     "creation_time": 1537825039.0,
     "config": {
@@ -509,5 +525,71 @@
     "uuid": "8853bd3d-1911-4db1-9c19-8bf68cc1fc8e",
     "creation_time": 1539875209.0,
     "name": "clear_samples_after_epoch: True - clip: 0.02 - episodes: 50 - mcts_sims: 100 - policy_lr: 0.01 - policy_momentum: 0.99 - step_exploration: 0.9 - value_lr: 0.005"
+  },
+  {
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "config": {
+      "clear_samples_after_epoch": true,
+      "episodes": 50,
+      "exploit_interval": 500,
+      "mcts_sims": 100,
+      "policy_lr": 0.01,
+      "policy_momentum": 0,
+      "step_exploration": 0.9,
+      "value_lr": 0.005
+    },
+    "uuid": "2842b495-cf42-47ba-a4dd-e8e31cec6ea5",
+    "creation_time": 1540147247.0,
+    "name": "clear_samples_after_epoch: True - episodes: 50 - exploit_interval: 500 - mcts_sims: 100 - policy_lr: 0.01 - policy_momentum: 0 - step_exploration: 0.9 - value_lr: 0.005"
+  },
+  {
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "config": {
+      "clear_samples_after_epoch": true,
+      "episodes": 50,
+      "exploit_interval": 500,
+      "mcts_sims": 100,
+      "policy_lr": 0.01,
+      "policy_momentum": 0.99,
+      "step_exploration": 0.9,
+      "value_lr": 0.005
+    },
+    "uuid": "7b5b860e-3aa6-4340-ba58-116bdcd2d22d",
+    "creation_time": 1540150057.0,
+    "name": "clear_samples_after_epoch: True - episodes: 50 - exploit_interval: 500 - mcts_sims: 100 - policy_lr: 0.01 - policy_momentum: 0.99 - step_exploration: 0.9 - value_lr: 0.005"
+  },
+  {
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "config": {
+      "clear_samples_after_epoch": true,
+      "episodes": 50,
+      "exploit_interval": 500,
+      "hidden_neurons": 256,
+      "mcts_sims": 100,
+      "policy_lr": 0.01,
+      "policy_momentum": 0.99,
+      "step_exploration": 0.9,
+      "value_lr": 0.005
+    },
+    "uuid": "dd2dd4b6-abe1-4cbe-97be-65736f829a1e",
+    "creation_time": 1540153079.0,
+    "name": "clear_samples_after_epoch: True - episodes: 50 - exploit_interval: 500 - hidden_neurons: 256 - mcts_sims: 100 - policy_lr: 0.01 - policy_momentum: 0.99 - step_exploration: 0.9 - value_lr: 0.005"
+  },
+  {
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "config": {
+      "clear_samples_after_epoch": true,
+      "episodes": 500,
+      "exploit_interval": 500,
+      "mcts_sims": 100,
+      "policy_lr": 1,
+      "policy_momentum": 0,
+      "step_exploration": 0.9,
+      "storage_size": 20000,
+      "value_lr": 0.005
+    },
+    "uuid": "9c4c7d04-93d0-48f8-8b02-f7c241c7c500",
+    "creation_time": 1540240894.0,
+    "name": "clear_samples_after_epoch: True - episodes: 500 - exploit_interval: 500 - mcts_sims: 100 - policy_lr: 1 - policy_momentum: 0 - step_exploration: 0.9 - storage_size: 20000 - value_lr: 0.005"
   }
 ]

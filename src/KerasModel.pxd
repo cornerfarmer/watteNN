@@ -22,6 +22,7 @@ cdef class KerasModel(Model):
     cdef float equalizer
     cdef Observation test_obs
     cdef Observation test_obs_p
+    cdef bool linear_output
 
     cdef void _build_choose_model(self, WattenEnv env, int hidden_neurons)
     cdef void _build_play_model(self, WattenEnv env, int hidden_neurons)
