@@ -11,7 +11,7 @@ env = WattenEnv(True)
 rating = ModelRating(env)
 rng = XorShfGenerator()
 mcts = MCTS(rng, episodes=10000, mcts_sims=100, exploration=0.1, step_exploration=0.9)
-model = KerasModel(env, 256, equalizer=0, clip=0, batch_size=128, policy_lr=1, policy_momentum=0, value_lr=0.005, value_momentum=0.9)
+model = KerasModel(env, 128, equalizer=0, clip=0, batch_size=128, policy_lr=1, policy_momentum=0.9, value_lr=0.005, value_momentum=0.9)
 #model = LookUp()
 storage = Storage()
 path = 'results/network/clear_samples_after_epoch: True - episodes: 50 - exploit_interval: 500 - mcts_sims: 100 - policy_lr: 1 - policy_momentum: 0 - step_exploration: 0.9 - value_lr: 0.005/1'

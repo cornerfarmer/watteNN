@@ -20,26 +20,26 @@ from src.XorShfGenerator import XorShfGenerator
 
 class WatteNNTask(taskplan.Task):
 
-    def __init__(self, preset, preset_pipe, logger):
-        super().__init__(preset, preset_pipe, logger)
+    def __init__(self, config, logger, metadata):
+        super().__init__(config, logger, metadata)
         self.sum = 0
-        self.env = WattenEnv(self.preset.get_bool("minimal_env"))
+        self.env = WattenEnv(self.config.get_bool("minimal_env"))
         self.model = self._build_model()
         self.best_model = self._build_model()
         self.train_model = self._build_model()
-        self.storage = Storage(self.preset.get_int("storage_size"))
+        self.storage = Storage(self.config.get_int("storage_size"))
         self.rng = XorShfGenerator()
-        self.mcts = MCTS(self.rng, self.preset.get_int("episodes"), self.preset.get_int("mcts_sims"), exploration=self.preset.get_float("exploration"), step_exploration=self.preset.get_float("step_exploration"))
+        self.mcts = MCTS(self.rng, self.config.get_int("episodes"), self.config.get_int("mcts_sims"), exploration=self.config.get_float("exploration"), step_exploration=self.config.get_float("step_exploration"))
         self.game = Game(self.env)
         self.train_model.copy_weights_from(self.model)
         self.best_model.copy_weights_from(self.model)
         self.rating = ModelRating(self.env)
 
     def _build_model(self):
-        if self.preset.get_string('model_type') == 'network':
-            return KerasModel(self.env, self.preset.get_int("hidden_neurons"), self.preset.get_int("batch_size"), self.preset.get_float("policy_lr"), self.preset.get_float("policy_momentum"), self.preset.get_float("value_lr"), self.preset.get_float("value_momentum"), self.preset.get_float("clip"), self.preset.get_float("equalizer"))
+        if self.config.get_string('model_type') == 'network':
+            return KerasModel(self.env, self.config.get_int("hidden_neurons"), self.config.get_int("batch_size"), self.config.get_float("policy_lr"), self.config.get_float("policy_momentum"), self.config.get_float("value_lr"), self.config.get_float("value_momentum"), self.config.get_float("clip"), self.config.get_float("equalizer"))
         else:
-            return LookUp(self.preset.get_float("clip"), self.preset.get_float("policy_lr"))
+            return LookUp(self.config.get_float("clip"), self.config.get_float("policy_lr"))
 
     def save(self, path):
         self.best_model.save(str(path / Path('best-model')))
@@ -52,7 +52,7 @@ class WatteNNTask(taskplan.Task):
         print("1", pytime.time() - start)
 
         start = pytime.time()
-        loss = self.train_model.memorize_storage(self.storage, self.preset.get_bool('clear_samples_after_epoch'), self.preset.get_int('epochs'), self.preset.get_int('sample_size'))
+        loss = self.train_model.memorize_storage(self.storage, self.config.get_bool('clear_samples_after_epoch'), self.config.get_int('epochs'), self.config.get_int('sample_size'))
         print("2", pytime.time() - start)
         if loss[0] > 0.5:
             raise ArithmeticError()
@@ -77,7 +77,7 @@ class WatteNNTask(taskplan.Task):
             if rating_value > 0.52:
                 self.best_model.copy_weights_from(self.model)
 
-        if self.preset.get_bool("minimal_env") and current_iteration % self.preset.get_int("exploit_interval") == 0:
+        if self.config.get_bool("minimal_env") and current_iteration % self.config.get_int("exploit_interval") == 0:
             self.best_model.copy_weights_from(self.model)
             table, avg_diff_on, avg_diff_off, max_diff, v_loss_on, v_loss_off, v_based_avg_diff_on, v_based_avg_diff_off = self.game.draw_game_tree(self.best_model, self.rating, False, None, None, "trees/" + str(current_iteration) + ".svg")
 

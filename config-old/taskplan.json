@@ -591,5 +591,35 @@
     "uuid": "9c4c7d04-93d0-48f8-8b02-f7c241c7c500",
     "creation_time": 1540240894.0,
     "name": "clear_samples_after_epoch: True - episodes: 500 - exploit_interval: 500 - mcts_sims: 100 - policy_lr: 1 - policy_momentum: 0 - step_exploration: 0.9 - storage_size: 20000 - value_lr: 0.005"
+  },
+  {
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "config": {
+      "clear_samples_after_epoch": true,
+      "episodes": 50,
+      "exploit_interval": 500,
+      "mcts_sims": 100,
+      "policy_lr": 1,
+      "step_exploration": 0.9,
+      "value_lr": 0.005
+    },
+    "uuid": "ec011fe4-267d-49a6-855e-17235d221f29",
+    "creation_time": 1540302110.0,
+    "name": "clear_samples_after_epoch: True - episodes: 50 - exploit_interval: 500 - mcts_sims: 100 - policy_lr: 1 - step_exploration: 0.9 - value_lr: 0.005"
+  },
+  {
+    "base": "75c5f09b-cafd-43c7-be1d-53cae4879d55",
+    "config": {
+      "clear_samples_after_epoch": true,
+      "episodes": 150,
+      "exploit_interval": 500,
+      "mcts_sims": 100,
+      "policy_lr": 1,
+      "step_exploration": 0.9,
+      "value_lr": 0.005
+    },
+    "uuid": "34c86eed-2afb-4cdb-9245-083d0db473d0",
+    "creation_time": 1540302159.0,
+    "name": "clear_samples_after_epoch: True - episodes: 150 - exploit_interval: 500 - mcts_sims: 100 - policy_lr: 1 - step_exploration: 0.9 - value_lr: 0.005"
   }
 ]
